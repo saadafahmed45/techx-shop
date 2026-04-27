@@ -10,6 +10,7 @@ import {
 import { HiArrowLeft, HiOutlineShare } from "react-icons/hi";
 import { BsBoxSeam } from "react-icons/bs";
 import ProductCard from "@/components/ProductCard";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export default function ProductDetailPage({ params }) {
   // Next.js 15 params handle
@@ -61,7 +62,8 @@ export default function ProductDetailPage({ params }) {
   return (
     <main className="min-h-screen bg-[#f7f8fc] pb-20">
       <div className="max-w-7xl mx-auto px-6 pt-10">
-        
+            <Breadcrumb customLast={product.title}/>
+
         {/* Main Product Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
           {/* Left: Images */}

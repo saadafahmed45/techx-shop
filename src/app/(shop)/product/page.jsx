@@ -1,4 +1,5 @@
 // app/products/page.jsx
+import Breadcrumb from "@/components/Breadcrumb";
 import ProductCard from "@/components/ProductCard";
 
 async function getProducts() {
@@ -36,12 +37,11 @@ export default async function ProductPage() {
           />
           <div className="relative max-w-7xl mx-auto px-6 md:px-10 py-10">
             {/* Breadcrumb */}
-            <p className="text-[12px] tracking-[0.2em] uppercase text-blue-400 font-semibold mb-4">
-              Home &rsaquo; Products
-            </p>
+                       <Breadcrumb/>
+           
             <h1
-              className="text-[30px] md:text-[56px] font-extrabold leading-tight text-gray-900 mb-3"
-              style={{ fontFamily: "'Syne', sans-serif" }}
+              className="text-[30px] md:text-[36px] font-extrabold leading-tight text-gray-900 mb-3"
+             
             >
               All Products
             </h1>
