@@ -36,7 +36,7 @@ export const categories = [
 
 const Category = () => {
   return (
-    <section className=" mx-auto px-12 bg-gray-50 py-12">
+    <section className=" mx-auto  px-5 md:px-12 bg-gray-50 py-12">
       
       <h1 className="text-3xl md:text-4xl font-bold text-center">
         Featured Categories
@@ -52,7 +52,7 @@ const Category = () => {
             <div className="group cursor-pointer bg-white rounded-xl overflow-hidden shadow hover:shadow-xl transition">
               
               {/* Image */}
-              <div className="relative w-full h-72 overflow-hidden">
+              <div className="relative w-full h-44 md:h-72 overflow-hidden">
            <Image
   src={cat.image}
   alt={cat.name}
@@ -66,9 +66,9 @@ const Category = () => {
               {/* Content */}
               <div className="p-4 text-center">
                 <h2 className="font-semibold">{cat.name}</h2>
-                <p className="text-sm text-gray-500">
+                {/* <p className="text-sm text-gray-500">
                   {cat.description}
-                </p>
+                </p> */}
               </div>
 
             </div>
