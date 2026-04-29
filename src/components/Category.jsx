@@ -53,12 +53,13 @@ const Category = () => {
               
               {/* Image */}
               <div className="relative w-full h-72 overflow-hidden">
-                <Image
-                  src={cat.image}
-                  alt={cat.name}
-                  fill
-                  className="object-cover group-hover:scale-110 transition duration-500"
-                />
+           <Image
+  src={cat.image}
+  alt={cat.name}
+  fill
+  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+  className="object-cover group-hover:scale-110 transition duration-500"
+/>
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition"></div>
               </div>
 

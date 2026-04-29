@@ -32,7 +32,7 @@ function Checkbox({ label, checked, onChange }) {
     <label className="flex items-center gap-2.5 cursor-pointer group py-1">
       <span
         onClick={onChange}
-        className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0 border transition-all duration-150"
+        className="w-4 h-4 rounded flex items-center justify-center shrink-0 border transition-all duration-150"
         style={{
           border: checked ? "none" : "1.5px solid #d1d5db",
           background: checked ? "#1a3aff" : "white",
@@ -67,7 +67,7 @@ function ProductCard({ product }) {
       onMouseLeave={e => e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)"}
     >
       {/* Image */}
-      <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "1/1" }}>
+      <Link href={`/product/${product.id}`} className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "1/1" }}>
         <img
           src={img} 
           alt={product.title}
@@ -103,7 +103,7 @@ function ProductCard({ product }) {
             Free Shipping
           </span>
         )}
-      </div>
+      </Link>
 
       {/* Info */}
       <div className="flex flex-col gap-1 px-4 pt-3.5 pb-4">
@@ -355,7 +355,7 @@ export default function ProductPage() {
 
           {/* ── Desktop Sidebar ── */}
           <aside
-            className="hidden md:block w-56 flex-shrink-0 self-start sticky top-6"
+            className="hidden md:block w-56 shrink-0 self-start sticky top-6"
           >
             <div className="bg-white rounded-2xl p-5 border border-gray-100"
               style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>

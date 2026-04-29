@@ -84,7 +84,7 @@ function ProductCard({ product, index }) {
       }}
     >
       {/* ── Image container ── */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-[#f0f4ff] to-[#e8eeff]" style={{ aspectRatio: "1 / 1" }}>
+      <div className="relative overflow-hidden bg-linear-to-b from-[#f0f4ff] to-[#e8eeff]" style={{ aspectRatio: "1 / 1" }}>
         <img
           src={product.image}
           alt={product.name}
@@ -216,7 +216,7 @@ export default function FeaturedProducts() {
               whileInView={{ scaleX: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="mt-5 h-[3px] w-14 rounded-full origin-center"
+              className="mt-5 h-0.75 w-14 rounded-full origin-center"
               style={{ background: "linear-gradient(90deg, #1a3aff, #7a9fff)" }}
             />
           </motion.div>
@@ -237,7 +237,7 @@ export default function FeaturedProducts() {
             className="flex justify-center mt-12"
           >
             <Link
-              href="/products"
+              href="/product"
               className="group inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-[13px] font-semibold text-white tracking-wide transition-all duration-300"
               style={{
                 background: "linear-gradient(135deg, #1a3aff 0%, #2a50ff 100%)",

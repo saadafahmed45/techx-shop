@@ -58,12 +58,12 @@ const slides = [
         <div className="relative flex flex-col gap-4 sm:gap-6">
           {/* Main Product Image with Overlay and Badge */}
           <div className="relative w-full">
-            <div className="relative   h-[350px] md:h-screen  overflow-hidden w-full">
+            <div className="relative   h-87.5 md:h-screen  overflow-hidden w-full">
               <div className="w-full pt-[56.25%] sm:pt-[56.25%] lg:pt-[56.25%] relative bg-gray-100">
                 <img
                   src={slide.image}
                   alt={slide.title}
-                  className="absolute inset-0 w-full h-[350px] md:h-screen object-cover transition-opacity duration-500"
+                  className="absolute inset-0 w-full h-87.5 md:h-screen object-cover transition-opacity duration-500"
                 />
               </div>
               {/* Vertical Badge */}
