@@ -38,12 +38,10 @@ export default function ProductDetailPage({ params }) {
         const pRes = await fetch(`https://api.escuelajs.co/api/v1/products/${id}`);
         const p = await pRes.json();
         
-        // রিলেটেড প্রোডাক্ট ফেচ করা (একই ক্যাটাগরির হলে ভালো হয়)
         const allRes = await fetch(`https://api.escuelajs.co/api/v1/products?categoryId=${p.category.id}&limit=10`);
         const all = await allRes.json();
 
         setProduct(p);
-        // নিজের আইডি বাদে বাকিগুলো ফিল্টার করা
         setRelated(all.filter((item) => item.id !== p.id).slice(0, 4));
       } catch (e) {
         console.error("Error fetching data:", e);
