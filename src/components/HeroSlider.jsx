@@ -5,28 +5,28 @@ const HeroSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 const slides = [
   {
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1320&h=750&fit=crop",
+    image: "https://images.pexels.com/photos/29457406/pexels-photo-29457406.jpeg",
     title: "Nike Air Max 2026",
     description:
       "Experience next-level comfort with the all-new Nike Air Max. Designed for everyday performance and bold street style.",
     badge: "Best Seller of the Year"
   },
   {
-    image: "https://images.pexels.com/photos/8147404/pexels-photo-8147404.jpeg",
+    image: "https://images.pexels.com/photos/4011762/pexels-photo-4011762.jpeg",
     title: "Urban Street Collection",
     description:
       "Step into modern street fashion with premium sneakers crafted for comfort, durability, and confidence.",
     badge: "New Arrival"
   },
   {
-    image: "https://images.pexels.com/photos/1127000/pexels-photo-1127000.jpeg",
+    image: "https://images.pexels.com/photos/29457406/pexels-photo-29457406.jpeg",
     title: "Minimal Classic Series",
     description:
       "Clean design meets everyday comfort. The perfect pair for casual outfits and all-day wear.",
     badge: "Limited Edition"
   },
   {
-    image: "https://images.pexels.com/photos/2146723/pexels-photo-2146723.jpeg",
+    image: "https://images.pexels.com/photos/3780681/pexels-photo-3780681.jpeg",
     title: "Performance Sport Pro",
     description:
       "Engineered for speed and flexibility. Elevate your performance with lightweight support and dynamic cushioning.",
@@ -131,3 +131,4 @@ const slides = [
 };
 
 export default HeroSlider;
+

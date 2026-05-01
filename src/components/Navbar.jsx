@@ -211,7 +211,7 @@ export default function Navbar() {
         {/* FIX: consistent max-w container for both bar and search */}
         <div
           ref={navRef}
-          className="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between"
+          className=" mx-auto px-8 md:px-24 h-16 flex items-center justify-between"
         >
           {/* Logo */}
           <Link href="/" className="flex flex-col leading-none select-none shrink-0">
@@ -253,15 +253,7 @@ export default function Navbar() {
                             openDropdown === link.label ? "rotate-180" : ""
                           }`}
                         />
-                        {/* FIX: each link has its own unique layoutId */}
-                        {isActive ? (
-                          <motion.span
-                            layoutId={`underline-${link.href}`}
-                            className="absolute bottom-0 left-0 h-[1.5px] bg-black w-full"
-                          />
-                        ) : (
-                          <span className="absolute bottom-0 left-0 h-px bg-black w-0 group-hover:w-full transition-all duration-300" />
-                        )}
+                       
                       </button>
 
                       <DesktopDropdown
@@ -272,21 +264,14 @@ export default function Navbar() {
                   ) : (
                     <Link
                       href={link.href}
-                      className={`group flex items-center text-[14px] tracking-wide transition-colors py-1 relative ${
+                      className={`group flex items-center text-[16px] tracking-wide transition-colors py-1 relative ${
                         isActive
                           ? "text-black font-semibold"
                           : "text-gray-500 hover:text-black"
                       }`}
                     >
                       {link.label}
-                      {isActive ? (
-                        <motion.span
-                          layoutId={`underline-${link.href}`}
-                          className="absolute bottom-0 left-0 h-[1.5px] bg-black w-full"
-                        />
-                      ) : (
-                        <span className="absolute bottom-0 left-0 h-px bg-black w-0 group-hover:w-full transition-all duration-300" />
-                      )}
+                   
                     </Link>
                   )}
                 </div>
@@ -322,8 +307,7 @@ export default function Navbar() {
             </motion.button>
 
             {/* Cart with badge */}
-            <motion.button
-              whileTap={{ scale: 0.88 }}
+            <Link              href="/cart"  
               className="relative hover:text-black transition-colors"
               aria-label="Cart"
             >
@@ -331,7 +315,7 @@ export default function Navbar() {
               <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-medium leading-none">
                 2
               </span>
-            </motion.button>
+            </Link>
           </div>
 
           {/* Mobile: icons + hamburger */}
