@@ -49,7 +49,7 @@ const DesktopDropdown = memo(function DesktopDropdown({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 4 }}
           transition={{ duration: 0.18, ease: "easeOut" }}
-          className="absolute top-full left-0 mt-2 bg-white border border-gray-100 shadow-xl min-w-[180px] z-[60] rounded-lg overflow-hidden"
+          className="absolute top-full left-0 mt-2 bg-white border border-gray-100 shadow-xl min-w-45 z-60 rounded-lg overflow-hidden"
         >
           {items.map((item, i) => (
             <motion.div
@@ -556,7 +556,7 @@ export default function Navbar() {
               animate={{ opacity: 0.35 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.22 }}
-              className="fixed inset-0 bg-black z-[54] md:hidden"
+              className="fixed inset-0 bg-black z-54 md:hidden"
               onClick={() =>
                 setMobileOpen(false)
               }
@@ -573,7 +573,7 @@ export default function Navbar() {
                 duration: 0.3,
                 ease: "easeInOut",
               }}
-              className="fixed top-0 left-0 bottom-0 w-[300px] bg-white z-[55] md:hidden flex flex-col overflow-y-auto"
+              className="fixed top-0 left-0 bottom-0 w-75 bg-white z-55 md:hidden flex flex-col overflow-y-auto"
               style={{
                 boxShadow:
                   "4px 0 24px rgba(0,0,0,0.12)",

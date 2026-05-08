@@ -36,7 +36,7 @@ export const categories = [
 
 const Category = () => {
   return (
-    <section className="px-5 md:px-12 py-16 bg-gradient-to-b from-gray-50 to-white">
+    <section className="px-5 md:px-12 py-16 bg-linear-to-b from-gray-50 to-white">
       
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto">
@@ -67,7 +67,7 @@ const Category = () => {
               </div>
 
               {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent"></div>
 
               {/* Content */}
               <div className="absolute bottom-0 p-4 w-full text-white">
