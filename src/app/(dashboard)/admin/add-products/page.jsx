@@ -426,7 +426,7 @@ const AddProducts = () => {
                       />
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         {c.imageUrl && (
-                          <img src={c.imageUrl} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" alt={c.name} />
+                          <img src={c.imageUrl} className="w-7 h-7 rounded-lg object-cover shrink-0" alt={c.name} />
                         )}
                         <span className="text-sm text-gray-700 truncate font-medium">{c.name}</span>
                       </div>

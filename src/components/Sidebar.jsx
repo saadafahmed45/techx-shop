@@ -89,7 +89,7 @@ const Sidebar = () => {
       <aside
         className={`
           fixed lg:sticky top-0 left-0 h-screen z-40
-          w-64 flex-shrink-0
+          w-64 shrink-0
           bg-gray-950 text-white
           flex flex-col
           transform transition-transform duration-300 ease-in-out
@@ -99,7 +99,7 @@ const Sidebar = () => {
         {/* Brand */}
         <div className="px-5 py-6 border-b border-white/8">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-900/50 flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-900/50 shrink-0">
               <Package className="w-4.5 h-4.5 text-white" />
             </div>
             <div>
@@ -135,7 +135,7 @@ const Sidebar = () => {
                           }
                         `}
                       >
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition ${
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition ${
                           active
                             ? "bg-white/20"
                             : "bg-white/5 group-hover:bg-white/10"
@@ -144,7 +144,7 @@ const Sidebar = () => {
                         </div>
                         <span className="flex-1 truncate">{item.label}</span>
                         {active && (
-                          <ChevronRight className="w-3.5 h-3.5 opacity-60 flex-shrink-0" />
+                          <ChevronRight className="w-3.5 h-3.5 opacity-60 shrink-0" />
                         )}
                       </Link>
                     </li>

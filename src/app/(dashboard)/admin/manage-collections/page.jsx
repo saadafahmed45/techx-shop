@@ -239,7 +239,7 @@ const ManageCollections = () => {
                     alt={collection.name}
                     className="h-48 w-full object-cover group-hover:scale-105 transition duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
                   <div className="absolute bottom-3 left-3">
                     <span className="bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-700 shadow-sm">
                       {collection.productIds?.length || 0} products
@@ -435,13 +435,13 @@ const ManageCollections = () => {
                               <img
                                 src={product.images?.[0] || "/placeholder.png"}
                                 alt={product.title}
-                                className="w-10 h-10 rounded-lg object-cover bg-gray-100 flex-shrink-0"
+                                className="w-10 h-10 rounded-lg object-cover bg-gray-100 shrink-0"
                               />
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-gray-800 truncate">{product.title}</p>
                                 <p className="text-xs text-indigo-600 font-semibold">${product.price}</p>
                               </div>
-                              <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition ${
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition ${
                                 sel ? "bg-indigo-600" : "border-2 border-gray-200"
                               }`}>
                                 {sel && <Check className="w-3 h-3 text-white" />}

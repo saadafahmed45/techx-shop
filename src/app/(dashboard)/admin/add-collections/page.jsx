@@ -209,7 +209,7 @@ const AddCollection = () => {
               {imagePreview ? (
                 <div className="relative rounded-2xl overflow-hidden ring-1 ring-gray-200">
                   <img src={imagePreview} alt="preview" className="w-full h-72 object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-trom-black/30 to-transparent" />
                   <button
                     type="button"
                     onClick={removeImage}
@@ -281,7 +281,7 @@ const AddCollection = () => {
               </div>
 
               {/* Product list */}
-              <div className="max-h-[420px] overflow-y-auto p-3 space-y-2">
+              <div className="max-h-105 overflow-y-auto p-3 space-y-2">
                 {filteredProducts.length === 0 ? (
                   <div className="text-center py-10">
                     <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
@@ -307,14 +307,14 @@ const AddCollection = () => {
                         <img
                           src={product.images?.[0] || "/placeholder.png"}
                           alt={product.title}
-                          className="w-14 h-14 rounded-xl object-cover flex-shrink-0 bg-gray-100"
+                          className="w-14 h-14 rounded-xl object-cover shrink-0 bg-gray-100"
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-gray-800 truncate">{product.title}</p>
                           <p className="text-xs text-indigo-600 font-bold mt-0.5">${product.price}</p>
                           <p className="text-xs text-gray-400">{product.variants?.length || 0} variants</p>
                         </div>
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition ${
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition ${
                           selected ? "bg-indigo-600" : "border-2 border-gray-200"
                         }`}>
                           {selected && <Check className="w-3 h-3 text-white" />}
@@ -341,7 +341,7 @@ const AddCollection = () => {
                         key={id}
                         className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg text-xs font-medium border border-indigo-100"
                       >
-                        <span className="truncate max-w-[100px]">{product.title}</span>
+                        <span className="truncate max-w-25">{product.title}</span>
                         <button
                           type="button"
                           onClick={() => toggleProduct(id)}
