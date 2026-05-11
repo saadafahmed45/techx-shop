@@ -1,353 +1,384 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Upload, X, Search, Package, ImageIcon, Check, Layers3, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
-import { Edit2, Trash2, X, RefreshCw, Upload, Package } from "lucide-react";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-const ManageCollections = () => {
-  const [collections, setCollections] = useState([]);
+const AddCollection = () => {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [editCollection, setEditCollection] = useState(null);
+  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [dragging, setDragging] = useState(false);
 
-  const fetchCollections = useCallback(async () => {
-    try {
-      const res = await fetch(`${API}/collections`);
-      const data = await res.json();
-      setCollections(Array.isArray(data) ? data : []);
-    } catch (err) {
-      toast.error("Failed to fetch collections");
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    fetchProducts();
   }, []);
 
-  const fetchProducts = useCallback(async () => {
+  const fetchProducts = async () => {
     try {
       const res = await fetch(`${API}/products`);
       const data = await res.json();
       setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchCollections();
-    fetchProducts();
-
-    // ✅ Real-time polling every 15 seconds
-    const interval = setInterval(() => {
-      fetchCollections();
-      fetchProducts();
-    }, 15000);
-
-    return () => clearInterval(interval);
-  }, [fetchCollections, fetchProducts]);
-
-  const handleDelete = async (_id) => {
-    try {
-      const res = await fetch(`${API}/collections/${_id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
-      // ✅ Instant UI update
-      setCollections((prev) => prev.filter((c) => c._id !== _id));
-      setDeleteConfirm(null);
-      toast.success("Collection deleted!");
-    } catch (err) {
-      toast.error("Failed to delete collection");
+      toast.error("Failed to load products");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const toggleProductInEdit = (productId) => {
-    if (!editCollection) return;
-    const currentIds = editCollection.productIds || [];
-    // Handle both string IDs and ObjectId strings
-    const currentStrings = currentIds.map((id) => String(id));
-    const productIdStr = String(productId);
-    const updatedIds = currentStrings.includes(productIdStr)
-      ? currentStrings.filter((id) => id !== productIdStr)
-      : [...currentStrings, productIdStr];
-    setEditCollection({ ...editCollection, productIds: updatedIds });
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) =>
+      product.title?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [products, search]);
+
+  const handleImageUpload = (file) => {
+    if (!file) return;
+    // FIX: revoke previous object URL to prevent memory leaks
+    if (imagePreview && imagePreview.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
-  const isProductSelected = (productId) => {
-    const ids = (editCollection?.productIds || []).map((id) => String(id));
-    return ids.includes(String(productId));
+  const handleInputChange = (e) => {
+    const file = e.target.files[0];
+    handleImageUpload(file);
   };
 
-  const handleEditSubmit = async (e) => {
+  const removeImage = () => {
+    if (imagePreview && imagePreview.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  // FIX: always store IDs as plain strings to avoid ObjectId comparison issues
+  const toggleProduct = (productId) => {
+    const id = String(productId);
+    setSelectedProducts((prev) =>
+      prev.includes(id)
+        ? prev.filter((existing) => existing !== id)
+        : [...prev, id]
+    );
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!editCollection) return;
-    setIsSubmitting(true);
 
-    const formData = new FormData();
-    formData.append("name", editCollection.name);
-    formData.append("description", editCollection.description);
-    if (editCollection.imageFile) {
-      formData.append("image", editCollection.imageFile);
+    if (!name.trim() || !description.trim() || !imageFile) {
+      toast.error("Please fill all required fields");
+      return;
     }
-    // ✅ FIX: Send as comma-separated string
-    formData.append("productIds", (editCollection.productIds || []).join(","));
 
     try {
-      const res = await fetch(`${API}/collections/${editCollection._id}`, {
-        method: "PUT",
+      setIsSubmitting(true);
+      const formData = new FormData();
+      formData.append("name", name.trim());
+      formData.append("description", description.trim());
+      formData.append("image", imageFile);
+
+      // FIX: Send as both JSON array AND comma-string so any backend parser works
+      formData.append("productIds", JSON.stringify(selectedProducts));
+      // Also append each id individually so backends that use req.body.productIds[] work
+      selectedProducts.forEach((id) => formData.append("productIds[]", id));
+
+      const res = await fetch(`${API}/collections`, {
+        method: "POST",
         body: formData,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed");
 
-      toast.success("✅ Collection updated!");
-      setEditCollection(null);
-      fetchCollections(); // Refresh to get updated data
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to create collection");
+
+      toast.success("Collection created successfully");
+      setName("");
+      setDescription("");
+      removeImage();
+      setSelectedProducts([]);
+      setSearch("");
     } catch (err) {
-      toast.error("❌ " + (err.message || "Failed to update collection"));
+      toast.error(err.message || "Failed to create collection");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditCollection({ ...editCollection, [name]: value });
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setEditCollection({
-      ...editCollection,
-      imageFile: file,
-      imagePreview: URL.createObjectURL(file),
-    });
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto" />
-          <p className="mt-3 text-gray-500">Loading collections...</p>
+      <div className="min-h-screen bg-[#F7F8FC] p-6 font-sans">
+        <div className="max-w-6xl mx-auto">
+          <div className="h-10 w-64 bg-gray-200 rounded-xl mb-8 animate-pulse" />
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-5">
+              <div className="bg-white rounded-2xl p-6 shadow-sm animate-pulse space-y-4">
+                <div className="h-6 bg-gray-100 rounded-lg w-1/3" />
+                <div className="h-12 bg-gray-100 rounded-xl" />
+                <div className="h-32 bg-gray-100 rounded-xl" />
+              </div>
+              <div className="bg-white rounded-2xl p-6 shadow-sm animate-pulse">
+                <div className="h-64 bg-gray-100 rounded-xl" />
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl p-6 shadow-sm animate-pulse">
+              <div className="h-80 bg-gray-100 rounded-xl" />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-[#F7F8FC] p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Manage Collections</h1>
-            <p className="text-gray-500 mt-1">{collections.length} collection{collections.length !== 1 ? "s" : ""}</p>
+
+        {/* HEADER */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200">
+              <Layers3 className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Create Collection</h1>
           </div>
-          <button
-            onClick={() => { fetchCollections(); fetchProducts(); }}
-            className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 text-sm font-medium transition"
-          >
-            <RefreshCw className="w-4 h-4" /> Refresh
-          </button>
+          <p className="text-sm text-gray-500 ml-13 pl-0.5">Organize products into curated groups for your storefront</p>
         </div>
 
-        {collections.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border p-16 text-center">
-            <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No Collections Yet</h3>
-            <p className="text-gray-400 mb-4">Create your first collection to group products</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-            {collections.map((c) => (
-              <div key={c._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group">
-                <div className="relative">
-                  <img
-                    src={c.imageUrl || "/placeholder.png"}
-                    className="h-44 w-full object-cover"
-                    alt={c.name}
+        <form onSubmit={handleSubmit} className="grid lg:grid-cols-3 gap-6">
+
+          {/* ── LEFT ── */}
+          <div className="lg:col-span-2 space-y-5">
+
+            {/* Details card */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <Sparkles className="w-4 h-4 text-indigo-500" />
+                <h2 className="font-semibold text-gray-800">Collection Details</h2>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                    Collection Name <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Summer Essentials 2026"
+                    className="w-full h-11 rounded-xl border border-gray-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-gray-50 placeholder:text-gray-400"
+                    required
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
                 </div>
-                <div className="p-4">
-                  <h2 className="font-bold text-gray-900 truncate">{c.name}</h2>
-                  <p className="text-gray-500 text-sm mt-1 line-clamp-2">{c.description}</p>
-                  <div className="flex items-center justify-between mt-3">
-                    <span className="text-xs bg-indigo-50 text-indigo-600 font-medium px-2.5 py-1 rounded-full">
-                      {c.productIds?.length || 0} product{(c.productIds?.length || 0) !== 1 ? "s" : ""}
-                    </span>
-                    <div className="flex gap-1.5">
-                      <button
-                        onClick={() => setEditCollection({ ...c, productIds: (c.productIds || []).map(String), imagePreview: c.imageUrl })}
-                        className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition"
-                        title="Edit"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm(c._id)}
-                        className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                    Description <span className="text-red-400">*</span>
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Describe what makes this collection special..."
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition resize-none bg-gray-50 placeholder:text-gray-400"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Cover Image card */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <ImageIcon className="w-4 h-4 text-indigo-500" />
+                <h2 className="font-semibold text-gray-800">Cover Image</h2>
+                <span className="ml-auto text-xs text-gray-400">PNG, JPG up to 10MB</span>
+              </div>
+
+              {imagePreview ? (
+                <div className="relative rounded-2xl overflow-hidden ring-1 ring-gray-200">
+                  <img src={imagePreview} alt="preview" className="w-full h-72 object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute top-3 right-3 w-9 h-9 rounded-xl bg-white/90 hover:bg-red-50 text-gray-600 hover:text-red-500 flex items-center justify-center shadow-md transition"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 shadow-sm">
+                    {imageFile?.name}
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Delete Confirmation Modal */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-            <div className="text-center">
-              <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trash2 className="w-7 h-7 text-red-600" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Delete Collection?</h3>
-              <p className="text-gray-500 text-sm mb-5">This will also unlink all associated products.</p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setDeleteConfirm(null)}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-sm"
+              ) : (
+                <label
+                  onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragging(false);
+                    const file = e.dataTransfer.files[0];
+                    if (file) handleImageUpload(file);
+                  }}
+                  className={`h-72 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all ${
+                    dragging
+                      ? "border-indigo-400 bg-indigo-50"
+                      : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
+                  }`}
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleDelete(deleteConfirm)}
-                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium text-sm"
-                >
-                  Delete
-                </button>
-              </div>
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition ${dragging ? "bg-indigo-100" : "bg-gray-100"}`}>
+                    <Upload className={`w-7 h-7 transition ${dragging ? "text-indigo-600" : "text-gray-400"}`} />
+                  </div>
+                  <p className="font-semibold text-gray-700 text-sm">Drop image here or <span className="text-indigo-600">browse</span></p>
+                  <p className="text-xs text-gray-400 mt-1">Recommended: 1200 × 600px</p>
+                  <input type="file" accept="image/*" onChange={handleInputChange} className="hidden" />
+                </label>
+              )}
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Edit Modal */}
-      {editCollection && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl my-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Edit Collection</h2>
-              <button
-                onClick={() => setEditCollection(null)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
+          {/* ── RIGHT ── */}
+          <div className="space-y-5">
 
-            <form onSubmit={handleEditSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={editCollection.name}
-                  onChange={handleEditChange}
-                  className="w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                  required
-                />
-              </div>
+            {/* Products card */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-gray-100">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="font-semibold text-gray-800">Add Products</h2>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {selectedProducts.length > 0
+                        ? `${selectedProducts.length} product${selectedProducts.length > 1 ? "s" : ""} selected`
+                        : "None selected"}
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                    <Package className="w-5 h-5 text-indigo-600" />
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
-                <textarea
-                  name="description"
-                  value={editCollection.description}
-                  onChange={handleEditChange}
-                  rows={3}
-                  className="w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Cover Image</label>
-                {editCollection.imagePreview && (
-                  <img
-                    src={editCollection.imagePreview}
-                    className="h-36 w-full object-cover rounded-lg mb-2"
-                    alt="preview"
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full h-10 rounded-xl border border-gray-200 bg-gray-50 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                   />
-                )}
-                <label className="flex items-center gap-2 cursor-pointer text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-                  <Upload className="w-4 h-4" /> Change image
-                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                </label>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Products ({(editCollection.productIds || []).length} selected)
-                </label>
-                {products.length === 0 ? (
-                  <p className="text-sm text-gray-400">No products available</p>
+              {/* Product list */}
+              <div className="max-h-[420px] overflow-y-auto p-3 space-y-2">
+                {filteredProducts.length === 0 ? (
+                  <div className="text-center py-10">
+                    <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                      <Package className="w-6 h-6 text-gray-300" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-500">No products found</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Try a different keyword</p>
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-56 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
-                    {products.map((p) => (
+                  filteredProducts.map((product) => {
+                    // FIX: always compare as strings — MongoDB _id is an object
+                    const selected = selectedProducts.includes(String(product._id));
+                    return (
                       <div
-                        key={p._id}
-                        onClick={() => toggleProductInEdit(p._id)}
-                        className={`cursor-pointer border-2 rounded-lg overflow-hidden transition ${
-                          isProductSelected(p._id)
-                            ? "border-indigo-500 ring-2 ring-indigo-200"
-                            : "border-transparent hover:border-gray-300"
+                        key={String(product._id)}
+                        onClick={() => toggleProduct(product._id)}
+                        className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-all border ${
+                          selected
+                            ? "border-indigo-200 bg-indigo-50/70"
+                            : "border-transparent hover:bg-gray-50"
                         }`}
                       >
                         <img
-                          src={p.images?.[0] || "/placeholder.png"}
-                          className="h-20 w-full object-cover"
-                          alt={p.title}
+                          src={product.images?.[0] || "/placeholder.png"}
+                          alt={product.title}
+                          className="w-14 h-14 rounded-xl object-cover flex-shrink-0 bg-gray-100"
                         />
-                        <div className="p-1.5 bg-white">
-                          <p className="text-xs text-gray-700 truncate font-medium">{p.title}</p>
-                          <p className="text-xs text-gray-400">${p.price}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800 truncate">{product.title}</p>
+                          <p className="text-xs text-indigo-600 font-bold mt-0.5">${product.price}</p>
+                          <p className="text-xs text-gray-400">{product.variants?.length || 0} variants</p>
+                        </div>
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition ${
+                          selected ? "bg-indigo-600" : "border-2 border-gray-200"
+                        }`}>
+                          {selected && <Check className="w-3 h-3 text-white" />}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })
                 )}
               </div>
+            </div>
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setEditCollection(null)}
-                  className="flex-1 px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save Changes"
-                  )}
-                </button>
+            {/* Selected tags */}
+            {selectedProducts.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                  Selected ({selectedProducts.length})
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedProducts.map((id) => {
+                    // FIX: compare as strings
+                    const product = products.find((p) => String(p._id) === String(id));
+                    return product ? (
+                      <span
+                        key={id}
+                        className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg text-xs font-medium border border-indigo-100"
+                      >
+                        <span className="truncate max-w-[100px]">{product.title}</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleProduct(id)}
+                          className="text-indigo-400 hover:text-red-500 transition"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ) : null;
+                  })}
+                </div>
               </div>
-            </form>
+            )}
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Creating Collection...
+                </>
+              ) : (
+                <>
+                  <Layers3 className="w-4 h-4" />
+                  Create Collection
+                </>
+              )}
+            </button>
           </div>
-        </div>
-      )}
+        </form>
+      </div>
     </div>
   );
 };
 
-export default ManageCollections;
+export default AddCollection;
