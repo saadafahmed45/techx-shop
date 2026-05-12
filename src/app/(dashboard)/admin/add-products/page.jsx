@@ -2,512 +2,935 @@
 
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { Plus, X, Upload, Tag, Package, Layers3, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Plus,
+  X,
+  Upload,
+  Tag,
+  Package,
+  Layers3,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:5000";
 
 const AddProducts = () => {
-  const [imageFiles, setImageFiles] = useState([]);
-  const [imagePreview, setImagePreview] = useState([]);
-  const [variants, setVariants] = useState([{ size: "", color: "#6366f1", stock: 0, price: 0 }]);
-  const [status, setStatus] = useState("draft");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [collections, setCollections] = useState([]);
-  const [selectedCollections, setSelectedCollections] = useState([]);
-  // FIX: Track form field values in state for controlled reset
+  const [imageFiles, setImageFiles] =
+    useState([]);
+
+  const [imagePreview, setImagePreview] =
+    useState([]);
+
+  const [variants, setVariants] =
+    useState([
+      {
+        size: "",
+        color: "#6366f1",
+        stock: 0,
+        price: 0,
+      },
+    ]);
+
+  const [status, setStatus] =
+    useState("draft");
+
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
+
+  const [collections, setCollections] =
+    useState([]);
+
+  // ✅ Selected Collections
+  const [
+    selectedCollections,
+    setSelectedCollections,
+  ] = useState([]);
+
   const [fields, setFields] = useState({
-    title: "", description: "", vendor: "", sku: "", price: "", productType: "",
+    title: "",
+    description: "",
+    vendor: "",
+    sku: "",
+    price: "",
+    productType: "",
   });
 
+  // =====================================
+  // FETCH COLLECTIONS
+  // =====================================
   useEffect(() => {
     fetch(`${API}/collections`)
       .then((res) => res.json())
-      .then((data) => setCollections(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Collections fetch error:", err));
+      .then((data) => {
+        setCollections(
+          Array.isArray(data) ? data : []
+        );
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error(
+          "Failed to load collections"
+        );
+      });
   }, []);
 
+  // =====================================
+  // FIELD CHANGE
+  // =====================================
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
-    setFields((prev) => ({ ...prev, [name]: value }));
+
+    setFields((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
+  // =====================================
+  // IMAGE UPLOAD
+  // =====================================
   const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length + imageFiles.length > 5) {
-      toast.warning("Maximum 5 images allowed");
+    const files = Array.from(
+      e.target.files
+    );
+
+    if (
+      files.length + imageFiles.length >
+      5
+    ) {
+      toast.warning(
+        "Maximum 5 images allowed"
+      );
       return;
     }
-    setImageFiles((prev) => [...prev, ...files]);
-    const previews = files.map((f) => URL.createObjectURL(f));
-    setImagePreview((prev) => [...prev, ...previews]);
+
+    setImageFiles((prev) => [
+      ...prev,
+      ...files,
+    ]);
+
+    const previews = files.map((file) =>
+      URL.createObjectURL(file)
+    );
+
+    setImagePreview((prev) => [
+      ...prev,
+      ...previews,
+    ]);
   };
 
+  // =====================================
+  // REMOVE IMAGE
+  // =====================================
   const removeImage = (index) => {
-    // FIX: revoke object URL to prevent memory leak
-    if (imagePreview[index]?.startsWith("blob:")) {
-      URL.revokeObjectURL(imagePreview[index]);
+    if (
+      imagePreview[index]?.startsWith(
+        "blob:"
+      )
+    ) {
+      URL.revokeObjectURL(
+        imagePreview[index]
+      );
     }
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
-    setImagePreview((prev) => prev.filter((_, i) => i !== index));
+
+    setImageFiles((prev) =>
+      prev.filter((_, i) => i !== index)
+    );
+
+    setImagePreview((prev) =>
+      prev.filter((_, i) => i !== index)
+    );
   };
 
+  // =====================================
+  // VARIANTS
+  // =====================================
   const addVariant = () => {
-    setVariants([...variants, { size: "", color: "#6366f1", stock: 0, price: 0 }]);
+    setVariants((prev) => [
+      ...prev,
+      {
+        size: "",
+        color: "#6366f1",
+        stock: 0,
+        price: 0,
+      },
+    ]);
   };
 
   const removeVariant = (index) => {
     if (variants.length === 1) return;
-    setVariants(variants.filter((_, i) => i !== index));
-  };
 
-  const updateVariant = (index, field, value) => {
-    const updated = [...variants];
-    updated[index][field] = field === "stock" || field === "price" ? Number(value) : value;
-    setVariants(updated);
-  };
-
-  // FIX: always coerce to string — MongoDB _id can be an object
-  const toggleCollection = (id) => {
-    const strId = String(id);
-    setSelectedCollections((prev) =>
-      prev.includes(strId) ? prev.filter((c) => c !== strId) : [...prev, strId]
+    setVariants((prev) =>
+      prev.filter((_, i) => i !== index)
     );
   };
 
-  const isCollectionSelected = (id) => selectedCollections.includes(String(id));
+  const updateVariant = (
+    index,
+    field,
+    value
+  ) => {
+    const updated = [...variants];
 
-  const resetForm = () => {
-    setFields({ title: "", description: "", vendor: "", sku: "", price: "", productType: "" });
-    // FIX: revoke all object URLs
-    imagePreview.forEach((url) => { if (url.startsWith("blob:")) URL.revokeObjectURL(url); });
-    setImageFiles([]);
-    setImagePreview([]);
-    setVariants([{ size: "", color: "#6366f1", stock: 0, price: 0 }]);
-    setSelectedCollections([]);
+    updated[index][field] =
+      field === "stock" ||
+      field === "price"
+        ? Number(value)
+        : value;
+
+    setVariants(updated);
   };
 
+  // =====================================
+  // COLLECTION SELECT
+  // =====================================
+  const toggleCollection = (
+    collection
+  ) => {
+    const exists =
+      selectedCollections.find(
+        (c) =>
+          c._id === String(collection._id)
+      );
+
+    if (exists) {
+      setSelectedCollections((prev) =>
+        prev.filter(
+          (c) =>
+            c._id !==
+            String(collection._id)
+        )
+      );
+    } else {
+      setSelectedCollections((prev) => [
+        ...prev,
+        {
+          _id: String(collection._id),
+          name: collection.name,
+        },
+      ]);
+    }
+  };
+
+  const isCollectionSelected = (
+    id
+  ) => {
+    return selectedCollections.some(
+      (c) => c._id === String(id)
+    );
+  };
+
+  // =====================================
+  // RESET FORM
+  // =====================================
+  const resetForm = () => {
+    setFields({
+      title: "",
+      description: "",
+      vendor: "",
+      sku: "",
+      price: "",
+      productType: "",
+    });
+
+    imagePreview.forEach((url) => {
+      if (url.startsWith("blob:")) {
+        URL.revokeObjectURL(url);
+      }
+    });
+
+    setImageFiles([]);
+    setImagePreview([]);
+
+    setVariants([
+      {
+        size: "",
+        color: "#6366f1",
+        stock: 0,
+        price: 0,
+      },
+    ]);
+
+    setSelectedCollections([]);
+    setStatus("draft");
+  };
+
+  // =====================================
+  // SUBMIT
+  // =====================================
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!fields.title) {
+      toast.error("Title is required");
+      return;
+    }
+
+    if (!fields.description) {
+      toast.error(
+        "Description is required"
+      );
+      return;
+    }
+
+    if (!fields.price) {
+      toast.error("Price is required");
+      return;
+    }
+
+    if (imageFiles.length === 0) {
+      toast.error(
+        "At least one image required"
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
-    const formData = new FormData();
-    formData.append("title", fields.title);
-    formData.append("description", fields.description);
-    formData.append("price", fields.price);
-    formData.append("productType", fields.productType);
-    formData.append("vendor", fields.vendor || "");
-    formData.append("sku", fields.sku || "");
-    formData.append("status", status);
-    formData.append("variants", JSON.stringify(variants));
-    // FIX: Send as JSON array AND repeated fields to support any backend parser
-    formData.append("collectionIds", JSON.stringify(selectedCollections));
-    selectedCollections.forEach((id) => formData.append("collectionIds[]", id));
-    imageFiles.forEach((file) => formData.append("images", file));
-
     try {
-      const res = await fetch(`${API}/products`, { method: "POST", body: formData });
+      const formData = new FormData();
+
+      // =========================
+      // BASIC FIELDS
+      // =========================
+      formData.append(
+        "title",
+        fields.title
+      );
+
+      formData.append(
+        "description",
+        fields.description
+      );
+
+      formData.append(
+        "vendor",
+        fields.vendor
+      );
+
+      formData.append(
+        "sku",
+        fields.sku
+      );
+
+      formData.append(
+        "price",
+        fields.price
+      );
+
+      formData.append(
+        "productType",
+        fields.productType
+      );
+
+      formData.append(
+        "status",
+        status
+      );
+
+      // =========================
+      // VARIANTS
+      // =========================
+      formData.append(
+        "variants",
+        JSON.stringify(variants)
+      );
+
+      // =========================
+      // COLLECTIONS
+      // =========================
+      formData.append(
+        "collections",
+        JSON.stringify(
+          selectedCollections
+        )
+      );
+
+      // =========================
+      // IMAGES
+      // =========================
+      imageFiles.forEach((file) => {
+        formData.append(
+          "images",
+          file
+        );
+      });
+
+      // =========================
+      // API REQUEST
+      // =========================
+      const res = await fetch(
+        `${API}/products`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed");
-      toast.success("Product saved successfully!");
+
+      if (!res.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to save product"
+        );
+      }
+
+      toast.success(
+        "✅ Product created successfully"
+      );
+
       resetForm();
-    } catch (err) {
-      toast.error(err.message || "Upload failed");
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error.message ||
+          "Failed to create product"
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const totalStock = variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
+  // =====================================
+  // TOTAL STOCK
+  // =====================================
+  const totalStock =
+    variants.reduce(
+      (sum, item) =>
+        sum + Number(item.stock || 0),
+      0
+    );
 
   return (
     <div className="bg-[#F7F8FC] min-h-screen pb-24">
-      <form onSubmit={handleSubmit} className="max-w-7xl mx-auto p-6" encType="multipart/form-data">
-
+      <form
+        onSubmit={handleSubmit}
+        encType="multipart/form-data"
+        className="max-w-7xl mx-auto p-6"
+      >
         {/* HEADER */}
         <div className="mb-6 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
                 <Package className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Add New Product</h1>
+
+              <h1 className="text-2xl font-bold text-gray-900">
+                Add Product
+              </h1>
             </div>
-            <p className="text-sm text-gray-500 mt-1 ml-13 pl-0.5">Fill in the details to create a new product listing</p>
+
+            <p className="text-sm text-gray-500 mt-1">
+              Create your product
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${
-              status === "active" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-            }`}>
-              {status === "active" ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
-              {status === "active" ? "Active" : "Draft"}
-            </span>
-          </div>
+
+          <span
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold ${
+              status === "active"
+                ? "bg-green-100 text-green-700"
+                : "bg-amber-100 text-amber-700"
+            }`}
+          >
+            {status === "active" ? (
+              <CheckCircle2 className="w-4 h-4" />
+            ) : (
+              <AlertCircle className="w-4 h-4" />
+            )}
+
+            {status}
+          </span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
-
-          {/* ── LEFT ── */}
+          {/* LEFT */}
           <div className="lg:col-span-3 space-y-5">
-
-            {/* Product Info */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-sm font-semibold text-gray-800 flex items-center gap-2 mb-5">
+            {/* PRODUCT INFO */}
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <h2 className="text-sm font-semibold mb-5 flex items-center gap-2">
                 <Tag className="w-4 h-4 text-indigo-500" />
                 Product Information
               </h2>
+
               <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                    Title <span className="text-red-400">*</span>
-                  </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={fields.title}
+                  onChange={
+                    handleFieldChange
+                  }
+                  placeholder="Product title"
+                  className="w-full h-11 border border-gray-200 rounded-xl px-4 bg-gray-50 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+                <textarea
+                  rows={4}
+                  name="description"
+                  value={fields.description}
+                  onChange={
+                    handleFieldChange
+                  }
+                  placeholder="Description"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 text-sm outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                />
+
+                <div className="grid grid-cols-2 gap-4">
                   <input
-                    name="title"
-                    value={fields.title}
-                    onChange={handleFieldChange}
-                    placeholder="e.g. Classic Linen Shirt"
-                    required
-                    className="w-full h-11 border border-gray-200 bg-gray-50 px-4 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
+                    type="text"
+                    name="vendor"
+                    value={fields.vendor}
+                    onChange={
+                      handleFieldChange
+                    }
+                    placeholder="Vendor"
+                    className="w-full h-11 border border-gray-200 rounded-xl px-4 bg-gray-50 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
                   />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                    Description <span className="text-red-400">*</span>
-                  </label>
-                  <textarea
-                    name="description"
-                    value={fields.description}
-                    onChange={handleFieldChange}
-                    placeholder="Describe the product, materials, fit, etc."
-                    rows={4}
-                    required
-                    className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition resize-none placeholder:text-gray-400"
+
+                  <input
+                    type="text"
+                    name="sku"
+                    value={fields.sku}
+                    onChange={
+                      handleFieldChange
+                    }
+                    placeholder="SKU"
+                    className="w-full h-11 border border-gray-200 rounded-xl px-4 bg-gray-50 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
                   />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Vendor / Brand</label>
-                    <input
-                      name="vendor"
-                      value={fields.vendor}
-                      onChange={handleFieldChange}
-                      placeholder="e.g. Nike, Zara"
-                      className="w-full h-11 border border-gray-200 bg-gray-50 px-4 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">SKU</label>
-                    <input
-                      name="sku"
-                      value={fields.sku}
-                      onChange={handleFieldChange}
-                      placeholder="e.g. LS-001-WHT"
-                      className="w-full h-11 border border-gray-200 bg-gray-50 px-4 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
-                    />
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Media */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-sm font-semibold text-gray-800 flex items-center gap-2 mb-5">
+            {/* IMAGES */}
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <h2 className="text-sm font-semibold mb-5 flex items-center gap-2">
                 <Upload className="w-4 h-4 text-indigo-500" />
-                Product Images
-                <span className="ml-auto text-xs text-gray-400 font-normal">{imageFiles.length}/5 uploaded</span>
+                Images
               </h2>
 
-              {imageFiles.length < 5 && (
-                <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/50 transition mb-4">
-                  <Upload className="w-6 h-6 text-gray-400 mb-1.5" />
-                  <span className="text-sm font-medium text-gray-600">Click to upload</span>
-                  <span className="text-xs text-gray-400 mt-0.5">PNG, JPG up to 10MB · Max 5 images</span>
-                  <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="hidden" />
-                </label>
-              )}
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-2xl h-32 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition">
+                <Upload className="w-6 h-6 text-gray-400 mb-2" />
 
-              {imagePreview.length > 0 && (
-                <div className="grid grid-cols-5 gap-3">
-                  {imagePreview.map((img, i) => (
-                    <div key={i} className="relative group aspect-square">
-                      <img src={img} className="w-full h-full object-cover rounded-xl" alt={`preview-${i}`} />
-                      {i === 0 && (
-                        <span className="absolute bottom-1.5 left-1.5 bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-                          MAIN
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeImage(i)}
-                        className="absolute top-1.5 right-1.5 w-6 h-6 bg-white/90 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-sm"
+                <p className="text-sm text-gray-500">
+                  Upload images
+                </p>
+
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={
+                    handleImageUpload
+                  }
+                  className="hidden"
+                />
+              </label>
+
+              {imagePreview.length >
+                0 && (
+                <div className="grid grid-cols-5 gap-3 mt-4">
+                  {imagePreview.map(
+                    (img, i) => (
+                      <div
+                        key={i}
+                        className="relative"
                       >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
+                        <img
+                          src={img}
+                          alt=""
+                          className="w-full h-24 object-cover rounded-xl"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeImage(i)
+                          }
+                          className="absolute top-2 right-2 bg-white rounded-full p-1 shadow"
+                        >
+                          <X className="w-4 h-4 text-red-500" />
+                        </button>
+                      </div>
+                    )
+                  )}
                 </div>
               )}
             </div>
 
-            {/* Pricing & Category */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-sm font-semibold text-gray-800 mb-5">Pricing & Category</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                    Base Price <span className="text-red-400">*</span>
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">$</span>
-                    <input
-                      type="number"
-                      name="price"
-                      value={fields.price}
-                      onChange={handleFieldChange}
-                      required
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                      className="w-full h-11 border border-gray-200 bg-gray-50 pl-8 pr-4 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Product Type</label>
-                  <input
-                    name="productType"
-                    value={fields.productType}
-                    onChange={handleFieldChange}
-                    placeholder="e.g. Shirt, Pants, Dress"
-                    className="w-full h-11 border border-gray-200 bg-gray-50 px-4 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
-                  />
-                </div>
+            {/* PRICE */}
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <h2 className="text-sm font-semibold mb-5">
+                Pricing
+              </h2>
+
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="number"
+                  name="price"
+                  value={fields.price}
+                  onChange={
+                    handleFieldChange
+                  }
+                  placeholder="Price"
+                  className="w-full h-11 border border-gray-200 rounded-xl px-4 bg-gray-50 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+                <input
+                  type="text"
+                  name="productType"
+                  value={
+                    fields.productType
+                  }
+                  onChange={
+                    handleFieldChange
+                  }
+                  placeholder="Product Type"
+                  className="w-full h-11 border border-gray-200 rounded-xl px-4 bg-gray-50 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                />
               </div>
             </div>
 
-            {/* Variants */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+            {/* VARIANTS */}
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-sm font-semibold text-gray-800">Variants</h2>
-                <span className="text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-lg font-medium">
-                  Total stock: {totalStock} units
-                </span>
+                <h2 className="text-sm font-semibold">
+                  Variants
+                </h2>
+
+                <button
+                  type="button"
+                  onClick={addVariant}
+                  className="flex items-center gap-1 text-sm text-indigo-600 font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add
+                </button>
               </div>
 
-              <div className="space-y-2.5">
-                {variants.map((variant, index) => (
-                  <div key={index} className="grid grid-cols-[1fr_auto_1fr_1fr_auto] gap-2.5 items-center p-3 bg-gray-50 rounded-xl border border-gray-100">
-                    <select
-                      className="h-9 border border-gray-200 px-3 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
-                      value={variant.size}
-                      onChange={(e) => updateVariant(index, "size", e.target.value)}
+              <div className="space-y-3">
+                {variants.map(
+                  (variant, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-5 gap-3 items-center"
                     >
-                      <option value="">Size</option>
-                      {["XS","S","M","L","XL","XXL"].map(s => <option key={s}>{s}</option>)}
-                    </select>
+                      <select
+                        value={
+                          variant.size
+                        }
+                        onChange={(e) =>
+                          updateVariant(
+                            index,
+                            "size",
+                            e.target.value
+                          )
+                        }
+                        className="h-10 border border-gray-200 rounded-xl px-3 text-sm"
+                      >
+                        <option value="">
+                          Size
+                        </option>
 
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-gray-400">Color</span>
-                      <div className="relative">
-                        <input
-                          type="color"
-                          value={variant.color}
-                          onChange={(e) => updateVariant(index, "color", e.target.value)}
-                          className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white"
-                        />
-                      </div>
-                    </div>
+                        {[
+                          "XS",
+                          "S",
+                          "M",
+                          "L",
+                          "XL",
+                        ].map((s) => (
+                          <option
+                            key={s}
+                            value={s}
+                          >
+                            {s}
+                          </option>
+                        ))}
+                      </select>
 
-                    <div className="relative">
+                      <input
+                        type="color"
+                        value={
+                          variant.color
+                        }
+                        onChange={(e) =>
+                          updateVariant(
+                            index,
+                            "color",
+                            e.target.value
+                          )
+                        }
+                        className="w-full h-10 border border-gray-200 rounded-xl"
+                      />
+
                       <input
                         type="number"
                         placeholder="Stock"
-                        value={variant.stock}
-                        min="0"
-                        onChange={(e) => updateVariant(index, "stock", e.target.value)}
-                        className="w-full h-9 border border-gray-200 px-3 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
+                        value={
+                          variant.stock
+                        }
+                        onChange={(e) =>
+                          updateVariant(
+                            index,
+                            "stock",
+                            e.target.value
+                          )
+                        }
+                        className="h-10 border border-gray-200 rounded-xl px-3 text-sm"
                       />
-                    </div>
 
-                    <div className="relative">
-                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
                       <input
                         type="number"
                         placeholder="Price"
-                        value={variant.price}
-                        min="0"
-                        step="0.01"
-                        onChange={(e) => updateVariant(index, "price", e.target.value)}
-                        className="w-full h-9 border border-gray-200 pl-5 pr-2 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
+                        value={
+                          variant.price
+                        }
+                        onChange={(e) =>
+                          updateVariant(
+                            index,
+                            "price",
+                            e.target.value
+                          )
+                        }
+                        className="h-10 border border-gray-200 rounded-xl px-3 text-sm"
                       />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeVariant(
+                            index
+                          )
+                        }
+                        className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-red-50"
+                      >
+                        <X className="w-4 h-4 text-red-500" />
+                      </button>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => removeVariant(index)}
-                      disabled={variants.length === 1}
-                      className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
-
-              <button
-                type="button"
-                onClick={addVariant}
-                className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 mt-4 text-sm font-medium transition"
-              >
-                <Plus className="w-4 h-4" />
-                Add variant
-              </button>
             </div>
           </div>
 
-          {/* ── RIGHT SIDEBAR ── */}
+          {/* RIGHT */}
           <div className="space-y-5">
+            {/* STATUS */}
+            <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">
+                Status
+              </h3>
 
-            {/* Status */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Visibility</h3>
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  { val: "draft", label: "Draft", desc: "Hidden", color: "amber" },
-                  { val: "active", label: "Active", desc: "Live", color: "green" },
-                ].map((opt) => (
-                  <button
-                    key={opt.val}
-                    type="button"
-                    onClick={() => setStatus(opt.val)}
-                    className={`p-3 rounded-xl border-2 text-left transition ${
-                      status === opt.val
-                        ? opt.color === "green"
-                          ? "border-green-500 bg-green-50"
-                          : "border-amber-400 bg-amber-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <p className={`text-sm font-semibold ${
-                      status === opt.val
-                        ? opt.color === "green" ? "text-green-700" : "text-amber-700"
-                        : "text-gray-700"
-                    }`}>{opt.label}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{opt.desc}</p>
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setStatus("draft")
+                  }
+                  className={`p-3 rounded-xl border text-sm font-medium ${
+                    status === "draft"
+                      ? "border-amber-500 bg-amber-50 text-amber-700"
+                      : "border-gray-200"
+                  }`}
+                >
+                  Draft
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setStatus("active")
+                  }
+                  className={`p-3 rounded-xl border text-sm font-medium ${
+                    status === "active"
+                      ? "border-green-500 bg-green-50 text-green-700"
+                      : "border-gray-200"
+                  }`}
+                >
+                  Active
+                </button>
               </div>
             </div>
 
-            {/* Collections */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <Layers3 className="w-3.5 h-3.5" />
+            {/* COLLECTIONS */}
+            <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-2">
+                <Layers3 className="w-4 h-4" />
                 Collections
               </h3>
-              {collections.length === 0 ? (
-                <div className="text-center py-6">
-                  <p className="text-xs text-gray-400">No collections yet.</p>
-                  <p className="text-xs text-gray-400">Create one first.</p>
-                </div>
+
+              {collections.length ===
+              0 ? (
+                <p className="text-sm text-gray-400">
+                  No collections found
+                </p>
               ) : (
-                <div className="space-y-1.5 max-h-56 overflow-y-auto">
-                  {collections.map((c) => (
-                    <label
-                      key={String(c._id)}
-                      className={`flex items-center gap-2.5 p-2 rounded-lg cursor-pointer transition ${
-                        isCollectionSelected(c._id) ? "bg-indigo-50" : "hover:bg-gray-50"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isCollectionSelected(c._id)}
-                        onChange={() => toggleCollection(c._id)}
-                        className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer"
-                      />
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        {c.imageUrl && (
-                          <img src={c.imageUrl} className="w-7 h-7 rounded-lg object-cover shrink-0" alt={c.name} />
+                <div className="space-y-2 max-h-72 overflow-y-auto">
+                  {collections.map(
+                    (collection) => (
+                      <label
+                        key={
+                          collection._id
+                        }
+                        className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer border transition ${
+                          isCollectionSelected(
+                            collection._id
+                          )
+                            ? "border-indigo-500 bg-indigo-50"
+                            : "border-gray-100 hover:bg-gray-50"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isCollectionSelected(
+                            collection._id
+                          )}
+                          onChange={() =>
+                            toggleCollection(
+                              collection
+                            )
+                          }
+                          className="w-4 h-4"
+                        />
+
+                        {collection.imageUrl && (
+                          <img
+                            src={
+                              collection.imageUrl
+                            }
+                            alt={
+                              collection.name
+                            }
+                            className="w-10 h-10 rounded-lg object-cover"
+                          />
                         )}
-                        <span className="text-sm text-gray-700 truncate font-medium">{c.name}</span>
-                      </div>
-                    </label>
-                  ))}
+
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-800">
+                            {
+                              collection.name
+                            }
+                          </p>
+                        </div>
+                      </label>
+                    )
+                  )}
                 </div>
               )}
 
-              {selectedCollections.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <p className="text-xs text-indigo-600 font-semibold mb-1.5">
-                    {selectedCollections.length} collection{selectedCollections.length > 1 ? "s" : ""} selected
+              {/* SELECTED */}
+              {selectedCollections.length >
+                0 && (
+                <div className="mt-4 border-t pt-4">
+                  <p className="text-xs text-indigo-600 font-semibold mb-2">
+                    Selected Collections
                   </p>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedCollections.map((id) => {
-                      // FIX: string comparison for _id lookup
-                      const col = collections.find((c) => String(c._id) === String(id));
-                      return col ? (
-                        <span key={id} className="text-[11px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-md font-medium">
-                          {col.name}
+
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCollections.map(
+                      (item) => (
+                        <span
+                          key={item._id}
+                          className="bg-indigo-100 text-indigo-700 text-xs px-3 py-1 rounded-full font-medium"
+                        >
+                          {item.name}
                         </span>
-                      ) : null;
-                    })}
+                      )
+                    )}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Summary */}
-            <div className="bg-gray-900 rounded-2xl p-4 text-white">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Summary</p>
-              <div className="space-y-2">
-                {[
-                  { label: "Images", value: `${imageFiles.length}/5` },
-                  { label: "Variants", value: variants.length },
-                  { label: "Total Stock", value: `${totalStock} units` },
-                  { label: "Collections", value: selectedCollections.length },
-                  { label: "Status", value: status === "active" ? "🟢 Active" : "🟡 Draft" },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">{label}</span>
-                    <span className="text-xs font-semibold text-white">{value}</span>
-                  </div>
-                ))}
+            {/* SUMMARY */}
+            <div className="bg-gray-900 rounded-2xl p-5 text-white">
+              <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-4">
+                Summary
+              </p>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>
+                    Images
+                  </span>
+
+                  <span>
+                    {
+                      imageFiles.length
+                    }
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>
+                    Variants
+                  </span>
+
+                  <span>
+                    {variants.length}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>
+                    Stock
+                  </span>
+
+                  <span>
+                    {totalStock}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>
+                    Collections
+                  </span>
+
+                  <span>
+                    {
+                      selectedCollections.length
+                    }
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* STICKY SAVE BAR */}
-        <div className="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-xl p-4 flex items-center justify-between z-50">
-          <p className="text-sm text-gray-500">
-            {fields.title ? (
-              <span className="font-medium text-gray-700">"{fields.title}"</span>
+        {/* SAVE BAR */}
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 flex items-center justify-end gap-3 z-50">
+          <button
+            type="button"
+            onClick={() =>
+              setStatus("draft")
+            }
+            className="h-11 px-6 rounded-xl border border-gray-300 text-sm font-medium"
+          >
+            Save Draft
+          </button>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            onClick={() =>
+              setStatus("active")
+            }
+            className="h-11 px-7 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold disabled:opacity-50 flex items-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                Saving...
+              </>
             ) : (
-              "Untitled product"
+              "Publish Product"
             )}
-            {" · "}{imageFiles.length} image{imageFiles.length !== 1 ? "s" : ""} · {variants.length} variant{variants.length !== 1 ? "s" : ""}
-          </p>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => { setStatus("draft"); }}
-              className="h-10 px-5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 text-sm font-medium transition"
-            >
-              Save as Draft
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              onClick={() => setStatus("active")}
-              className="h-10 bg-indigo-600 hover:bg-indigo-700 text-white px-7 rounded-xl text-sm font-semibold transition shadow-md shadow-indigo-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Saving...
-                </>
-              ) : "Publish Product"}
-            </button>
-          </div>
+          </button>
         </div>
       </form>
     </div>
