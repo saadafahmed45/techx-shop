@@ -366,7 +366,7 @@ const ManageCollections = () => {
             </div>
 
             <form onSubmit={handleEditSubmit} className="p-6">
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-col gap-6">
                 {/* LEFT */}
                 <div className="space-y-4">
                   <div>
@@ -380,7 +380,18 @@ const ManageCollections = () => {
                       className="w-full h-11 rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                     />
                   </div>
-
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Slug *</label>
+                    <input
+                      type="text"
+                      name="slug"
+                      value={editCollection.slug}
+                      onChange={handleEditChange}
+                      rows={3}
+                      required
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition resize-none"
+                    />
+                  </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Description *</label>
                     <textarea
@@ -392,7 +403,7 @@ const ManageCollections = () => {
                       className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition resize-none"
                     />
                   </div>
-
+                    
                   {/* Cover image */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Cover Image</label>
@@ -410,49 +421,8 @@ const ManageCollections = () => {
                     </label>
                   </div>
                 </div>
-
-                {/* RIGHT: Products */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                    Products ({editCollection.productIds?.length || 0} selected)
-                  </label>
-                  <div className="border border-gray-200 rounded-xl overflow-hidden">
-                    <div className="max-h-64 overflow-y-auto divide-y divide-gray-50">
-                      {products.length === 0 ? (
-                        <div className="p-6 text-center text-sm text-gray-400">No products available</div>
-                      ) : (
-                        products.map((product) => {
-                          // FIX: always use string comparison for _id
-                          const sel = isProductSelected(String(product._id));
-                          return (
-                            <div
-                              key={String(product._id)}
-                              onClick={() => toggleProductInEdit(String(product._id))}
-                              className={`flex items-center gap-3 p-3 cursor-pointer transition ${
-                                sel ? "bg-indigo-50" : "hover:bg-gray-50"
-                              }`}
-                            >
-                              <img
-                                src={product.images?.[0] || "/placeholder.png"}
-                                alt={product.title}
-                                className="w-10 h-10 rounded-lg object-cover bg-gray-100 shrink-0"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-800 truncate">{product.title}</p>
-                                <p className="text-xs text-indigo-600 font-semibold">${product.price}</p>
-                              </div>
-                              <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition ${
-                                sel ? "bg-indigo-600" : "border-2 border-gray-200"
-                              }`}>
-                                {sel && <Check className="w-3 h-3 text-white" />}
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>
-                </div>
+ 
+                
               </div>
 
               {/* Modal Actions */}
