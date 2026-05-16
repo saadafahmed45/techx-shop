@@ -21,7 +21,7 @@ export default function ProductCard({ product, index = 0 }) {
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
       {/* Image */}
-      <Link href={`/product/${product.id}`} className="relative block overflow-hidden aspect-[4/3] bg-gray-50">
+      <Link href={`/product/${product.id}`} className="relative block overflow-hidden aspect-4/3 bg-gray-50">
         <img
           src={cleanImage}
           alt={product.title}
@@ -29,7 +29,7 @@ export default function ProductCard({ product, index = 0 }) {
           onError={(e) => { e.target.src = `https://picsum.photos/seed/${product.id}/400/300`; }}
         />
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Category badge */}
         <span

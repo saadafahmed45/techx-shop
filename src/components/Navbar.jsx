@@ -100,7 +100,7 @@ export default function Navbar() {
                       </button>
 
                       {dropdownOpen && (
-                        <div className="absolute top-full left-0 mt-2 bg-white border border-gray-100 shadow-lg rounded-md overflow-hidden min-w-[170px]">
+                        <div className="absolute top-full left-0 mt-2 bg-white border border-gray-100 shadow-lg rounded-md overflow-hidden min-w-42.5">
                           {link.items.map((item) => (
                             <Link
                               key={item.href}
