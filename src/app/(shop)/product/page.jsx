@@ -36,8 +36,7 @@ import { BsCheckLg } from "react-icons/bs";
 // ========================================
 
 const API =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000";
+  "https://techx-server-tau.vercel.app";
 
 // ========================================
 // CONSTANTS
