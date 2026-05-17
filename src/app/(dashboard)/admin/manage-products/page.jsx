@@ -510,64 +510,93 @@ function EditProductModal({
       [name]: value,
     }));
   };
+// ==========================================
+// FRONTEND UPDATE FIX
+// ==========================================
 
-  // =========================================
-  // UPDATE
-  // =========================================
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  const handleSubmit =
-    async (e) => {
-      e.preventDefault();
+  try {
+    setSaving(true);
 
-      try {
-        setSaving(true);
+    const data = new FormData();
 
-        const res =
-          await fetch(
-            `${API}/products/${product._id}`,
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-              body: JSON.stringify(
-                formData
-              ),
-            }
-          );
-
-        const data =
-          await res.json();
-
-        if (!res.ok)
-          throw new Error(
-            data.message
-          );
-
-        Swal.fire({
-          icon: "success",
-          title:
-            "Product Updated",
-          text: "Changes saved successfully",
-          confirmButtonColor:
-            "#4f46e5",
-        });
-
-        onUpdated(
-          data.data
-        );
-      } catch (err) {
-        Swal.fire({
-          icon: "error",
-          title:
-            err.message ||
-            "Update failed",
-        });
-      } finally {
-        setSaving(false);
+    Object.entries(formData).forEach(
+      ([key, value]) => {
+        data.append(key, value);
       }
-    };
+    );
+
+    // ONLY APPEND IF NEW IMAGE EXISTS
+    if (newImages.length > 0) {
+      newImages.forEach((file) => {
+        data.append("images", file);
+      });
+    }
+
+    const res = await fetch(
+      `${API}/products/${product._id}`,
+      {
+        method: "PUT",
+
+        headers: {
+          Accept: "application/json",
+        },
+
+        body: data,
+      }
+    );
+
+    // ======================================
+    // DEBUG RESPONSE
+    // ======================================
+    const text = await res.text();
+
+    console.log(text);
+
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch (error) {
+      throw new Error(
+        "Server returned invalid JSON"
+      );
+    }
+
+    if (!res.ok) {
+      throw new Error(
+        result.message ||
+          "Update failed"
+      );
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "Updated!",
+      text:
+        "Product updated successfully",
+      timer: 2000,
+      showConfirmButton: false,
+      confirmButtonColor: "#4f46e5",
+    });
+
+    onUpdated(result.data);
+  } catch (err) {
+    console.error(err);
+
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text:
+        err.message ||
+        "Update failed",
+    });
+  } finally {
+    setSaving(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
