@@ -122,7 +122,7 @@ export default function HeroBanner() {
           initial={{ scaleY: 0 }}
           animate={{ scaleY: 1 }}
           transition={{ duration: 1, ease: "easeInOut" }}
-          className="absolute left-0 top-[10%] bottom-[10%] w-[2px] origin-top"
+          className="absolute left-0 top-[10%] bottom-[10%] w-0.5 origin-top"
           style={{ background: "linear-gradient(to bottom, transparent, #3a5aff, transparent)" }}
         />
 
@@ -280,7 +280,7 @@ export default function HeroBanner() {
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                className="relative rounded-2xl overflow-hidden w-full max-w-[520px] aspect-[4/3]"
+                className="relative rounded-2xl overflow-hidden w-full max-w-130 aspect-4/3"
                 style={{
                   background: "linear-gradient(145deg, #e8eeff 0%, #edf1ff 50%, #e4eaff 100%)",
                   border: "1px solid rgba(58,90,255,0.18)",
@@ -290,7 +290,7 @@ export default function HeroBanner() {
               >
                 {/* Inner top border shine */}
                 <div
-                  className="absolute top-0 left-0 right-0 h-[1px]"
+                  className="absolute top-0 left-0 right-0 h-px"
                   style={{ background: "linear-gradient(90deg, transparent, rgba(58,90,255,0.5), transparent)" }}
                 />
 
@@ -349,7 +349,7 @@ export default function HeroBanner() {
 
                   {/* Scan line */}
                   <motion.div
-                    className="absolute left-0 right-0 h-[2px] pointer-events-none"
+                    className="absolute left-0 right-0 h-0.5 pointer-events-none"
                     style={{ background: "linear-gradient(90deg, transparent, rgba(58,90,255,0.3), transparent)" }}
                     animate={{ top: ["10%", "90%", "10%"] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "linear" }}

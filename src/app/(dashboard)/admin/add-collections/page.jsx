@@ -176,11 +176,13 @@ const AddCollection = () => {
 
       setSelectedProducts([]);
       setSearch("");
+      
     } catch (err) {
       toast.error(err.message || "Failed to create collection");
     } finally {
       setIsSubmitting(false);
     }
+    
   };
 
   // ==========================================

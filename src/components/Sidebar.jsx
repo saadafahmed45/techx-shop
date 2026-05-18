@@ -21,7 +21,14 @@ const menuGroups = [
     label: "Overview",
     items: [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-      { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
+      { href: "/admin/manage-orders", label: "Orders", icon: ShoppingBag },
+    ],
+  },
+    {
+    label: "Hero Slider",
+    items: [
+      { href: "/admin/add-hero-slider", label: "Add Hero Slider", icon: Plus },
+      { href: "/admin/manage-hero-sliders", label: "Manage Hero Sliders", icon: Package },
     ],
   },
   {
