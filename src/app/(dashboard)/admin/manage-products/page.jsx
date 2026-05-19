@@ -299,14 +299,17 @@ export default function ManageProducts() {
             <div className="col-span-1">
               Price
             </div>
-
-            <div className="col-span-2">
+ <div className="col-span-1">
               Status
             </div>
-
-            <div className="col-span-2 text-right">
+         <div className="col-span-2">
+              Stock
+            </div>
+           
+            <div className="col-span-1 text-right">
               Actions
             </div>
+
           </div>
 
           {/* PRODUCTS */}
@@ -380,8 +383,10 @@ export default function ManageProducts() {
                   </span>
                 </div>
 
+   
+
                 {/* STATUS */}
-                <div className="lg:col-span-2 flex items-center">
+                <div className="lg:col-span-1 flex items-center">
                   {product.status ===
                   "draft" ? (
                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
@@ -395,9 +400,14 @@ export default function ManageProducts() {
                     </span>
                   )}
                 </div>
-
+  {/* STOCK */}
+                <div className="lg:col-span-2 flex items-center">
+                  <span className="font-semibold text-gray-900">
+                    {product.stock || 0}
+                  </span>
+                </div>
                 {/* ACTIONS */}
-                <div className="lg:col-span-2 flex items-center justify-end gap-2">
+                <div className="lg:col-span-1 flex items-center justify-end gap-2">
                   <button
                     onClick={() => {
                       setSelectedProduct(
@@ -486,6 +496,8 @@ function EditProductModal({
         product.price || "",
       vendor:
         product.vendor || "",
+         stock:
+        product.stock || 0,
       productType:
         product.productType ||
         "",
@@ -679,7 +691,24 @@ function EditProductModal({
                 className="w-full h-11 rounded-xl border border-gray-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
+   {/* stock */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Stock
+              </label>
 
+              <input
+                type="text"
+                name="stock"
+                value={
+                  formData.stock
+                }
+                onChange={
+                  handleChange
+                }
+                className="w-full h-11 rounded-xl border border-gray-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
             {/* STATUS */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
