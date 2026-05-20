@@ -1,40 +1,39 @@
-"use client";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-export const categories = [
-  {
-    id: 1,
-    name: "Electronics",
-    slug: "electronics",
-    image: "https://images.pexels.com/photos/20385205/pexels-photo-20385205.jpeg",
-    description: "Explore gadgets and accessories",
-  },
-  {
-    id: 2,
-    name: "Clothes",
-    slug: "updated-name-1777491150523",
-    image: "https://images.pexels.com/photos/6804613/pexels-photo-6804613.jpeg",
-    description: "Latest fashion trends",
-  },
-  {
-    id: 3,
-    name: "Furniture",
-    slug: "furniture",
-    image: "https://images.pexels.com/photos/18662969/pexels-photo-18662969.jpeg",
-    description: "Decor and essentials for your home",
-  },
-  {
-    id: 4,
-    name: "Shoes",
-    slug: "shoes",
-    image: "https://images.pexels.com/photos/4432469/pexels-photo-4432469.jpeg",
-    description: "Comfortable and stylish footwear",
-  },
-];
 
-const Category = () => {
+
+
+// API
+
+const API =
+  process.env.NEXT_PUBLIC_API_URL;
+
+// FETCH CATEGORIES
+// fetch(`${API}/collections`)
+
+async function getCategories() {
+  const res = await fetch(
+    `${API}/collections`,
+    {
+      next: {
+        revalidate: 60,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch categories");
+  }
+
+  return res.json();
+}
+
+
+
+const Category = async () => {
+  const categories = await getCategories();
   return (
     <section className="px-5 md:px-12 py-16 bg-linear-to-b from-gray-50 to-white">
       
@@ -58,7 +57,7 @@ const Category = () => {
               {/* Image */}
               <div className="relative w-full h-44 md:h-72">
                 <Image
-                  src={cat.image}
+                  src={cat.imageUrl}
                   alt={cat.name}
                   fill
                   sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
