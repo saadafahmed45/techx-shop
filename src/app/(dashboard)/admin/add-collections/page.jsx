@@ -13,6 +13,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -164,7 +165,6 @@ const AddCollection = () => {
         throw new Error(data.message || "Failed to create collection");
       }
 
-      toast.success("Collection created successfully");
 
       setName("");
       setSlug("");
@@ -177,8 +177,20 @@ const AddCollection = () => {
       setSelectedProducts([]);
       setSearch("");
       
-    } catch (err) {
-      toast.error(err.message || "Failed to create collection");
+      Swal.fire({
+               icon: "success",
+               title:
+                 "Collection Created Successfully",
+               confirmButtonColor:
+                 "#4f46e5",
+             });
+           } catch (err) {
+             Swal.fire({
+               icon: "error",
+               title:
+                 err.message ||
+                 "Collection failed to create!",
+             })
     } finally {
       setIsSubmitting(false);
     }

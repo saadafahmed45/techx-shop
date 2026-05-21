@@ -119,7 +119,7 @@ function ProductCard({
     >
       {/* IMAGE */}
       <div
-        className="relative overflow-hidden bg-linear-to-b from-[#f0f4ff] to-[#e8eeff]"
+        className="relative overflow-hidden   bg-linear-to-b from-[#f0f4ff] to-[#e8eeff]"
         style={{
           aspectRatio:
             "1 / 1",
@@ -247,13 +247,13 @@ function ProductCard({
         <Link
           href={`/product/${product._id}`}
         >
-          <h3 className="text-[17px] font-bold text-gray-900 leading-tight hover:text-blue-600 transition-colors line-clamp-1">
+          <h3 className="text-[17px] font-bold text-gray-900 leading-tight hover:text-blue-600 transition-colors line-clamp-2">
             {product.title}
           </h3>
         </Link>
 
         {/* RATING */}
-        <div className="flex items-center gap-1 mt-1">
+        {/* <div className="flex items-center gap-1 mt-1">
           {[1, 2, 3, 4, 5].map(
             (star) => (
               <AiFillStar
@@ -282,7 +282,7 @@ function ProductCard({
               ?.count || 0}
             )
           </span>
-        </div>
+        </div> */}
 
         {/* DESCRIPTION */}
         {/* <p className="text-[13px] text-gray-500 line-clamp-2 leading-6 mt-1">
@@ -290,7 +290,7 @@ function ProductCard({
         </p> */}
 
         {/* PRICE */}
-        <div className="flex items-center justify-between mt-2 pt-3 border-t border-gray-50">
+        <div className="flex items-center justify-between mt-2 pt-1 border-t border-gray-50">
           <span className="text-[20px] font-extrabold text-[#1a3aff]">
             $
             {Number(
@@ -343,9 +343,14 @@ export default function FeaturedProducts() {
               data
             )
           ) {
-            setProducts(
-              data.slice(0, 6)
-            );
+          setProducts(
+  data
+    .filter(
+      (product) =>
+        product.featured
+    )
+    .slice(0, 6)
+);
           }
         } catch (error) {
           console.log(error);
@@ -358,7 +363,7 @@ export default function FeaturedProducts() {
   }, []);
 
   return (
-    <section className="py-16 px-4 md:px-13 lg:px-24 md:py-24">
+    <section className="py-16 px-4 md:px-12 lg:px-32 md:py-24">
       <div className="mx-auto">
         {/* HEADER */}
         <motion.div
@@ -413,7 +418,7 @@ export default function FeaturedProducts() {
 
         {/* PRODUCTS */}
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
             {Array.from({
               length: 6,
             }).map(
@@ -436,7 +441,7 @@ export default function FeaturedProducts() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
             {products.map(
               (
                 product,

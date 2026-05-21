@@ -6,6 +6,7 @@ import {
   Layers3, Plus, ChevronDown, Tag, ImageIcon,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -89,12 +90,25 @@ const AddProducts = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to create product");
 
-      toast.success("Product Added Successfully");
+     
       setFields({ title: "", slug: "", description: "", vendor: "", stock: "", price: "", productType: "", tags: "" });
       setSelectedCollections([]); setImageFiles([]); setImagePreview([]);
       setFeatured(false); setStatus("draft"); setSlugEdited(false);
-    } catch (error) {
-      toast.error(error.message);
+  
+          Swal.fire({
+            icon: "success",
+            title:
+              "Product Added Successfully",
+            confirmButtonColor:
+              "#4f46e5",
+          });
+        } catch (err) {
+          Swal.fire({
+            icon: "error",
+            title:
+              err.message ||
+              "Product failed to add!",
+          })
     } finally {
       setIsSubmitting(false);
     }

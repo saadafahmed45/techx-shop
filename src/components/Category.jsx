@@ -35,7 +35,7 @@ async function getCategories() {
 const Category = async () => {
   const categories = await getCategories();
   return (
-    <section className="px-5 md:px-12 py-16 bg-linear-to-b from-gray-50 to-white">
+    <section className="px-5 md:px-32 py-16 bg-linear-to-b from-gray-50 to-white">
       
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto">

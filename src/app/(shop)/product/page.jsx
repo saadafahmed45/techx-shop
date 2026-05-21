@@ -770,7 +770,7 @@ useEffect(() => {
           "#f7f8fc",
       }}
     >
-      <div className=" mx-auto px-5 md:px-10 py-8 flex gap-7">
+      <div className=" mx-auto px-5 md:px-32 py-8 flex gap-7">
         {/* SIDEBAR */}
         <aside className="hidden md:block w-56 shrink-0 self-start sticky top-20">
           <div className="bg-white rounded-2xl p-5 border border-gray-100">
@@ -783,7 +783,7 @@ useEffect(() => {
         {/* MAIN */}
         <div className="flex-1 min-w-0">
           {/* HEADER */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex  flex-col md:flex-row items-center justify-between mb-6">
             <div>
               <h1 className="text-[32px] font-extrabold text-gray-900">
                 Products
