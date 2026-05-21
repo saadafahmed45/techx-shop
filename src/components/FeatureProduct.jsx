@@ -118,7 +118,8 @@ function ProductCard({
       }}
     >
       {/* IMAGE */}
-      <div
+        <Link
+          href={`/product/${product._id}`}
         className="relative overflow-hidden   bg-linear-to-b from-[#f0f4ff] to-[#e8eeff]"
         style={{
           aspectRatio:
@@ -225,7 +226,7 @@ function ProductCard({
           <HiOutlineShoppingBag className="text-sm" />
           Add to Cart
         </motion.button>
-      </div>
+      </Link>
 
       {/* INFO */}
       <div className="flex flex-col gap-1.5 px-4 pt-4 pb-5">
