@@ -5,15 +5,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 import {
-  AiFillStar,
   AiOutlineHeart,
   AiFillHeart,
 } from "react-icons/ai";
-
-import {
-  HiArrowRight,
-  HiOutlineShoppingBag,
-} from "react-icons/hi";
 
 import {
   TbHeadphones,
@@ -21,457 +15,210 @@ import {
   TbDeviceWatch,
   TbEar,
 } from "react-icons/tb";
-import AddToCartButton from "./AddToCartButton";
 
-// =======================================
-// API
-// =======================================
+import { HiOutlineShoppingBag } from "react-icons/hi";
 
-const API =
-  process.env.NEXT_PUBLIC_API_URL;
+import { useCart } from "@/context/CartContext";
 
-// =======================================
+const API = process.env.NEXT_PUBLIC_API_URL;
+
+// ============================
 // CATEGORY ICON
-// =======================================
+// ============================
 
+const getCategoryIcon = (type) => {
+  const t = type?.toLowerCase() || "";
 
-
-const getCategoryIcon = (
-  type
-) => {
-  const t =
-    type?.toLowerCase() || "";
-
-  if (
-    t.includes("headphone")
-  ) {
-    return <TbHeadphones />;
-  }
-
-  if (
-    t.includes("earbud")
-  ) {
-    return <TbEar />;
-  }
-
-  if (
-    t.includes("watch")
-  ) {
-    return <TbDeviceWatch />;
-  }
-
+  if (t.includes("headphone")) return <TbHeadphones />;
+  if (t.includes("earbud")) return <TbEar />;
+  if (t.includes("watch")) return <TbDeviceWatch />;
   return <TbDeviceMobile />;
 };
 
-// =======================================
+// ============================
 // PRODUCT CARD
-// =======================================
+// ============================
 
-function ProductCard({
-  product,
-  index,
-}) {
-  const [wished, setWished] =
-    useState(false);
+function ProductCard({ product, index }) {
+  if (!product) return null; // ✅ CRASH PREVENT
 
-  const [hovered, setHovered] =
-    useState(false);
+  const [wished, setWished] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  const { addToCart, openCart } = useCart();
 
   const image =
-    product.images?.[0] ||
-    "https://picsum.photos/500";
+    product?.images?.[0] || "https://picsum.photos/500";
+
+  const handleAdd = (e) => {
+    e.preventDefault();
+    addToCart(product);
+    openCart();
+  };
 
   return (
     <motion.div
-      initial={{
-        opacity: 0,
-        y: 32,
-      }}
-      whileInView={{
-        opacity: 1,
-        y: 0,
-      }}
-      viewport={{
-        once: true,
-        margin: "-60px",
-      }}
-      transition={{
-        delay: index * 0.08,
-        duration: 0.55,
-        ease: "easeOut",
-      }}
-      onMouseEnter={() =>
-        setHovered(true)
-      }
-      onMouseLeave={() =>
-        setHovered(false)
-      }
-      className="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.05 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="group bg-white rounded-2xl overflow-hidden border border-slate-100 transition-all duration-300"
       style={{
         boxShadow: hovered
-          ? "0 20px 60px rgba(26,58,255,0.12), 0 4px 16px rgba(0,0,0,0.06)"
-          : "0 2px 16px rgba(0,0,0,0.05)",
-
-        transform: hovered
-          ? "translateY(-4px)"
-          : "translateY(0)",
-
-        transition:
-          "all 0.35s ease",
+          ? "0 20px 40px rgba(0,0,0,0.10)"
+          : "0 4px 14px rgba(0,0,0,0.05)",
+        transform: hovered ? "translateY(-6px)" : "translateY(0)",
       }}
     >
       {/* IMAGE */}
-        <Link
-          href={`/product/${product._id}`}
-        className="relative overflow-hidden   bg-linear-to-b from-[#f0f4ff] to-[#e8eeff]"
-        style={{
-          aspectRatio:
-            "1 / 1",
-        }}
+      <Link
+        href={`/product/${product?._id}`}
+        className="block relative aspect-square bg-linear-to-b from-slate-50 to-slate-100 overflow-hidden"
       >
         <img
           src={image}
-          alt={product.title}
-          className="w-full h-full object-cover transition-transform duration-700"
-          style={{
-            transform:
-              hovered
-                ? "scale(1.06)"
-                : "scale(1)",
-          }}
+          alt={product?.title || "product"}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
-        {/* OVERLAY */}
-        <div
-          className="absolute inset-0 transition-opacity duration-300"
-          style={{
-            background:
-              "linear-gradient(to top, rgba(10,18,80,0.35) 0%, transparent 55%)",
-
-            opacity: hovered
-              ? 1
-              : 0.4,
-          }}
-        />
-
-        {/* FEATURED BADGE */}
-        {product.featured && (
-          <span
-            className="absolute top-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-widest uppercase text-white"
-            style={{
-              background:
-                "linear-gradient(135deg, #1a3aff, #2a4aff)",
-
-              boxShadow:
-                "0 2px 10px rgba(26,58,255,0.4)",
-            }}
-          >
-            FEATURED
-          </span>
-        )}
-
-        {/* WISHLIST */}
-        <motion.button
-          whileTap={{
-            scale: 0.85,
-          }}
+        {/* WISH BUTTON */}
+        <button
           onClick={(e) => {
             e.preventDefault();
-
-            setWished(
-              !wished
-            );
+            setWished(!wished);
           }}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          style={{
-            background:
-              "rgba(255,255,255,0.92)",
-
-            backdropFilter:
-              "blur(8px)",
-
-            boxShadow:
-              "0 2px 8px rgba(0,0,0,0.12)",
-          }}
+          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow"
         >
           {wished ? (
-            <AiFillHeart className="text-red-500 text-sm" />
+            <AiFillHeart className="text-red-500" />
           ) : (
-            <AiOutlineHeart className="text-gray-500 text-sm" />
+            <AiOutlineHeart className="text-slate-500" />
           )}
-        </motion.button>
+        </button>
 
-        {/* ADD TO CART */}
-             <AddToCartButton
-                          product={product}
-                        />
+        {/* QUICK ADD */}
+        <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition">
+          <button
+            onClick={handleAdd}
+            className="w-full flex cursor-pointer items-center justify-center gap-2 bg-black text-white py-2.5 rounded-xl font-semibold hover:bg-slate-900 transition"
+          >
+            <HiOutlineShoppingBag />
+            Add to Cart
+          </button>
+        </div>
       </Link>
 
-      {/* INFO */}
-      <div className="flex flex-col gap-1.5 px-4 pt-4 pb-5">
-        {/* CATEGORY */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-blue-500 text-[13px]">
-            {getCategoryIcon(
-              product.productType
-            )}
-          </span>
+      {/* CONTENT */}
+      <div className="p-4 space-y-3">
 
-          <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#7a8ab0]">
-            {product.productType ||
-              "PRODUCT"}
+        {/* CATEGORY */}
+        <div className="flex items-center gap-2 text-indigo-500 text-sm">
+          {getCategoryIcon(product?.productType)}
+          <span className="text-[11px] uppercase tracking-widest text-slate-400">
+            {product?.productType || "product"}
           </span>
         </div>
 
         {/* TITLE */}
-        <Link
-          href={`/product/${product._id}`}
-        >
-          <h3 className="text-[17px] font-bold text-gray-900 leading-tight hover:text-blue-600 transition-colors line-clamp-2">
-            {product.title}
+        <Link href={`/product/${product?._id}`}>
+          <h3 className="font-bold text-slate-900 line-clamp-2 hover:text-indigo-600 transition">
+            {product?.title || "Untitled Product"}
           </h3>
         </Link>
 
-        {/* RATING */}
-        {/* <div className="flex items-center gap-1 mt-1">
-          {[1, 2, 3, 4, 5].map(
-            (star) => (
-              <AiFillStar
-                key={star}
-                className={`text-[12px] ${
-                  star <=
-                  Math.round(
-                    product
-                      .rating
-                      ?.average || 0
-                  )
-                    ? "text-yellow-400"
-                    : "text-gray-200"
-                }`}
-              />
-            )
-          )}
+        {/* PRICE + BUTTON */}
+        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
 
-          <span className="text-[11px] text-gray-400 ml-1">
-            {product
-              .rating
-              ?.average || 0}{" "}
-            (
-            {product
-              .rating
-              ?.count || 0}
-            )
+          <span className="text-lg font-black text-indigo-600">
+            ${Number(product?.price || 0).toFixed(2)}
           </span>
-        </div> */}
 
-        {/* DESCRIPTION */}
-        {/* <p className="text-[13px] text-gray-500 line-clamp-2 leading-6 mt-1">
-          {product.description}
-        </p> */}
-
-        {/* PRICE */}
-        <div className="flex items-center justify-between mt-2 pt-1 border-t border-gray-50">
-          <span className="text-[20px] font-extrabold text-[#1a3aff]">
-            $
-            {Number(
-              product.price || 0
-            ).toFixed(2)}
-          </span>
-     <AddToCartButton
-                  product={product}
-                />
-    
+          {/* <button
+            onClick={handleAdd}
+            className="flex items-center gap-2 text-sm font-semibold px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition"
+          >
+            <HiOutlineShoppingBag />
+            Add
+          </button> */}
         </div>
       </div>
     </motion.div>
   );
 }
 
-// =======================================
+// ============================
 // MAIN COMPONENT
-// =======================================
+// ============================
 
 export default function FeaturedProducts() {
-  const [products, setProducts] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  // =======================================
-  // FETCH PRODUCTS
-  // =======================================
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts =
-      async () => {
-        try {
-          const res =
-            await fetch(
-              `${API}/products`
-            );
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch(`${API}/products`);
+        const data = await res.json();
 
-          const data =
-            await res.json();
-
-          if (
-            Array.isArray(
-              data
-            )
-          ) {
+        // ✅ SAFE DATA CLEANING
+        if (Array.isArray(data)) {
           setProducts(
-  data
-    .filter(
-      (product) =>
-        product.featured
-    )
-    .slice(0, 6)
-);
-          }
-        } catch (error) {
-          console.log(error);
-        } finally {
-          setLoading(false);
+            data.filter(Boolean).filter((p) => p?.featured)
+          );
+        } else {
+          setProducts([]);
         }
-      };
+      } catch (err) {
+        console.log(err);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchProducts();
   }, []);
 
   return (
-    <section className="py-16 px-4 md:px-12 lg:px-32 md:py-24">
-      <div className="mx-auto">
+    <section className="py-14 md:py-24 px-4 sm:px-6 lg:px-32 bg-slate-50">
+      <div className=" mx-auto">
+
         {/* HEADER */}
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 20,
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0,
-          }}
-          viewport={{
-            once: true,
-          }}
-          transition={{
-            duration: 0.55,
-          }}
-          className="flex flex-col items-center text-center mb-12 md:mb-14"
-        >
-          <h2 className="text-[36px] md:text-[38px] font-bold text-gray-900 leading-tight">
+        <div className="text-center mb-10 md:mb-14">
+          <h2 className="text-3xl md:text-4xl font-black text-slate-900">
             Featured Products
           </h2>
 
-          <p className="text-[15px] text-gray-400 mt-2 max-w-sm leading-relaxed">
-            Engineered for
-            precision.
-            Designed for
-            you.
+          <p className="text-slate-400 mt-2">
+            Premium picks curated for you
           </p>
 
-          <motion.div
-            initial={{
-              scaleX: 0,
-            }}
-            whileInView={{
-              scaleX: 1,
-            }}
-            viewport={{
-              once: true,
-            }}
-            transition={{
-              delay: 0.3,
-              duration: 0.6,
-            }}
-            className="mt-5 h-0.75 w-14 rounded-full origin-center"
-            style={{
-              background:
-                "linear-gradient(90deg, #1a3aff, #7a9fff)",
-            }}
-          />
-        </motion.div>
+          <div className="w-16 h-1 bg-indigo-500 mx-auto mt-5 rounded-full" />
+        </div>
 
-        {/* PRODUCTS */}
+        {/* GRID */}
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
-            {Array.from({
-              length: 6,
-            }).map(
-              (_, i) => (
-                <div
-                  key={i}
-                  className="bg-white rounded-2xl overflow-hidden animate-pulse"
-                >
-                  <div className="aspect-square bg-gray-100" />
-
-                  <div className="p-4 space-y-3">
-                    <div className="h-3 bg-gray-100 rounded w-1/3" />
-
-                    <div className="h-4 bg-gray-100 rounded w-3/4" />
-
-                    <div className="h-3 bg-gray-100 rounded w-1/2" />
-                  </div>
-                </div>
-              )
-            )}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="aspect-square bg-white rounded-2xl animate-pulse"
+              />
+            ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
-            {products.map(
-              (
-                product,
-                i
-              ) => (
-                <ProductCard
-                  key={
-                    product._id
-                  }
-                  product={
-                    product
-                  }
-                  index={i}
-                />
-              )
-            )}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            {products?.map((product, i) => (
+              <ProductCard
+                key={product?._id || i}
+                product={product}
+                index={i}
+              />
+            ))}
           </div>
         )}
-
-        {/* BUTTON */}
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 16,
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0,
-          }}
-          viewport={{
-            once: true,
-          }}
-          transition={{
-            delay: 0.5,
-            duration: 0.45,
-          }}
-          className="flex justify-center mt-12"
-        >
-          <Link
-            href="/product"
-            className="group inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-[13px] font-semibold text-white tracking-wide transition-all duration-300"
-            style={{
-              background:
-                "linear-gradient(135deg, #1a3aff 0%, #2a50ff 100%)",
-
-              boxShadow:
-                "0 4px 20px rgba(26,58,255,0.25)",
-            }}
-          >
-            Browse All Products
-
-            <HiArrowRight className="text-sm group-hover:translate-x-1 transition-transform duration-200" />
-          </Link>
-        </motion.div>
       </div>
     </section>
   );

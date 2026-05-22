@@ -13,7 +13,7 @@ import {
   XCircle,
   Download,
 } from "lucide-react";
-
+import { generateInvoice } from "@/utils/generateInvoice";
 const API =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5000";
@@ -331,11 +331,21 @@ const OrdersPage = () => {
                       </option>
                     </select>
 
-                    <button className="w-full flex items-center justify-center gap-2 rounded-2xl bg-slate-900 text-white py-3 font-semibold hover:bg-slate-800 transition">
+                    {/* <button className="w-full flex items-center justify-center gap-2 rounded-2xl bg-slate-900 text-white py-3 font-semibold hover:bg-slate-800 transition">
                       <Download className="w-5 h-5" />
 
                       Download Invoice
-                    </button>
+                    </button> */}
+
+                                       <button className="w-full flex items-center justify-center gap-2 rounded-2xl bg-slate-900 text-white py-3 font-semibold hover:bg-slate-800 transition"
+                        onClick={() =>
+                          generateInvoice(order)
+                        }
+                      >
+                      <Download className="w-5 h-5" />
+
+                        Download Invoice
+                      </button>
                   </div>
                 </div>
 
