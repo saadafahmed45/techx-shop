@@ -18,6 +18,7 @@ import {
 import { MdKeyboardArrowDown } from "react-icons/md";
 
 import Link from "next/link";
+import CartDrawer from "./CartDrawer";
 
 // ─────────────────────────────────────────────
 // Nav Data
@@ -147,7 +148,7 @@ export default function Navbar() {
             <button>
               <AiOutlineHeart className="text-[22px]" />
             </button>
-
+ <CartDrawer />
             <Link
               href="/cart"
               className="relative"

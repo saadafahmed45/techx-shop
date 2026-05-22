@@ -17,6 +17,7 @@ import {
   HiOutlineRefresh,
 } from "react-icons/hi";
 import AddReview from "@/components/AddReview";
+import AddToCartButton from "@/components/AddToCartButton";
 
 const API =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -422,10 +423,12 @@ const ProductDetailsPage = () => {
 
             {/* BUTTONS */}
             <div className="flex flex-col sm:flex-row gap-4 mt-10">
-              <button className="h-14 px-10 rounded-2xl bg-blue-600 hover:bg-blue-700 transition text-white font-bold text-sm flex-1">
+              {/* <button className="h-14 px-10 rounded-2xl bg-blue-600 hover:bg-blue-700 transition text-white font-bold text-sm flex-1">
                 Add To Cart
-              </button>
-
+              </button> */}
+                <AddToCartButton
+                  product={product}
+                />
               <button className="h-14 px-10 rounded-2xl border border-gray-200 hover:bg-gray-50 transition font-semibold">
                 Buy Now
               </button>

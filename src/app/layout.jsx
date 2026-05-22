@@ -1,11 +1,15 @@
-    // import { ClerkProvider } from "@clerk/nextjs";
+import Providers from "@/providers/Providers";
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}) {
   return (
-    // <ClerkProvider>
-      <html lang="en">
-        <body className="h-full">{children}</body>
-      </html>
-    // {/* </ClerkProvider> */}
+    <html lang="en">
+      <body>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
+    </html>
   );
 }

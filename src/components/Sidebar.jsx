@@ -21,7 +21,8 @@ const menuGroups = [
     label: "Overview",
     items: [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-      { href: "/admin/manage-orders", label: "Orders", icon: ShoppingBag },
+      { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
+      { href: "/admin/order-list", label: "Order List", icon: ShoppingBag },
     ],
   },
     {

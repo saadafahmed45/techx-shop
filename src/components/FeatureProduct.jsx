@@ -21,6 +21,7 @@ import {
   TbDeviceWatch,
   TbEar,
 } from "react-icons/tb";
+import AddToCartButton from "./AddToCartButton";
 
 // =======================================
 // API
@@ -32,6 +33,8 @@ const API =
 // =======================================
 // CATEGORY ICON
 // =======================================
+
+
 
 const getCategoryIcon = (
   type
@@ -199,33 +202,9 @@ function ProductCard({
         </motion.button>
 
         {/* ADD TO CART */}
-        <motion.button
-          initial={false}
-          animate={{
-            y: hovered
-              ? 0
-              : 12,
-
-            opacity:
-              hovered
-                ? 1
-                : 0,
-          }}
-          transition={{
-            duration: 0.25,
-          }}
-          className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-semibold text-white tracking-wide"
-          style={{
-            background:
-              "linear-gradient(135deg, #1a3aff, #2a50ff)",
-
-            boxShadow:
-              "0 4px 16px rgba(26,58,255,0.4)",
-          }}
-        >
-          <HiOutlineShoppingBag className="text-sm" />
-          Add to Cart
-        </motion.button>
+             <AddToCartButton
+                          product={product}
+                        />
       </Link>
 
       {/* INFO */}
@@ -298,14 +277,10 @@ function ProductCard({
               product.price || 0
             ).toFixed(2)}
           </span>
-
-          <Link
-            href={`/product/${product._id}`}
-            className="flex items-center gap-1 text-[12px] font-semibold text-gray-400 hover:text-blue-600 hover:gap-2 transition-all duration-200"
-          >
-            Details{" "}
-            <HiArrowRight className="text-[13px]" />
-          </Link>
+     <AddToCartButton
+                  product={product}
+                />
+    
         </div>
       </div>
     </motion.div>

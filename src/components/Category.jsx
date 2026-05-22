@@ -50,7 +50,7 @@ const Category = async () => {
       {/* Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
         {categories.map((cat) => (
-          <Link key={cat.id} href={`/product?category=${cat.slug}`}>
+          <Link key={cat._id} href={`/product?category=${cat.slug}`}>
             
             <div className="group relative rounded-2xl overflow-hidden cursor-pointer shadow-md hover:shadow-2xl transition duration-300">
               

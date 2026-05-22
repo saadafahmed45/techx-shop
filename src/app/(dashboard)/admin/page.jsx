@@ -41,53 +41,72 @@ export default function AdminPage() {
   const [loading, setLoading] =
     useState(true);
 
-  // FETCH DATA
+  // =======================================
+  // FETCH ALL DATA
+  // =======================================
+
   useEffect(() => {
     const fetchData =
       async () => {
         try {
-          const [
-            productRes,
-            collectionRes,
-            orderRes,
-          ] = await Promise.all([
-            fetch(`${API}/products`),
-            fetch(`${API}/collections`),
-            fetch(`${API}/orders`),
-          ]);
+          // PRODUCTS
+          const productRes =
+            await fetch(
+              `${API}/products`
+            );
 
           const productData =
             await productRes.json();
 
+          if (
+            Array.isArray(
+              productData
+            )
+          ) {
+            setProducts(
+              productData
+            );
+          }
+
+          // COLLECTIONS
+          const collectionRes =
+            await fetch(
+              `${API}/collections`
+            );
+
           const collectionData =
             await collectionRes.json();
+
+          if (
+            Array.isArray(
+              collectionData
+            )
+          ) {
+            setCollections(
+              collectionData
+            );
+          }
+
+          // ORDERS
+          const orderRes =
+            await fetch(
+              `${API}/orders`
+            );
 
           const orderData =
             await orderRes.json();
 
-          setProducts(
+          if (
             Array.isArray(
-              productData
+              orderData
             )
-              ? productData
-              : []
-          );
-
-          setCollections(
-            Array.isArray(
-              collectionData
-            )
-              ? collectionData
-              : []
-          );
-
-          setOrders(
-            Array.isArray(orderData)
-              ? orderData
-              : []
-          );
-        } catch (err) {
-          console.log(err);
+          ) {
+            setOrders(
+              orderData
+            );
+          }
+        } catch (error) {
+          console.log(error);
         } finally {
           setLoading(false);
         }
