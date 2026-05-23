@@ -28,7 +28,6 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 const getCategoryIcon = (type) => {
   const t = type?.toLowerCase() || "";
-
   if (t.includes("headphone")) return <TbHeadphones />;
   if (t.includes("earbud")) return <TbEar />;
   if (t.includes("watch")) return <TbDeviceWatch />;
@@ -40,15 +39,14 @@ const getCategoryIcon = (type) => {
 // ============================
 
 function ProductCard({ product, index }) {
-  if (!product) return null; // ✅ CRASH PREVENT
+  if (!product) return null;
 
   const [wished, setWished] = useState(false);
   const [hovered, setHovered] = useState(false);
 
   const { addToCart, openCart } = useCart();
 
-  const image =
-    product?.images?.[0] || "https://picsum.photos/500";
+  const image = product?.images?.[0] || "https://picsum.photos/500";
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -128,20 +126,11 @@ function ProductCard({ product, index }) {
           </h3>
         </Link>
 
-        {/* PRICE + BUTTON */}
+        {/* PRICE */}
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-
           <span className="text-lg font-black text-indigo-600">
             ${Number(product?.price || 0).toFixed(2)}
           </span>
-
-          {/* <button
-            onClick={handleAdd}
-            className="flex items-center gap-2 text-sm font-semibold px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition"
-          >
-            <HiOutlineShoppingBag />
-            Add
-          </button> */}
         </div>
       </div>
     </motion.div>
@@ -159,19 +148,25 @@ export default function FeaturedProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setLoading(true);
+
         const res = await fetch(`${API}/products`);
         const data = await res.json();
 
-        // ✅ SAFE DATA CLEANING
         if (Array.isArray(data)) {
           setProducts(
-            data.filter(Boolean).filter((p) => p?.featured)
+            data.filter(
+              (product) =>
+                product &&
+                product.status === "active" &&
+                Array.isArray(product.featured) // ✅ FIX: was product.features
+            )
           );
         } else {
           setProducts([]);
         }
-      } catch (err) {
-        console.log(err);
+      } catch (error) {
+        console.log(error);
         setProducts([]);
       } finally {
         setLoading(false);
@@ -181,20 +176,21 @@ export default function FeaturedProducts() {
     fetchProducts();
   }, []);
 
+  // ✅ FIX: was product.features?.includes — field is "featured"
+  const newArrivalsProducts = products.filter((product) =>
+    product.featured?.includes("Trending Now")
+  );
+
   return (
     <section className="py-14 md:py-24 px-4 sm:px-6 lg:px-32 bg-slate-50">
-      <div className=" mx-auto">
+      <div className="mx-auto">
 
         {/* HEADER */}
         <div className="text-center mb-10 md:mb-14">
           <h2 className="text-3xl md:text-4xl font-black text-slate-900">
             Featured Products
           </h2>
-
-          <p className="text-slate-400 mt-2">
-            Premium picks curated for you
-          </p>
-
+          <p className="text-slate-400 mt-2">Premium picks curated for you</p>
           <div className="w-16 h-1 bg-indigo-500 mx-auto mt-5 rounded-full" />
         </div>
 
@@ -202,15 +198,16 @@ export default function FeaturedProducts() {
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-square bg-white rounded-2xl animate-pulse"
-              />
+              <div key={i} className="aspect-square bg-white rounded-2xl animate-pulse" />
             ))}
           </div>
+        ) : newArrivalsProducts.length === 0 ? (
+          <p className="text-center text-slate-400 py-16">
+            No New Arrivals products found.
+          </p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-            {products?.map((product, i) => (
+            {newArrivalsProducts.map((product, i) => (
               <ProductCard
                 key={product?._id || i}
                 product={product}
