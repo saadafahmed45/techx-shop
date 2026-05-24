@@ -19,6 +19,7 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 
 import Link from "next/link";
 import CartDrawer from "./CartDrawer";
+import { useCart } from "@/context/CartContext";
 
 // ─────────────────────────────────────────────
 // Nav Data
@@ -42,7 +43,15 @@ const NAV_LINKS = [
   },
 ];
 
+
+//  cart context
+
 export default function Navbar() {
+
+    const {
+    cart,
+  } = useCart();
+
   const pathname = usePathname();
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -156,7 +165,7 @@ export default function Navbar() {
               <AiOutlineShopping className="text-[22px]" />
 
               <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center">
-                2
+           {cart.length}
               </span>
             </Link>
           </div>

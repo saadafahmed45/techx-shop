@@ -57,7 +57,7 @@ export default function CartPage() {
             {cart.map((item) => (
               <div
                 key={item._id}
-                className="bg-white border rounded-3xl p-5 flex gap-5 shadow-sm hover:shadow-md transition"
+                className="bg-white  rounded-3xl p-5 flex gap-5 shadow-md hover:shadow-lg transition"
               >
                 {/* IMAGE */}
                 <img
@@ -121,7 +121,7 @@ export default function CartPage() {
           </div>
 
           {/* RIGHT - SUMMARY */}
-          <div className="bg-white border rounded-3xl p-6 h-fit shadow-sm sticky top-10">
+          <div className="bg-white border rounded-3xl p-6 h-fit shadow-md sticky top-10">
 
             <h2 className="text-2xl font-black text-slate-900 mb-6">
               Order Summary
