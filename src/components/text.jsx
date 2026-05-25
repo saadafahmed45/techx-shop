@@ -1,10 +1,9 @@
-"use client"
+
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   Search, X, SlidersHorizontal, Package, Star,
   ChevronDown, Loader2, ShoppingCart, Heart, Tag,
   ArrowUpDown, LayoutGrid, LayoutList,
-  DollarSign,
 } from "lucide-react";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -73,7 +72,7 @@ export default function ProductSearch() {
         p.title?.toLowerCase().includes(q) ||
         p.vendor?.toLowerCase().includes(q) ||
         p.productType?.toLowerCase().includes(q) ||
-        // p.tags?.toLowerCase().includes(q) ||
+        p.tags?.toLowerCase().includes(q) ||
         p.description?.toLowerCase().includes(q)
       );
     }
@@ -459,7 +458,7 @@ function GridCard({ product, wishlisted, onWishlist }) {
           </div>
         )}
 
-        <button className="mt-3 w-full h-9 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-indigo-200  duration-200">
+        <button className="mt-3 w-full h-9 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-indigo-200 hover:shadow-indigo-300 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 duration-200">
           <ShoppingCart size={13} /> Add to Cart
         </button>
       </div>

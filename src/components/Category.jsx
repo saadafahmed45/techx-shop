@@ -45,6 +45,7 @@ const Category = async () => {
         <p className="text-gray-500 mt-3">
           Discover our most popular product categories curated just for you.
         </p>
+         <div className="w-16 h-1 bg-indigo-500 mx-auto mt-5 rounded-full" />
       </div>
 
       {/* Grid */}
@@ -72,9 +73,9 @@ const Category = async () => {
               <div className="absolute bottom-0 p-4 w-full text-white">
                 
                 {/* Badge */}
-                <span className="text-xs bg-white/20 backdrop-blur px-2 py-1 rounded-full">
+                {/* <span className="text-xs bg-white/20 backdrop-blur px-2 py-1 rounded-full">
                   Category
-                </span>
+                </span> */}
 
                 <h2 className="text-lg font-semibold mt-2">
                   {cat.name}

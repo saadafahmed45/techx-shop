@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   AiOutlineSearch,
@@ -27,9 +27,10 @@ import { useCart } from "@/context/CartContext";
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Product", href: "/product" },
-  { label: "About", href: "/about" },
-  { label: "Collections", href: "/collections" },
+  // { label: "About", href: "/about" },
+  // { label: "Collections", href: "/collections" },
   { label: "Dashboard", href: "/admin" },
+  { label: "Search", href: "/search" },
 
   {
     label: "Accessories",
@@ -58,6 +59,31 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
+const API = process.env.NEXT_PUBLIC_API_URL;
+
+
+   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${API}/collections`, {
+          cache: "no-store",
+        });
+        if (!response.ok) throw new Error('Network response was not ok');
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Empty array ensures it runs once on mount
   return (
     <>
       {/* Navbar */}
@@ -111,13 +137,13 @@ export default function Navbar() {
 
                       {dropdownOpen && (
                         <div className="absolute top-full left-0 mt-2 bg-white border border-gray-100 shadow-lg rounded-md overflow-hidden min-w-42.5">
-                          {link.items.map((item) => (
+                          {data?.map((item) => (
                             <Link
                               key={item.href}
-                              href={`/product?category=${item.href}`}
+                              href={`/product?category=${item.slug}`}
                               className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-black"
                             >
-                              {item.label}
+                              {item.name}
                             </Link>
                           ))}
                         </div>

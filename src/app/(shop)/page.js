@@ -4,6 +4,7 @@ import HeroBanner from "@/components/HeroBanner";
 import HeroSlider from "@/components/HeroSlider";
 import ProductsFilterTabs from "@/components/ProductsFilterTabs";
 import ProductSlider from "@/components/ProductSlider";
+import TopSellingSlider from "@/components/TopSellingSlider";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
  <Category/>
  <FeaturedProducts/>
  <ProductsFilterTabs/>
+ <TopSellingSlider/>
   </div>
   );
 }

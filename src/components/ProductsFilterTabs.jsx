@@ -92,7 +92,7 @@ export default function ProductsFilterTabs() {
             );
 
       // ONLY 4 PRODUCTS
-      return filtered.slice(0, 4);
+      return filtered.slice(0, 5);
     }, [
       products,
       activeCollection,
@@ -131,6 +131,8 @@ export default function ProductsFilterTabs() {
             lifestyle essentials to
             power your day.
           </p>
+
+           <div className="w-16 h-1 bg-indigo-500 mx-auto mt-5 rounded-full" />
 {/* 
           <Link
             href="/products"
@@ -194,7 +196,7 @@ export default function ProductsFilterTabs() {
             PRODUCTS
         ====================================== */}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mt-16">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-5 mt-16">
 
           {filteredProducts.map(
             (product) => (
