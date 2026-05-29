@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { Trash2 } from "lucide-react";
+import {
+  Trash2,
+  ShoppingCart,
+  ShieldCheck,
+  CreditCard,
+  Truck,
+} from "lucide-react";
 
 export default function CartPage() {
   const {
@@ -19,148 +25,272 @@ export default function CartPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4">
-      
-      {/* HEADER */}
-      <div className="max-w-5xl mx-auto mb-10">
-        <h1 className="text-4xl font-black text-slate-900">
-          Shopping Cart
-        </h1>
-        <p className="text-slate-400 mt-2">
-          Review your selected products before checkout
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#fafafa] px-6 py-10">
 
-      {/* EMPTY STATE */}
-      {cart.length === 0 ? (
-        <div className="max-w-5xl mx-auto bg-white border rounded-3xl p-16 text-center shadow-sm">
-          <h2 className="text-2xl font-bold text-slate-900">
-            Your cart is empty
-          </h2>
-          <p className="text-slate-400 mt-2">
-            Add some products to continue shopping
-          </p>
+      <div className="max-w-7xl mx-auto">
 
-          <Link
-            href="/"
-            className="inline-block mt-6 px-6 py-3 bg-black text-white rounded-xl"
-          >
-            Continue Shopping
-          </Link>
-        </div>
-      ) : (
-        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* TOP HEADER */}
+        <div className="flex justify-between items-center mb-12">
 
-          {/* LEFT - CART ITEMS */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center gap-3">
+            <ShoppingCart size={30} />
 
-            {cart.map((item) => (
-              <div
-                key={item._id}
-                className="bg-white  rounded-3xl p-5 flex gap-5 shadow-md hover:shadow-lg transition"
-              >
-                {/* IMAGE */}
-                <img
-                  src={item.images[0]}
-                  className="w-24 h-24 object-cover rounded-2xl border"
-                />
-
-                {/* INFO */}
-                <div className="flex-1">
-                  <h2 className="font-bold text-lg text-slate-900">
-                    {item.title}
-                  </h2>
-
-                  <p className="text-indigo-600 font-black mt-1">
-                    ${item.price}
-                  </p>
-
-                  {/* QUANTITY */}
-                  <div className="flex items-center gap-3 mt-4">
-
-                    <button
-                      onClick={() =>
-                        decreaseQuantity(item._id)
-                      }
-                      className="w-9 h-9 rounded-xl border hover:bg-slate-100"
-                    >
-                      -
-                    </button>
-
-                    <span className="font-bold w-6 text-center">
-                      {item.quantity}
-                    </span>
-
-                    <button
-                      onClick={() =>
-                        increaseQuantity(item._id)
-                      }
-                      className="w-9 h-9 rounded-xl border hover:bg-slate-100"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                {/* ACTION */}
-                <div className="flex flex-col justify-between items-end">
-
-                  <button
-                    onClick={() => removeItem(item._id)}
-                    className="text-red-500 hover:text-red-600"
-                  >
-                    <Trash2 />
-                  </button>
-
-                  <p className="font-black text-slate-900">
-                    ${item.price * item.quantity}
-                  </p>
-                </div>
-              </div>
-            ))}
+            <h1 className="text-2xl font-">
+              Shopping Cart
+            </h1>
           </div>
 
-          {/* RIGHT - SUMMARY */}
-          <div className="bg-white border rounded-3xl p-6 h-fit shadow-md sticky top-10">
+          <p className="text-gray-500 text-lg">
+            {cart.length} items
+          </p>
+        </div>
 
-            <h2 className="text-2xl font-black text-slate-900 mb-6">
-              Order Summary
+        {cart.length === 0 ? (
+          <div className="bg-white rounded-3xl p-20 text-center">
+            <h2 className="text-3xl font-bold">
+              Cart Empty
             </h2>
-
-            <div className="space-y-3 text-slate-600">
-
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>${total}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>Free</span>
-              </div>
-
-              <div className="border-t pt-4 flex justify-between font-black text-slate-900 text-lg">
-                <span>Total</span>
-                <span>${total}</span>
-              </div>
-            </div>
-
-            <Link
-              href="/checkout"
-              className="block mt-6 w-full text-center bg-black text-white py-4 rounded-2xl font-bold hover:bg-slate-800 transition"
-            >
-              Proceed to Checkout
-            </Link>
 
             <Link
               href="/"
-              className="block mt-3 text-center text-sm text-slate-500 hover:text-slate-700"
+              className="mt-5 inline-block px-6 py-3 bg-pink-600 text-white rounded-xl"
             >
               Continue Shopping
             </Link>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="grid lg:grid-cols-3 gap-8">
+
+            {/* LEFT */}
+            <div className="lg:col-span-2">
+
+              {/* title row */}
+              <div className="flex justify-between mb-6">
+
+                <h2 className="text-2xl ">
+                  Cart Items ({cart.length})
+                </h2>
+
+                <p className="text-gray-500">
+                  Total: Tk {total}
+                </p>
+              </div>
+
+              <div className="space-y-5">
+
+                {cart.map((item) => (
+                  <div
+                    key={item._id}
+                    className="bg-white shadow-sm rounded-3xl p-6"
+                  >
+                    <div className="flex gap-5">
+
+                      {/* IMAGE */}
+                      <img
+                        src={item.images?.[0]}
+                        alt={item.title}
+                        className="w-28 h-28 rounded-2xl object-cover"
+                      />
+
+                      {/* CONTENT */}
+                      <div className="flex-1">
+
+                        {/* TOP */}
+                        <div className="flex justify-between">
+
+                          <div>
+
+                            <h2 className="font-semibold text-xl">
+                              {item.title}
+                            </h2>
+
+                            <p className="text-gray-400 mt-1">
+                              SKU: {item._id?.slice(0, 8)}
+                            </p>
+
+                            <div className="flex gap-3 mt-3">
+
+                              <span className="border rounded-lg px-3 py-1 text-sm">
+                                SIZE: 37
+                              </span>
+
+                              <span className="border rounded-lg px-3 py-1 text-sm">
+                                COLOR: Default
+                              </span>
+
+                            </div>
+
+                           
+
+
+
+    {/* qty */}
+                         
+                          </div>
+
+                          <button
+                            onClick={() =>
+                              removeItem(item._id)
+                            }
+                            className="text-gray-400"
+                          >
+                            <Trash2 />
+                          </button>
+                        </div>
+
+
+
+<div className="flex justify-between items-end mt-5">
+ <p className="text-pink-600 text-xl font-medium mt-4">
+                              Tk {item.price}
+
+                              <span className="text-gray-500 text-lg ml-2">
+                                each
+                              </span>
+                            </p>
+
+
+     <div className="flex gap-2 items-center">
+
+                              <button
+                                onClick={() =>
+                                  decreaseQuantity(
+                                    item._id
+                                  )
+                                }
+                                className="w-10 h-10 rounded-xl border border-pink-500 text-pink-500"
+                              >
+                                -
+                              </button>
+
+                              <div className="border border-pink-500 px-5 py-2 rounded-xl">
+                                {item.quantity}
+                              </div>
+
+                              <button
+                                onClick={() =>
+                                  increaseQuantity(
+                                    item._id
+                                  )
+                                }
+                                className="w-10 h-10 rounded-xl border border-pink-500 text-pink-500"
+                              >
+                                +
+                              </button>
+                            </div>
+</div>
+
+
+                        <hr className="my-5" />
+
+                        {/* bottom */}
+                        <div className="flex justify-between items-end">
+
+                          <div>
+                            <p className="text-gray-500">
+                              Subtotal
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-6">
+
+                        
+
+                            <h2 className="text-2xl text-pink-600 font-medium">
+                              Tk{" "}
+                              {item.price *
+                                item.quantity}
+                            </h2>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT SUMMARY */}
+            <div className="bg-white shadow-md rounded-3xl p-7 h-fit sticky top-10">
+
+              <div className="flex gap-3 items-center mb-8">
+                <CreditCard size={22} />
+
+                <h2 className="text-2xl font-semibold">
+                  Order Summary
+                </h2>
+              </div>
+
+              <div className="space-y-5">
+
+                <div className="flex justify-between">
+                  <span>
+                    Items ({cart.length})
+                  </span>
+
+                  <span>
+                    Tk {total}
+                  </span>
+                </div>
+
+                <div className="bg-green-100 rounded-xl px-4 py-3 flex justify-between text-green-700 font-medium">
+
+                  <span>
+                    You saved
+                  </span>
+
+                  <span>
+                    Tk 5620 (23%)
+                  </span>
+
+                </div>
+
+                <hr />
+
+                <div className="flex justify-between text-2xl font-medium">
+
+                  <span>Total</span>
+
+                  <span>
+                    Tk {total}
+                  </span>
+
+                </div>
+
+                <div className="bg-green-50 rounded-xl p-4 flex gap-2 text-green-700">
+
+                  <ShieldCheck size={20} />
+
+                  <span>
+                    Secure Checkout &
+                    COD Available
+                  </span>
+
+                </div>
+
+                <Link
+                  href="/checkout"
+                  className="block text-center bg-pink-600 text-white py-4 rounded-xl font-semibold mt-6"
+                >
+                  Proceed to Checkout
+                </Link>
+
+                <Link
+                  href="/"
+                  className="border border-pink-600 text-pink-600 py-4 rounded-xl block text-center mt-4"
+                >
+                  <div className="flex justify-center gap-2">
+                    <Truck size={18} />
+                    Continue Shopping
+                  </div>
+                </Link>
+
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

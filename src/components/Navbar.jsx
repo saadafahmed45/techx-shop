@@ -31,6 +31,7 @@ const NAV_LINKS = [
   // { label: "Collections", href: "/collections" },
   { label: "Dashboard", href: "/admin" },
   { label: "Search", href: "/search" },
+  { label: "track-order", href: "/track-order" },
 
   {
     label: "Accessories",
