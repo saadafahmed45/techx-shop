@@ -89,7 +89,7 @@ const API = process.env.NEXT_PUBLIC_API_URL;
     <>
       {/* Navbar */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-5 md:px-10 h-16 flex items-center justify-between">
+        <div className=" mx-auto px-5 md:px-32 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
