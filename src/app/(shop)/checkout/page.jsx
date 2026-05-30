@@ -26,19 +26,13 @@ const DIVISIONS_DISTRICTS = {
     "Khulna", "Jessore", "Satkhira", "Bagerhat", "Narail",
     "Magura", "Jhenaidah", "Kushtia", "Meherpur", "Chuadanga",
   ],
-  Sylhet: [
-    "Sylhet", "Moulvibazar", "Habiganj", "Sunamganj",
-  ],
-  Barisal: [
-    "Barisal", "Bhola", "Patuakhali", "Pirojpur", "Jhalokati", "Barguna",
-  ],
+  Sylhet: ["Sylhet", "Moulvibazar", "Habiganj", "Sunamganj"],
+  Barisal: ["Barisal", "Bhola", "Patuakhali", "Pirojpur", "Jhalokati", "Barguna"],
   Rangpur: [
     "Rangpur", "Dinajpur", "Kurigram", "Gaibandha", "Nilphamari",
     "Lalmonirhat", "Panchagarh", "Thakurgaon",
   ],
-  Mymensingh: [
-    "Mymensingh", "Jamalpur", "Netrokona", "Sherpur",
-  ],
+  Mymensingh: ["Mymensingh", "Jamalpur", "Netrokona", "Sherpur"],
 };
 
 export default function CheckoutPage() {
@@ -65,7 +59,6 @@ export default function CheckoutPage() {
 
   const handleChange = (field) => (e) => {
     const update = { ...formData, [field]: e.target.value };
-    // Reset district when division changes
     if (field === "division") update.district = "";
     setFormData(update);
   };
@@ -93,15 +86,26 @@ export default function CheckoutPage() {
       });
 
       const data = await res.json();
-      console.log(data);
 
       if (res.ok) {
         clearCart();
+
+        // ── Build query params for success page ──
+        const params = new URLSearchParams({
+          orderId:  data.insertedId || data._id || data.orderId || "",
+          name:     formData.name,
+          phone:    formData.phone,
+          email:    formData.email,
+          address:  `${formData.address}, ${formData.district}, ${formData.division}`,
+          total:    totalPrice.toString(),
+          items:    cart.length.toString(),
+        });
+
         Swal.fire({
           icon: "success",
           title: "Order Placed Successfully",
-          confirmButtonColor: "#e91e8c",
-        }).then(() => router.push("/track-order"));
+          confirmButtonColor: "#2563eb",
+        }).then(() => router.push(`/order-success?${params.toString()}`));
       } else {
         throw new Error(data?.message || "Something went wrong");
       }
@@ -109,7 +113,6 @@ export default function CheckoutPage() {
       Swal.fire({
         icon: "error",
         title: err.message || "Order failed to place",
-        confirmButtonColor: "#e91e8c",
       });
     } finally {
       setLoading(false);
@@ -119,7 +122,6 @@ export default function CheckoutPage() {
   return (
     <div>
       <div className="max-w-7xl mx-auto p-6">
-        {/* Single <form> wraps everything so Place Order button submits naturally */}
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
 
@@ -137,7 +139,7 @@ export default function CheckoutPage() {
                     placeholder="Your full name"
                     required
                     value={formData.name}
-                    className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-pink-500"
+                    className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-blue-600"
                     onChange={handleChange("name")}
                   />
                 </div>
@@ -152,19 +154,17 @@ export default function CheckoutPage() {
                       placeholder="01XXXXXXXXX"
                       required
                       value={formData.phone}
-                      className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-pink-500"
+                      className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-blue-600"
                       onChange={handleChange("phone")}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Email (optional)
-                    </label>
+                    <label className="block text-sm font-medium mb-1">Email (optional)</label>
                     <input
                       type="email"
                       placeholder="Your email address"
                       value={formData.email}
-                      className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-pink-500"
+                      className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-blue-600"
                       onChange={handleChange("email")}
                     />
                   </div>
@@ -178,7 +178,7 @@ export default function CheckoutPage() {
                     <select
                       required
                       value={formData.division}
-                      className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-pink-500"
+                      className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-blue-600"
                       onChange={handleChange("division")}
                     >
                       <option value="" disabled>Select Division</option>
@@ -195,7 +195,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.district}
                       disabled={!formData.division}
-                      className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-pink-500 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+                      className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-blue-600 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
                       onChange={handleChange("district")}
                     >
                       <option value="" disabled>
@@ -217,7 +217,7 @@ export default function CheckoutPage() {
                     placeholder="House / Road / Area"
                     required
                     value={formData.address}
-                    className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-pink-500"
+                    className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-blue-600"
                     onChange={handleChange("address")}
                   />
                 </div>
@@ -227,7 +227,7 @@ export default function CheckoutPage() {
                   <textarea
                     placeholder="Any special instruction (optional)"
                     value={formData.note}
-                    className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none h-20 focus:outline-none focus:border-pink-500"
+                    className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none h-20 focus:outline-none focus:border-blue-600"
                     onChange={handleChange("note")}
                   />
                 </div>
@@ -238,7 +238,7 @@ export default function CheckoutPage() {
             <div>
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-xl font-semibold">Order Summary</h2>
-                <span className="text-slate-950 text-2xl">🚚</span>
+                <span className="text-2xl">🚚</span>
               </div>
 
               {cart.length === 0 ? (
@@ -256,46 +256,24 @@ export default function CheckoutPage() {
                         <p className="text-sm font-semibold truncate">{item.title}</p>
                         <div className="flex gap-1 mt-1 flex-wrap">
                           {item.size && (
-                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">
-                              size: {item.size}
-                            </span>
+                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">size: {item.size}</span>
                           )}
                           {item.color && (
-                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">
-                              color: {item.color}
-                            </span>
+                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">color: {item.color}</span>
                           )}
                         </div>
                         <div className="flex items-center gap-2 mt-2">
-                          <button
-                            type="button"
-                            onClick={() => decreaseQuantity(item._id)}
-                            className="w-5 h-5 rounded-full border border-gray-300 text-gray-500 text-sm flex items-center justify-center hover:border-pink-400 hover:text-slate-950"
-                          >
-                            −
-                          </button>
+                          <button type="button" onClick={() => decreaseQuantity(item._id)}
+                            className="w-5 h-5 rounded-full border border-gray-300 text-gray-500 text-sm flex items-center justify-center hover:border-blue-600">−</button>
                           <span className="text-sm font-medium w-4 text-center">{item.quantity}</span>
-                          <button
-                            type="button"
-                            onClick={() => increaseQuantity(item._id)}
-                            className="w-5 h-5 rounded-full border border-gray-300 text-gray-500 text-sm flex items-center justify-center hover:border-pink-400 hover:text-slate-950"
-                          >
-                            +
-                          </button>
+                          <button type="button" onClick={() => increaseQuantity(item._id)}
+                            className="w-5 h-5 rounded-full border border-gray-300 text-gray-500 text-sm flex items-center justify-center hover:border-blue-600">+</button>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => removeItem(item._id)}
-                          className="text-gray-300 hover:text-slate-950 transition-colors"
-                          aria-label="Remove item"
-                        >
-                          🗑
-                        </button>
-                        <span className="text-sm font-semibold">
-                          Tk {(item.price * item.quantity).toLocaleString()}
-                        </span>
+                        <button type="button" onClick={() => removeItem(item._id)}
+                          className="text-gray-300 hover:text-red-500 transition-colors" aria-label="Remove item">🗑</button>
+                        <span className="text-sm font-semibold">Tk {(item.price * item.quantity).toLocaleString()}</span>
                       </div>
                     </div>
                   ))}
@@ -313,12 +291,10 @@ export default function CheckoutPage() {
                     placeholder="Enter code"
                     value={coupon}
                     onChange={(e) => setCoupon(e.target.value)}
-                    className="flex-1 border border-r-0 border-gray-200 rounded-l-xl px-3 py-2 text-sm focus:outline-none focus:border-pink-500"
+                    className="flex-1 border border-r-0 border-gray-200 rounded-l-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-600"
                   />
-                  <button
-                    type="button"
-                    className="border border-pink-500 text-slate-950 rounded-r-xl px-4 text-sm font-semibold hover:bg-pink-50 transition-colors"
-                  >
+                  <button type="button"
+                    className="border border-blue-700 text-blue-700 rounded-r-xl px-4 text-sm font-semibold hover:bg-blue-50 transition-colors">
                     Apply
                   </button>
                 </div>
@@ -342,20 +318,17 @@ export default function CheckoutPage() {
               </div>
 
               <div className="text-center mb-3">
-                <a href="#" className="text-xs text-slate-950 underline">
-                  Read Exchange Policy
-                </a>
+                <a href="#" className="text-xs text-blue-600 underline">Read Exchange Policy</a>
               </div>
 
               <button
                 type="submit"
                 disabled={loading || cart.length === 0}
-                className="w-full py-3.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Processing..." : `Place Order — Tk ${totalPrice.toLocaleString()}`}
               </button>
             </div>
-
           </div>
         </form>
       </div>

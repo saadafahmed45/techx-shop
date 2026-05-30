@@ -141,7 +141,7 @@ export default function CartPage() {
 
 
 <div className="flex justify-between items-end mt-5">
- <p className="text-pink-600 text-xl font-medium mt-4">
+ <p className="text-blue-700 text-xl font-medium mt-4">
                               Tk {item.price}
 
                               <span className="text-gray-500 text-lg ml-2">
@@ -158,12 +158,12 @@ export default function CartPage() {
                                     item._id
                                   )
                                 }
-                                className="w-10 h-10 rounded-xl border border-pink-500 text-pink-500"
+                                className="w-10 h-10 rounded-xl border border-blue-700 text-blue-700"
                               >
                                 -
                               </button>
 
-                              <div className="border border-pink-500 px-5 py-2 rounded-xl">
+                              <div className="border border-blue-700 px-5 py-2 rounded-xl">
                                 {item.quantity}
                               </div>
 
@@ -173,7 +173,7 @@ export default function CartPage() {
                                     item._id
                                   )
                                 }
-                                className="w-10 h-10 rounded-xl border border-pink-500 text-pink-500"
+                                className="w-10 h-10 rounded-xl border border-blue-700 text-blue-700"
                               >
                                 +
                               </button>
@@ -196,7 +196,7 @@ export default function CartPage() {
 
                         
 
-                            <h2 className="text-2xl text-pink-600 font-medium">
+                            <h2 className="text-2xl text-blue-700 font-medium">
                               Tk{" "}
                               {item.price *
                                 item.quantity}
@@ -271,14 +271,14 @@ export default function CartPage() {
 
                 <Link
                   href="/checkout"
-                  className="block text-center bg-pink-600 text-white py-4 rounded-xl font-semibold mt-6"
+                  className="block text-center bg-blue-700 text-white py-4 rounded-xl font-semibold mt-6"
                 >
                   Proceed to Checkout
                 </Link>
 
                 <Link
                   href="/"
-                  className="border border-pink-600 text-pink-600 py-4 rounded-xl block text-center mt-4"
+                  className="border border-blue-700 text-blue-700 py-4 rounded-xl block text-center mt-4"
                 >
                   <div className="flex justify-center gap-2">
                     <Truck size={18} />

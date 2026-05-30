@@ -191,7 +191,7 @@ const meta = order
           className="flex-1 px-3 py-2 text-sm outline-none bg-transparent text-gray-700"
         />
         <button type="submit" disabled={loading}
-          className="bg-blue-600 hover:bg-pink-600 active:scale-95 text-white text-sm font-semibold px-5 py-2 rounded-full flex items-center gap-2 transition-all disabled:opacity-60 shrink-0">
+          className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-semibold px-5 py-2 rounded-full flex items-center gap-2 transition-all disabled:opacity-60 shrink-0">
           {loading
             ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             : <>→ Track</>}
