@@ -121,7 +121,7 @@ export default function CheckoutPage() {
 
   return (
     <div>
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-6 py-18">
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
 

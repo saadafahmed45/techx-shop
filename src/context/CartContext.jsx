@@ -1,5 +1,7 @@
 "use client";
 
+import { auth, googleProvider } from "@/lib/firebase";
+import { signInWithPopup } from "firebase/auth";
 import {
   createContext,
   useContext,
@@ -78,6 +80,24 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => setCart([]);
 
+
+// google auth
+ const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(
+        auth,
+        googleProvider
+      );
+
+      console.log("User:", result.user);
+
+      alert(`Welcome ${result.user.displayName}`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+
   return (
     <CartContext.Provider
       value={{
@@ -91,6 +111,7 @@ export const CartProvider = ({ children }) => {
         openCart,
         closeCart,
         toggleCart,
+        handleGoogleLogin,
       }}
     >
       {children}

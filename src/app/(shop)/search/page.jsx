@@ -1,15 +1,15 @@
 "use client"
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Search, X, SlidersHorizontal, Package, Star,
-  ChevronDown, Loader2, ShoppingCart, Heart, Tag,
+  ChevronDown, ShoppingCart, Heart, Tag,
   ArrowUpDown, LayoutGrid, LayoutList,
   DollarSign,
 } from "lucide-react";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
-/* ─── debounce hook ─── */
 function useDebounce(value, delay = 350) {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -20,24 +20,36 @@ function useDebounce(value, delay = 350) {
 }
 
 export default function ProductSearch() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [products, setProducts]     = useState([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState(null);
 
-  /* filters */
-  const [query, setQuery]           = useState("");
+  // ── Read ?q= from URL on mount ──
+  const [query, setQuery]           = useState(() => searchParams.get("q") || "");
   const [statusFilter, setStatus]   = useState("all");
   const [sortBy, setSortBy]         = useState("default");
   const [typeFilter, setTypeFilter] = useState("all");
   const [priceMax, setPriceMax]     = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [view, setView]             = useState("grid"); // grid | list
+  const [view, setView]             = useState("grid");
   const [wishlist, setWishlist]     = useState([]);
 
   const debouncedQuery = useDebounce(query, 350);
   const inputRef = useRef(null);
 
-  /* ── fetch ── */
+  // ── Sync URL when query changes (pushes ?q= to URL) ──
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (debouncedQuery.trim()) params.set("q", debouncedQuery.trim());
+    const newUrl = params.toString() ? `/search?${params.toString()}` : "/search";
+    // Replace so back button works correctly
+    router.replace(newUrl, { scroll: false });
+  }, [debouncedQuery]);
+
+  // ── Fetch products ──
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -56,38 +68,27 @@ export default function ProductSearch() {
     fetchProducts();
   }, []);
 
-  /* ── product types for filter dropdown ── */
   const productTypes = useMemo(() => {
-    const types = [...new Set(products.map(p => p.productType).filter(Boolean))];
-    return types;
+    return [...new Set(products.map(p => p.productType).filter(Boolean))];
   }, [products]);
 
-  /* ── filtered + sorted ── */
   const results = useMemo(() => {
     let list = [...products];
 
-    /* search */
     if (debouncedQuery.trim()) {
       const q = debouncedQuery.toLowerCase();
       list = list.filter(p =>
         p.title?.toLowerCase().includes(q) ||
         p.vendor?.toLowerCase().includes(q) ||
         p.productType?.toLowerCase().includes(q) ||
-        // p.tags?.toLowerCase().includes(q) ||
         p.description?.toLowerCase().includes(q)
       );
     }
 
-    /* status */
     if (statusFilter !== "all") list = list.filter(p => p.status === statusFilter);
-
-    /* type */
     if (typeFilter !== "all") list = list.filter(p => p.productType === typeFilter);
-
-    /* price max */
     if (priceMax !== "") list = list.filter(p => Number(p.price) <= Number(priceMax));
 
-    /* sort */
     if (sortBy === "price-asc")  list.sort((a, b) => Number(a.price) - Number(b.price));
     if (sortBy === "price-desc") list.sort((a, b) => Number(b.price) - Number(a.price));
     if (sortBy === "name-asc")   list.sort((a, b) => a.title?.localeCompare(b.title));
@@ -114,19 +115,18 @@ export default function ProductSearch() {
     sortBy !== "default",
   ].filter(Boolean).length;
 
-  /* ── shared classes ── */
   const selectCls = "appearance-none h-10 pl-3 pr-8 rounded-xl bg-white border border-slate-200 text-sm text-slate-600 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 cursor-pointer transition-all";
 
   return (
     <div className="min-h-screen bg-slate-50">
 
-      {/* ════ TOP SEARCH HERO ════ */}
-      <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
-        <div className="max-w-325 mx-auto px-4 md:px-8 py-4">
+      {/* ── Search Hero ── */}
+      <div className="bg-white border-b border-slate-200 shadow-sm sticky top-16 z-30">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
 
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
 
-            {/* Search bar */}
+            {/* Search input */}
             <div className="relative flex-1">
               <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
@@ -134,7 +134,7 @@ export default function ProductSearch() {
                 type="text"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder="Search products by name, brand, type, tags…"
+                placeholder="Search products by name, brand, type…"
                 className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-200 pl-11 pr-10 text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
                 autoFocus
               />
@@ -183,11 +183,10 @@ export default function ProductSearch() {
             </div>
           </div>
 
-          {/* Expandable filter bar */}
+          {/* Expandable filters */}
           {showFilters && (
             <div className="flex flex-wrap gap-3 mt-3 pt-3 border-t border-slate-100">
 
-              {/* Status */}
               <div className="relative">
                 <select value={statusFilter} onChange={e => setStatus(e.target.value)} className={selectCls}>
                   <option value="all">All Status</option>
@@ -197,7 +196,6 @@ export default function ProductSearch() {
                 <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
 
-              {/* Type */}
               <div className="relative">
                 <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className={selectCls}>
                   <option value="all">All Types</option>
@@ -206,7 +204,6 @@ export default function ProductSearch() {
                 <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
 
-              {/* Sort */}
               <div className="relative">
                 <select value={sortBy} onChange={e => setSortBy(e.target.value)} className={selectCls}>
                   <option value="default">Sort: Default</option>
@@ -219,7 +216,6 @@ export default function ProductSearch() {
                 <ArrowUpDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
 
-              {/* Max price */}
               <div className="relative">
                 <DollarSign size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input
@@ -231,7 +227,6 @@ export default function ProductSearch() {
                 />
               </div>
 
-              {/* Clear */}
               {activeFilterCount > 0 && (
                 <button
                   onClick={clearFilters}
@@ -245,10 +240,10 @@ export default function ProductSearch() {
         </div>
       </div>
 
-      {/* ════ BODY ════ */}
-      <div className="max-w-325 mx-auto px-4 md:px-8 py-6">
+      {/* ── Body ── */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
 
-        {/* Result meta row */}
+        {/* Result meta */}
         <div className="flex items-center justify-between mb-5">
           <div>
             {loading ? (
@@ -287,7 +282,7 @@ export default function ProductSearch() {
           </div>
         </div>
 
-        {/* ── LOADING ── */}
+        {/* Loading */}
         {loading && (
           <div className={`grid gap-4 ${view === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" : "grid-cols-1"}`}>
             {Array.from({ length: 8 }).map((_, i) => (
@@ -303,7 +298,7 @@ export default function ProductSearch() {
           </div>
         )}
 
-        {/* ── ERROR ── */}
+        {/* Error */}
         {!loading && error && (
           <div className="flex flex-col items-center justify-center py-24 text-slate-400">
             <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center mb-4">
@@ -314,7 +309,7 @@ export default function ProductSearch() {
           </div>
         )}
 
-        {/* ── EMPTY ── */}
+        {/* Empty */}
         {!loading && !error && results.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 text-slate-400">
             <div className="w-20 h-20 rounded-3xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-5">
@@ -333,7 +328,7 @@ export default function ProductSearch() {
           </div>
         )}
 
-        {/* ── GRID VIEW ── */}
+        {/* Grid View */}
         {!loading && !error && results.length > 0 && view === "grid" && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {results.map(product => (
@@ -347,7 +342,7 @@ export default function ProductSearch() {
           </div>
         )}
 
-        {/* ── LIST VIEW ── */}
+        {/* List View */}
         {!loading && !error && results.length > 0 && view === "list" && (
           <div className="space-y-3">
             {results.map(product => (
@@ -360,22 +355,17 @@ export default function ProductSearch() {
             ))}
           </div>
         )}
-
       </div>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────
-   GRID CARD
-───────────────────────────────────────── */
+/* ── Grid Card ── */
 function GridCard({ product, wishlisted, onWishlist }) {
   const [imgErr, setImgErr] = useState(false);
 
   return (
     <div className="group bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 flex flex-col">
-
-      {/* Image */}
       <div className="relative overflow-hidden bg-slate-50 aspect-square">
         {product.images?.[0] && !imgErr ? (
           <img
@@ -389,27 +379,17 @@ function GridCard({ product, wishlisted, onWishlist }) {
             <Package size={40} strokeWidth={1.5} />
           </div>
         )}
-
-        {/* Wishlist */}
         <button
           onClick={onWishlist}
           className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 ${
-            wishlisted
-              ? "bg-rose-500 text-white scale-110"
-              : "bg-white/90 text-slate-400 hover:text-rose-400 opacity-0 group-hover:opacity-100"
+            wishlisted ? "bg-rose-500 text-white scale-110" : "bg-white/90 text-slate-400 hover:text-rose-400 opacity-0 group-hover:opacity-100"
           }`}
         >
           <Heart size={14} fill={wishlisted ? "currentColor" : "none"} />
         </button>
-
-        {/* Status badge */}
         {product.status === "draft" && (
-          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 text-[10px] font-bold uppercase tracking-wider">
-            Draft
-          </span>
+          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 text-[10px] font-bold uppercase tracking-wider">Draft</span>
         )}
-
-        {/* Featured badge */}
         {product.featured && (
           <span className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-lg bg-indigo-600 text-white text-[10px] font-bold flex items-center gap-1">
             <Star size={9} fill="currentColor" /> Featured
@@ -417,49 +397,33 @@ function GridCard({ product, wishlisted, onWishlist }) {
         )}
       </div>
 
-      {/* Info */}
       <div className="p-3.5 flex flex-col flex-1">
         {product.vendor && (
-          <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-400 mb-1">
-            {product.vendor}
-          </p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-400 mb-1">{product.vendor}</p>
         )}
-        <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 leading-snug mb-1.5">
-          {product.title}
-        </h3>
-
+        <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 leading-snug mb-1.5">{product.title}</h3>
         {product.productType && (
           <span className="inline-flex items-center gap-1 mb-2 text-[11px] text-slate-400">
             <Tag size={9} /> {product.productType}
           </span>
         )}
-
         <div className="mt-auto flex items-center justify-between">
-          <span className="text-base font-black text-indigo-600">
-            ${Number(product.price || 0).toFixed(2)}
-          </span>
+          <span className="text-base font-black text-indigo-600">${Number(product.price || 0).toFixed(2)}</span>
           <span className={`text-[11px] font-semibold ${Number(product.stock) === 0 ? "text-rose-400" : "text-emerald-500"}`}>
             {Number(product.stock) === 0 ? "Out of stock" : `${product.stock} left`}
           </span>
         </div>
-
-        {/* Collections */}
         {product.collections?.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2.5 pt-2.5 border-t border-slate-100">
             {product.collections.slice(0, 2).map(c => (
-              <span key={c._id} className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-medium">
-                {c.name}
-              </span>
+              <span key={c._id} className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-medium">{c.name}</span>
             ))}
             {product.collections.length > 2 && (
-              <span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-400 text-[10px] font-medium">
-                +{product.collections.length - 2}
-              </span>
+              <span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-400 text-[10px] font-medium">+{product.collections.length - 2}</span>
             )}
           </div>
         )}
-
-        <button className="mt-3 w-full h-9 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-indigo-200  duration-200">
+        <button className="mt-3 w-full h-9 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-indigo-200">
           <ShoppingCart size={13} /> Add to Cart
         </button>
       </div>
@@ -467,16 +431,12 @@ function GridCard({ product, wishlisted, onWishlist }) {
   );
 }
 
-/* ─────────────────────────────────────────
-   LIST CARD
-───────────────────────────────────────── */
+/* ── List Card ── */
 function ListCard({ product, wishlisted, onWishlist }) {
   const [imgErr, setImgErr] = useState(false);
 
   return (
     <div className="group bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 flex items-center gap-4 p-4">
-
-      {/* Image */}
       <div className="w-20 h-20 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
         {product.images?.[0] && !imgErr ? (
           <img src={product.images[0]} alt={product.title} onError={() => setImgErr(true)}
@@ -488,7 +448,6 @@ function ListCard({ product, wishlisted, onWishlist }) {
         )}
       </div>
 
-      {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -507,7 +466,6 @@ function ListCard({ product, wishlisted, onWishlist }) {
             </div>
           </div>
         </div>
-
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           {product.productType && (
             <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[11px] font-medium flex items-center gap-1">
@@ -528,14 +486,11 @@ function ListCard({ product, wishlisted, onWishlist }) {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="flex flex-col gap-2 shrink-0">
         <button
           onClick={onWishlist}
           className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-all ${
-            wishlisted
-              ? "bg-rose-50 border-rose-200 text-rose-500"
-              : "bg-white border-slate-200 text-slate-400 hover:border-rose-200 hover:text-rose-400"
+            wishlisted ? "bg-rose-50 border-rose-200 text-rose-500" : "bg-white border-slate-200 text-slate-400 hover:border-rose-200 hover:text-rose-400"
           }`}
         >
           <Heart size={14} fill={wishlisted ? "currentColor" : "none"} />

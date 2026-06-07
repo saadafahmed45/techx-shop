@@ -69,7 +69,7 @@ export default function TopSellingSlider() {
   );
 
   return (
-    <section className="relative overflow-hidden  px-4 md:px-32 bg-[#f7f8fc] py-20">
+    <section className="relative overflow-hidden  px-4 md:px-32 bg-[#f7f8fc] py-12">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-30">
         <div className="h-full w-full bg-[radial-gradient(circle_at_center,#d1d5db_1px,transparent_1px)] bg-size-[28px_28px]" />
@@ -89,13 +89,13 @@ export default function TopSellingSlider() {
                 </span>
 
                 <h2 className="text-4xl font-extrabold leading-tight text-black md:text-5xl">
-                  Ultra HD TV
+                 Sony Headphones 
                   <br />
                   Special Offer
                 </h2>
 
                 <p className="mt-4 text-lg text-gray-500">
-                  ASUS CX70 2QF-621XPL 13"
+                  Sony WH-1000XM4 Wireless Noise-Canceling Headphones
                 </p>
 
                 <div className="mt-8">
@@ -119,6 +119,7 @@ export default function TopSellingSlider() {
                   src="https://images.pexels.com/photos/29581125/pexels-photo-29581125.jpeg"
                   alt="TV"
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   priority
                   className="rounded-2xl object-cover shadow-2xl"
                 />

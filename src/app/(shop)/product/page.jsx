@@ -770,7 +770,7 @@ useEffect(() => {
           "#f7f8fc",
       }}
     >
-      <div className=" mx-auto px-5 md:px-32 py-8 flex gap-7">
+      <div className=" mx-auto px-5 md:px-32 py-14 flex gap-7">
         {/* SIDEBAR */}
         <aside className="hidden md:block w-56 shrink-0 self-start sticky top-20">
           <div className="bg-white rounded-2xl p-5 border border-gray-100">

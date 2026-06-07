@@ -121,18 +121,18 @@ export default function ProductsFilterTabs() {
 
         <div className="text-center max-w-3xl mx-auto">
 
-          <h2 className="text-4xl md:text-6xl font-black tracking-tight text-black leading-tight">
+          <h2 className="text-2xl md:text-4xl font-black tracking-tight text-black leading-tight">
             Explore Our Premium
             Gear
           </h2>
 
-          <p className="mt-5 text-slate-500 text-lg leading-relaxed">
+          <p className="mt-3 text-slate-500 text-lg leading-relaxed">
             Top-rated tech and
             lifestyle essentials to
             power your day.
           </p>
 
-           <div className="w-16 h-1 bg-indigo-500 mx-auto mt-5 rounded-full" />
+           <div className="w-16 h-1 bg-indigo-500 mx-auto mt-2 rounded-full" />
 {/* 
           <Link
             href="/products"
@@ -148,7 +148,7 @@ export default function ProductsFilterTabs() {
             FILTER BUTTONS
         ====================================== */}
 
-        <div className="flex flex-wrap items-center justify-center gap-3 mt-14">
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
 
           <button
             onClick={() =>
