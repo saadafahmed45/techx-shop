@@ -81,21 +81,21 @@ export const CartProvider = ({ children }) => {
   const clearCart = () => setCart([]);
 
 
-// google auth
- const handleGoogleLogin = async () => {
-    try {
-      const result = await signInWithPopup(
-        auth,
-        googleProvider
-      );
+// // google auth
+//  const handleGoogleLogin = async () => {
+//     try {
+//       const result = await signInWithPopup(
+//         auth,
+//         googleProvider
+//       );
 
-      console.log("User:", result.user);
+//       console.log("User:", result.user);
 
-      alert(`Welcome ${result.user.displayName}`);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+//       alert(`Welcome ${result.user.displayName}`);
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   };
 
 
   return (
@@ -111,7 +111,7 @@ export const CartProvider = ({ children }) => {
         openCart,
         closeCart,
         toggleCart,
-        handleGoogleLogin,
+        // handleGoogleLogin,
       }}
     >
       {children}
