@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Search, X, SlidersHorizontal, Package, Star,
@@ -19,35 +19,45 @@ function useDebounce(value, delay = 350) {
   return debounced;
 }
 
-export default function ProductSearch() {
+/* ── Isolated component that reads ?q= from the URL ── */
+function SearchParamsReader({ onQuery }) {
   const searchParams = useSearchParams();
+  useEffect(() => {
+    onQuery(searchParams.get("q") || "");
+  }, [searchParams]);
+  return null;
+}
+
+/* ── Isolated component that syncs query → URL ── */
+function SearchParamsWriter({ query }) {
   const router = useRouter();
-
-  const [products, setProducts]     = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState(null);
-
-  // ── Read ?q= from URL on mount ──
-  const [query, setQuery]           = useState(() => searchParams.get("q") || "");
-  const [statusFilter, setStatus]   = useState("all");
-  const [sortBy, setSortBy]         = useState("default");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [priceMax, setPriceMax]     = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [view, setView]             = useState("grid");
-  const [wishlist, setWishlist]     = useState([]);
-
   const debouncedQuery = useDebounce(query, 350);
-  const inputRef = useRef(null);
 
-  // ── Sync URL when query changes (pushes ?q= to URL) ──
   useEffect(() => {
     const params = new URLSearchParams();
     if (debouncedQuery.trim()) params.set("q", debouncedQuery.trim());
     const newUrl = params.toString() ? `/search?${params.toString()}` : "/search";
-    // Replace so back button works correctly
     router.replace(newUrl, { scroll: false });
   }, [debouncedQuery]);
+
+  return null;
+}
+
+export default function ProductSearch() {
+  const [products, setProducts]       = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState(null);
+  const [query, setQuery]             = useState("");
+  const [statusFilter, setStatus]     = useState("all");
+  const [sortBy, setSortBy]           = useState("default");
+  const [typeFilter, setTypeFilter]   = useState("all");
+  const [priceMax, setPriceMax]       = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [view, setView]               = useState("grid");
+  const [wishlist, setWishlist]       = useState([]);
+
+  const debouncedQuery = useDebounce(query, 350);
+  const inputRef = useRef(null);
 
   // ── Fetch products ──
   useEffect(() => {
@@ -86,8 +96,8 @@ export default function ProductSearch() {
     }
 
     if (statusFilter !== "all") list = list.filter(p => p.status === statusFilter);
-    if (typeFilter !== "all") list = list.filter(p => p.productType === typeFilter);
-    if (priceMax !== "") list = list.filter(p => Number(p.price) <= Number(priceMax));
+    if (typeFilter !== "all")   list = list.filter(p => p.productType === typeFilter);
+    if (priceMax !== "")        list = list.filter(p => Number(p.price) <= Number(priceMax));
 
     if (sortBy === "price-asc")  list.sort((a, b) => Number(a.price) - Number(b.price));
     if (sortBy === "price-desc") list.sort((a, b) => Number(b.price) - Number(a.price));
@@ -119,6 +129,16 @@ export default function ProductSearch() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+
+      {/* ── Read ?q= from URL on mount (Suspense required by Next.js) ── */}
+      <Suspense fallback={null}>
+        <SearchParamsReader onQuery={setQuery} />
+      </Suspense>
+
+      {/* ── Sync query → URL (Suspense required by Next.js) ── */}
+      <Suspense fallback={null}>
+        <SearchParamsWriter query={query} />
+      </Suspense>
 
       {/* ── Search Hero ── */}
       <div className="bg-white border-b border-slate-200 shadow-sm sticky top-16 z-30">
@@ -282,7 +302,7 @@ export default function ProductSearch() {
           </div>
         </div>
 
-        {/* Loading */}
+        {/* Loading skeletons */}
         {loading && (
           <div className={`grid gap-4 ${view === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" : "grid-cols-1"}`}>
             {Array.from({ length: 8 }).map((_, i) => (
@@ -309,7 +329,7 @@ export default function ProductSearch() {
           </div>
         )}
 
-        {/* Empty */}
+        {/* Empty state */}
         {!loading && !error && results.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 text-slate-400">
             <div className="w-20 h-20 rounded-3xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-5">
