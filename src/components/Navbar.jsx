@@ -14,7 +14,6 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 import { HiMagnifyingGlass } from "react-icons/hi2";
 
 import Link from "next/link";
-import CartDrawer from "./CartDrawer";
 import { useCart } from "@/context/CartContext";
 
 // ─────────────────────────────────────────────
@@ -335,7 +334,6 @@ export default function Navbar() {
               <AiOutlineHeart className="text-[18px]" />
             </Link>
 
-            <CartDrawer />
 
             <Link href="/cart" className="relative w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
               <AiOutlineShopping className="text-[18px]" />
