@@ -327,7 +327,11 @@ export default function Navbar() {
             </div>
 
             {/* Icons */}
-            <Link href="/login" className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
+            <Link href="/profile" className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
+              <AiOutlineUser className="text-[18px]" />
+            </Link>
+
+             <Link href="/login" className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
               <AiOutlineUser className="text-[18px]" />
             </Link>
             <Link href="/wishlist" className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
