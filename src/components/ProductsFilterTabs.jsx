@@ -206,7 +206,7 @@ export default function ProductsFilterTabs() {
               >
 
                 {/* IMAGE */}
-                <div className="relative overflow-hidden bg-slate-100">
+                <Link href={`/product/${product._id}`} className="relative overflow-hidden bg-slate-100">
 
                   <img
                     src={
@@ -228,7 +228,7 @@ export default function ProductsFilterTabs() {
                       }
                     </span>
                   )}
-                </div>
+                </Link>
 
                 {/* CONTENT */}
                 <div className="p-4 md:p-5">

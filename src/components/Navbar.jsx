@@ -269,7 +269,7 @@ export default function Navbar() {
                         <button
                           key={product._id}
                           onClick={() => handleResultClick(product._id)}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/6 transition-all text-left"
+                          className="w-full cursor-pointer  flex items-center gap-3 px-3 py-2.5 hover:bg-white/6 transition-all text-left"
                         >
                           {product.images?.[0] ? (
                             <img

@@ -3,21 +3,9 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-
-import {
-  AiOutlineHeart,
-  AiFillHeart,
-} from "react-icons/ai";
-
-import {
-  TbHeadphones,
-  TbDeviceMobile,
-  TbDeviceWatch,
-  TbEar,
-} from "react-icons/tb";
-
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import { TbHeadphones, TbDeviceMobile, TbDeviceWatch, TbEar } from "react-icons/tb";
 import { HiOutlineShoppingBag } from "react-icons/hi";
-
 import { useCart } from "@/context/CartContext";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -43,7 +31,6 @@ export function ProductCard({ product, index }) {
 
   const [wished, setWished] = useState(false);
   const [hovered, setHovered] = useState(false);
-
   const { addToCart, openCart } = useCart();
 
   const image = product?.images?.[0] || "https://picsum.photos/500";
@@ -81,7 +68,7 @@ export function ProductCard({ product, index }) {
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
-        {/* WISH BUTTON */}
+        {/* WISHLIST BUTTON */}
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -110,7 +97,6 @@ export function ProductCard({ product, index }) {
 
       {/* CONTENT */}
       <div className="p-4 space-y-3">
-
         {/* CATEGORY */}
         <div className="flex items-center gap-2 text-indigo-500 text-sm">
           {getCategoryIcon(product?.productType)}
@@ -121,7 +107,7 @@ export function ProductCard({ product, index }) {
 
         {/* TITLE */}
         <Link href={`/product/${product?._id}`}>
-          <h3 className="font-semibold text-slate-900 line-clamp-2  transition">
+          <h3 className="font-semibold text-slate-900 line-clamp-2 transition">
             {product?.title || "Untitled Product"}
           </h3>
         </Link>
@@ -129,7 +115,7 @@ export function ProductCard({ product, index }) {
         {/* PRICE */}
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
           <span className="text-lg font-black text-indigo-600">
-          ৳ {Number(product?.price || 0).toFixed(2)}
+            ৳ {Number(product?.price || 0).toFixed(2)}
           </span>
         </div>
       </div>
@@ -138,60 +124,73 @@ export function ProductCard({ product, index }) {
 }
 
 // ============================
-// MAIN COMPONENT
+// GENERIC PRODUCT SECTION
 // ============================
 
-export default function FeaturedProducts() {
+/**
+ * Props:
+ * - title        {string}  — Section heading, e.g. "Featured Products"
+ * - filterValue  {string}  — The value inside product.featured[] to filter by, e.g. "Featured" | "Trending Now"
+ * - bgColor      {string}  — Tailwind bg class, e.g. "bg-slate-50" | "bg-white" (default: "bg-slate-50")
+ * - accentColor  {string}  — Tailwind bg class for the underline bar, e.g. "bg-indigo-500" (default: "bg-indigo-500")
+ * - emptyMessage {string}  — Custom empty state text (optional)
+ */
+export default function ProductSection({
+  title = "Products",
+  filterValue,
+  bgColor = "bg-slate-50",
+  accentColor = "bg-indigo-500",
+  emptyMessage,
+}) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
+      const res = await fetch(`${API}/products`, {
+        signal: AbortSignal.timeout(20000), // 20s — cold start এর জন্য
+        cache: "no-store",
+      });
 
-        const res = await fetch(`${API}/products`);
-        const data = await res.json();
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
 
-        if (Array.isArray(data)) {
-          setProducts(
-            data.filter(
-              (product) =>
-                product &&
-                product.status === "active" &&
-                Array.isArray(product.featured) // ✅ FIX: was product.features
-            )
-          );
-        } else {
-          setProducts([]);
-        }
-      } catch (error) {
-        console.log(error);
+      if (Array.isArray(data)) {
+        setProducts(
+          data.filter(
+            (p) => p && p.status === "active" && Array.isArray(p.featured)
+          )
+        );
+      } else {
         setProducts([]);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Fetch failed:", error.message);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchProducts();
-  }, []);
-
-  // ✅ FIX: was product.features?.includes — field is "featured"
-  const newArrivalsProducts = products.filter((product) =>
-    product.featured?.includes("Featured")
-  );
+  fetchProducts();
+}, []);
+  // Filter by the given filterValue prop (e.g. "Featured", "Trending Now", "New Arrival")
+  const filtered = filterValue
+    ? products.filter((p) => p.featured?.includes(filterValue))
+    : products;
 
   return (
-    <section className="py-14 md:py-24 px-4 sm:px-6 lg:px-32 bg-slate-50">
+    <section className={`py-14 md:py-24 px-4 sm:px-6 lg:px-32 ${bgColor}`}>
       <div className="mx-auto">
 
         {/* HEADER */}
         <div className="text-center mb-10 md:mb-14">
           <h2 className="text-3xl md:text-4xl font-black text-slate-900">
-            Featured Products
+            {title}
           </h2>
-          {/* <p className="text-slate-400 mt-2">Premium picks curated for you</p> */}
-          <div className="w-16 h-1 bg-indigo-500 mx-auto mt-5 rounded-full" />
+          <div className={`w-16 h-1 ${accentColor} mx-auto mt-5 rounded-full`} />
         </div>
 
         {/* GRID */}
@@ -201,13 +200,13 @@ export default function FeaturedProducts() {
               <div key={i} className="aspect-square bg-white rounded-2xl animate-pulse" />
             ))}
           </div>
-        ) : newArrivalsProducts.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <p className="text-center text-slate-400 py-16">
-            No Featured products found.
+            {emptyMessage || `No ${title} found.`}
           </p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-            {newArrivalsProducts.map((product, i) => (
+            {filtered.map((product, i) => (
               <ProductCard
                 key={product?._id || i}
                 product={product}

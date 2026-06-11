@@ -75,6 +75,8 @@ export default function ProductSlider() {
                     src={item.image}
                     alt={item.title}
                     fill
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+
                     className="object-contain"
                   />
                 </div>

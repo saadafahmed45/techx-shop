@@ -13,6 +13,7 @@ import {
 import { HiArrowLeft } from "react-icons/hi2";
 import AddReview from "@/components/AddReview";
 import AddToCartButton from "@/components/AddToCartButton";
+import { ProductCard } from "@/components/FeatureProduct";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const FALLBACK = "https://picsum.photos/600/600";
@@ -135,11 +136,11 @@ const ProductDetailsPage = () => {
   const discountPrice = (Number(product.price || 0) * 1.25).toFixed(2);
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-14">
+    <div className="min-h-screen bg-stone-50 pt-8 md:pt-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-14">
 
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-xs text-stone-400 mb-8 font-medium">
+        <nav className="flex items-center gap-2 text-sm text-stone-400 mb-8 font-medium">
           <Link href="/" className="hover:text-stone-700 transition-colors">Home</Link>
           <span>/</span>
           <Link href="/product" className="hover:text-stone-700 transition-colors">Products</Link>
@@ -289,7 +290,7 @@ const ProductDetailsPage = () => {
 
           {activeTab === "description" && (
             <div className="p-7 md:p-10">
-              <p className="text-stone-600 leading-relaxed text-sm">{product.description}</p>
+              <p className="text-stone-600 leading-relaxed text-md">{product.description}</p>
             </div>
           )}
 
@@ -375,32 +376,7 @@ const ProductDetailsPage = () => {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {relatedProducts.map((item) => (
-                <Link
-                  key={item._id}
-                  href={`/product/${item._id}`}
-                  className="group bg-white rounded-xl border border-stone-200 overflow-hidden hover:-translate-y-1 hover:shadow-md transition-all duration-300"
-                >
-                  <div className="overflow-hidden bg-stone-50 aspect-square">
-                    <img
-                      src={item.images?.[0] || FALLBACK}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="p-4">
-                    {item.vendor && (
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">
-                        {item.vendor}
-                      </p>
-                    )}
-                    <h3 className="font-semibold text-stone-900 text-sm line-clamp-2 group-hover:text-stone-600 transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-stone-900 font-bold text-base mt-1.5">
-                      ${Number(item.price || 0).toFixed(2)}
-                    </p>
-                  </div>
-                </Link>
+                <ProductCard key={item._id} product={item} />
               ))}
             </div>
           </div>

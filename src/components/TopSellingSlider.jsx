@@ -69,13 +69,13 @@ export default function TopSellingSlider() {
   );
 
   return (
-    <section className="relative overflow-hidden  px-4 md:px-32 bg-[#f7f8fc] py-12">
+    <section className="relative overflow-hidden  px-4 md:px-32 bg-[#f7f8fc] py-18">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-30">
         <div className="h-full w-full bg-[radial-gradient(circle_at_center,#d1d5db_1px,transparent_1px)] bg-size-[28px_28px]" />
       </div>
 
-      <div className="relative z-10 mx-auto  px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto   px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
           {/* LEFT SIDE */}
           <div className="relative overflow-hidden rounded-4xl bg-white p-8 shadow-lg lg:p-12">
@@ -216,7 +216,7 @@ export default function TopSellingSlider() {
                       )}
 
                       {/* IMAGE */}
-                      <Link href={`/products/${product._id}`}>
+                      <Link href={`/product/${product._id}`}>
                         <div className="relative mb-6 h-56 overflow-hidden rounded-2xl bg-[#f7f7f7]">
                           <Image
                             src={
@@ -225,6 +225,8 @@ export default function TopSellingSlider() {
                             }
                             alt={product?.title || "product"}
                             fill
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+
                             className="object-cover transition duration-500 group-hover:scale-110"
                           />
                         </div>
