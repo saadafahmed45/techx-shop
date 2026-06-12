@@ -40,7 +40,7 @@ export function ProductCard({ product, index }) {
     addToCart(product);
     openCart();
   };
-
+// box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -49,10 +49,10 @@ export function ProductCard({ product, index }) {
       transition={{ delay: index * 0.05 }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group bg-white rounded-2xl overflow-hidden border border-slate-100 transition-all duration-300"
+      className="group bg-white rounded-2xl overflow-hidden border border-slate-200 transition-all duration-300"
       style={{
         boxShadow: hovered
-          ? "0 20px 40px rgba(0,0,0,0.10)"
+          ? "0 10px 20px rgba(0,0,0,0.10)"
           : "0 4px 14px rgba(0,0,0,0.05)",
         transform: hovered ? "translateY(-6px)" : "translateY(0)",
       }}

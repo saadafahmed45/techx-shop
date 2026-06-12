@@ -202,7 +202,7 @@ export default function ProductsFilterTabs() {
             (product) => (
               <div
                 key={product._id}
-                className="group bg-white rounded-3xl overflow-hidden border border-slate-200 hover:shadow-2xl transition-all duration-500"
+                className="group bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-2xl transition-all duration-500"
               >
 
                 {/* IMAGE */}
@@ -233,7 +233,7 @@ export default function ProductsFilterTabs() {
                 {/* CONTENT */}
                 <div className="p-4 md:p-5">
             <Link href={`/product/${product._id}`} className="transition-colors duration-300 hover:text-slate-700">
-             <h3 className="text-sm md:text-lg font-bold text-slate-900 line-clamp-2 leading-snug">
+             <h3 className="text-sm md:text-lg font-semibold text-slate-900 line-clamp-2 leading-snug">
                 {product.title}
                </h3>
             </Link>

@@ -1,86 +1,130 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import {
-  useEffect,
-  useMemo,
-  useState,
-  useCallback,
-} from "react";
-
-import {
-  Search,
-  Edit2,
-  Trash2,
-  Plus,
-  RefreshCw,
-  CheckCircle2,
-  Clock3,
-  Loader2,
-  ImageIcon,
-  Package,
-  X,
-  ChevronDown,
-  Star,
-  UploadCloud,
-  Sparkles,
+  Search, Edit2, Trash2, Plus, RefreshCw,
+  CheckCircle2, Clock3, Loader2, ImageIcon,
+  Package, X, ChevronDown, Star, UploadCloud, Sparkles, GripVertical,
 } from "lucide-react";
-
 import Swal from "sweetalert2";
 
-const API =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-// =========================================
-// FEATURE OPTIONS
-// =========================================
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const FEATURE_OPTIONS = [
-  "Featured",
-  "Best Seller",
-  "New Arrivals",
-  "Popular Sales",
-  "Limited Edition",
-  "Top Selling Products",
-  "Trending Now",
+  "Featured", "Best Seller", "New Arrivals", "Popular Sales",
+  "Limited Edition", "Top Selling Products", "Trending Now",
 ];
 
-/* ─────────────────────────────────────────
-   MAIN PAGE
-───────────────────────────────────────── */
+// ─── Product image with fallback ─────────────────────────────────────────────
+const ProductThumb = ({ src, alt, className }) => {
+  const [error, setError] = useState(false);
+  useEffect(() => { setError(false); }, [src]);
 
+  if (!src || error) {
+    return (
+      <div className={`${className} bg-slate-100 flex items-center justify-center`}>
+        <ImageIcon className="w-5 h-5 text-slate-400" />
+      </div>
+    );
+  }
+  return (
+    <img src={src} alt={alt} className={className}
+      onError={() => setError(true)} />
+  );
+};
+
+// ─── Draggable image list ─────────────────────────────────────────────────────
+const DraggableImageList = ({ images, onReorder, onRemove }) => {
+  const dragIndex = useRef(null);
+  const [dragOver, setDragOver] = useState(null);
+
+  const handleDragStart = (i) => { dragIndex.current = i; };
+  const handleDragOver  = (e, i) => { e.preventDefault(); setDragOver(i); };
+  const handleDrop      = (i) => {
+    const from = dragIndex.current;
+    if (from === null || from === i) { setDragOver(null); return; }
+    const next = [...images];
+    const [moved] = next.splice(from, 1);
+    next.splice(i, 0, moved);
+    onReorder(next);
+    dragIndex.current = null;
+    setDragOver(null);
+  };
+  const handleDragEnd = () => { dragIndex.current = null; setDragOver(null); };
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
+      {images.map((img, i) => (
+        <div
+          key={i}
+          draggable
+          onDragStart={() => handleDragStart(i)}
+          onDragOver={(e) => handleDragOver(e, i)}
+          onDrop={() => handleDrop(i)}
+          onDragEnd={handleDragEnd}
+          className={`relative group rounded-3xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing
+            ${dragOver === i ? "border-indigo-400 scale-105 shadow-lg" : "border-slate-200"}`}
+        >
+          <ProductThumb
+            src={typeof img === "string" ? img : URL.createObjectURL(img)}
+            alt={`image-${i}`}
+            className="w-full h-32 object-cover"
+          />
+
+          {/* Drag handle */}
+          <div className="absolute top-2 left-2 bg-black/50 rounded-lg p-1 opacity-0 group-hover:opacity-100 transition">
+            <GripVertical size={14} className="text-white" />
+          </div>
+
+          {/* Order badge */}
+          <div className="absolute top-2 right-8 bg-black/50 text-white text-[10px] font-bold rounded-md px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition">
+            #{i + 1}
+          </div>
+
+          {/* Remove */}
+          <button
+            type="button"
+            onClick={() => onRemove(i)}
+            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-red-500"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ManageProducts() {
-  const [products, setProducts] = useState([]);
-  const [collections, setCollections] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
-  const [editModal, setEditModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [products,         setProducts]         = useState([]);
+  const [collections,      setCollections]      = useState([]);
+  const [loading,          setLoading]          = useState(true);
+  const [search,           setSearch]           = useState("");
+  const [status,           setStatus]           = useState("all");
+  const [editModal,        setEditModal]        = useState(false);
+  const [selectedProduct,  setSelectedProduct]  = useState(null);
 
-  // FETCH PRODUCTS
   const fetchProducts = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/products`);
+      setLoading(true);
+      const res  = await fetch(`${API}/products`);
       const data = await res.json();
       setProducts(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.log(err);
+    } catch {
       Swal.fire({ icon: "error", title: "Failed to fetch products" });
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // FETCH COLLECTIONS
   const fetchCollections = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/collections`);
+      const res  = await fetch(`${API}/collections`);
       const data = await res.json();
       setCollections(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.log(err);
-    }
+    } catch {}
   }, []);
 
   useEffect(() => {
@@ -88,20 +132,18 @@ export default function ManageProducts() {
     fetchCollections();
   }, [fetchProducts, fetchCollections]);
 
-  // FILTER PRODUCTS
   const filteredProducts = useMemo(() => {
+    const q = search.toLowerCase();
     return products.filter((p) => {
-      const q = search.toLowerCase();
       const matchSearch =
         p.title?.toLowerCase().includes(q) ||
         p.vendor?.toLowerCase().includes(q) ||
         p.productType?.toLowerCase().includes(q);
-      const matchStatus = status === "all" ? true : p.status === status;
+      const matchStatus = status === "all" || p.status === status;
       return matchSearch && matchStatus;
     });
   }, [products, search, status]);
 
-  // DELETE
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "Delete Product?",
@@ -111,9 +153,7 @@ export default function ManageProducts() {
       confirmButtonColor: "#ef4444",
       confirmButtonText: "Delete",
     });
-
     if (!result.isConfirmed) return;
-
     try {
       const res = await fetch(`${API}/products/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
@@ -125,9 +165,8 @@ export default function ManageProducts() {
   };
 
   const activeCount = products.filter((p) => p.status === "active").length;
-  const draftCount = products.filter((p) => p.status === "draft").length;
+  const draftCount  = products.filter((p) => p.status === "draft").length;
 
-  // LOADING
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
@@ -150,19 +189,13 @@ export default function ManageProducts() {
             </p>
           </div>
           <div className="flex gap-3">
-            <button
-              onClick={fetchProducts}
-              className="h-11 px-5 rounded-2xl border border-slate-200 bg-white text-sm font-medium flex items-center gap-2 hover:border-indigo-300 hover:text-indigo-600 transition"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
+            <button onClick={fetchProducts}
+              className="h-11 px-5 rounded-2xl border border-slate-200 bg-white text-sm font-medium flex items-center gap-2 hover:border-indigo-300 hover:text-indigo-600 transition">
+              <RefreshCw className="w-4 h-4" /> Refresh
             </button>
-            <Link
-              href="/admin/add-products"
-              className="h-11 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold flex items-center gap-2 shadow-lg shadow-indigo-200 transition"
-            >
-              <Plus className="w-4 h-4" />
-              Add Product
+            <Link href="/admin/add-products"
+              className="h-11 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold flex items-center gap-2 shadow-lg shadow-indigo-200 transition">
+              <Plus className="w-4 h-4" /> Add Product
             </Link>
           </div>
         </div>
@@ -187,20 +220,14 @@ export default function ManageProducts() {
         <div className="bg-white rounded-3xl border border-slate-200 p-4 flex flex-col md:flex-row gap-3">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+            <input type="text" placeholder="Search products..."
+              value={search} onChange={(e) => setSearch(e.target.value)}
               className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400"
             />
           </div>
           <div className="relative">
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="appearance-none h-11 px-4 pr-10 rounded-2xl border border-slate-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400"
-            >
+            <select value={status} onChange={(e) => setStatus(e.target.value)}
+              className="appearance-none h-11 px-4 pr-10 rounded-2xl border border-slate-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400">
               <option value="all">All Status</option>
               <option value="active">Active</option>
               <option value="draft">Draft</option>
@@ -211,8 +238,6 @@ export default function ManageProducts() {
 
         {/* TABLE */}
         <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden">
-
-          {/* HEAD */}
           <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-widest text-slate-400 font-bold">
             <div className="col-span-1">#</div>
             <div className="col-span-4">Product</div>
@@ -223,7 +248,6 @@ export default function ManageProducts() {
             <div className="col-span-2">Actions</div>
           </div>
 
-          {/* PRODUCTS */}
           {filteredProducts.length === 0 ? (
             <div className="py-20 flex flex-col items-center justify-center text-slate-300">
               <Package className="w-12 h-12" />
@@ -231,62 +255,45 @@ export default function ManageProducts() {
             </div>
           ) : (
             filteredProducts.map((product, index) => (
-              <div
-                key={product._id}
-                className="grid grid-cols-1 lg:grid-cols-12 gap-4 px-6 py-5 border-b border-slate-100 hover:bg-slate-50 transition"
-              >
-                {/* NUMBER */}
+              <div key={product._id}
+                className="grid grid-cols-1 lg:grid-cols-12 gap-4 px-6 py-5 border-b border-slate-100 hover:bg-slate-50 transition">
+
                 <div className="lg:col-span-1 flex items-center text-sm text-slate-400 font-semibold">
                   {index + 1}
                 </div>
 
-                {/* PRODUCT */}
                 <div className="lg:col-span-4 flex items-center gap-4">
-                  {product.images?.[0] ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.title}
-                      className="w-14 h-14 rounded-2xl object-cover border border-slate-200"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
-                      <ImageIcon className="w-5 h-5 text-slate-400" />
-                    </div>
-                  )}
+                  <ProductThumb
+                    src={product.images?.[0]}
+                    alt={product.title}
+                    className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shrink-0"
+                  />
                   <div className="min-w-0">
                     <h2 className="font-bold text-slate-900 truncate">{product.title}</h2>
-                    <p className="text-sm text-slate-400 truncate">
-                      {product.vendor || "No vendor"}
-                    </p>
+                    <p className="text-sm text-slate-400 truncate">{product.vendor || "No vendor"}</p>
                   </div>
                 </div>
 
-                {/* TYPE */}
                 <div className="lg:col-span-2 flex items-center text-sm text-slate-500">
                   {product.productType || "—"}
                 </div>
 
-                {/* PRICE */}
                 <div className="lg:col-span-1 flex items-center font-bold text-indigo-600">
                   ${Number(product.price || 0).toFixed(2)}
                 </div>
 
-                {/* STATUS */}
                 <div className="lg:col-span-1 flex items-center">
                   {product.status === "draft" ? (
                     <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold flex items-center gap-1">
-                      <Clock3 className="w-3 h-3" />
-                      Draft
+                      <Clock3 className="w-3 h-3" /> Draft
                     </span>
                   ) : (
                     <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      Active
+                      <CheckCircle2 className="w-3 h-3" /> Active
                     </span>
                   )}
                 </div>
 
-                {/* FEATURED */}
                 <div className="lg:col-span-1 flex items-center">
                   {Array.isArray(product.featured) && product.featured.length > 0 ? (
                     <span className="inline-flex items-center gap-1 text-yellow-500 text-xs font-bold">
@@ -294,25 +301,18 @@ export default function ManageProducts() {
                       {product.featured.length}
                     </span>
                   ) : (
-                    <span className="text-xs text-slate-400">No</span>
+                    <span className="text-xs text-slate-400">—</span>
                   )}
                 </div>
 
-                {/* ACTIONS */}
                 <div className="lg:col-span-2 flex items-center gap-2">
                   <button
-                    onClick={() => {
-                      setSelectedProduct(product);
-                      setEditModal(true);
-                    }}
-                    className="w-10 h-10 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition"
-                  >
+                    onClick={() => { setSelectedProduct(product); setEditModal(true); }}
+                    className="w-10 h-10 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition">
                     <Edit2 className="w-4 h-4" />
                   </button>
-                  <button
-                    onClick={() => handleDelete(product._id)}
-                    className="w-10 h-10 rounded-2xl bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition"
-                  >
+                  <button onClick={() => handleDelete(product._id)}
+                    className="w-10 h-10 rounded-2xl bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -322,16 +322,13 @@ export default function ManageProducts() {
         </div>
       </div>
 
-      {/* MODAL */}
       {editModal && selectedProduct && (
         <EditProductModal
           product={selectedProduct}
           collections={collections}
           onClose={() => setEditModal(false)}
           onUpdated={(updated) => {
-            setProducts((prev) =>
-              prev.map((p) => (p._id === updated._id ? updated : p))
-            );
+            setProducts((prev) => prev.map((p) => p._id === updated._id ? updated : p));
             setEditModal(false);
           }}
         />
@@ -340,49 +337,44 @@ export default function ManageProducts() {
   );
 }
 
-/* ─────────────────────────────────────────
-   EDIT MODAL
-───────────────────────────────────────── */
-
+// ─── Edit Modal ───────────────────────────────────────────────────────────────
 function EditProductModal({ product, collections, onClose, onUpdated }) {
   const [saving, setSaving] = useState(false);
-  const [previewImages, setPreviewImages] = useState(product.images || []);
-  const [newImages, setNewImages] = useState([]);
+
+  // images: mix of strings (existing URLs) and File objects (new uploads)
+  const [images, setImages] = useState(product.images || []);
 
   const [formData, setFormData] = useState({
-    title: product.title || "",
-    price: product.price || "",
-    vendor: product.vendor || "",
-    stock: product.stock || 0,
+    title:       product.title       || "",
+    price:       product.price       || "",
+    vendor:      product.vendor      || "",
+    stock:       product.stock       || 0,
     productType: product.productType || "",
     description: product.description || "",
-    status: product.status || "draft",
-    // ✅ FIX: always initialize as array
-    featured: Array.isArray(product.featured) ? product.featured : [],
+    status:      product.status      || "draft",
+    featured:    Array.isArray(product.featured) ? product.featured : [],
     collections: product.collections || [],
   });
 
+  // close on Escape
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = "auto"; };
-  }, []);
+    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => {
+      document.body.style.overflow = "auto";
+      window.removeEventListener("keydown", handler);
+    };
+  }, [onClose]);
 
-  const inputCls =
-    "w-full h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition";
+  const inputCls = "w-full h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition";
+  const labelCls = "block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2";
 
-  const labelCls =
-    "block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2";
-
-  // CHANGE
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ FIX: toggle feature in array
   const toggleFeature = (feature) => {
     setFormData((prev) => ({
       ...prev,
@@ -392,19 +384,18 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
     }));
   };
 
-  // IMAGE CHANGE
+  // Add new images (File objects appended to list)
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setNewImages(files);
-    setPreviewImages(files.map((file) => URL.createObjectURL(file)));
+    setImages((prev) => [...prev, ...files]);
   };
 
-  // REMOVE IMAGE
-  const removeImage = (index) => {
-    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
-  };
+  // Reorder images (both strings and Files)
+  const handleReorder = (newOrder) => setImages(newOrder);
 
-  // REMOVE COLLECTION
+  // Remove image by index
+  const handleRemove = (index) => setImages((prev) => prev.filter((_, i) => i !== index));
+
   const removeCollection = (id) => {
     setFormData((prev) => ({
       ...prev,
@@ -412,16 +403,17 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
     }));
   };
 
-  // SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.title.trim()) {
+      Swal.fire({ icon: "warning", title: "Title is required" });
+      return;
+    }
     try {
       setSaving(true);
-
       const body = new FormData();
 
       Object.entries(formData).forEach(([key, value]) => {
-        // ✅ FIX: stringify both arrays properly
         if (key === "collections" || key === "featured") {
           body.append(key, JSON.stringify(value));
         } else {
@@ -429,22 +421,19 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
         }
       });
 
-      newImages.forEach((img) => body.append("images", img));
+      // existing image URLs as JSON
+      const existingUrls = images.filter((img) => typeof img === "string");
+      body.append("existingImages", JSON.stringify(existingUrls));
 
-      const res = await fetch(`${API}/products/${product._id}`, {
-        method: "PUT",
-        body,
-      });
+      // new File objects
+      images.filter((img) => img instanceof File)
+            .forEach((file) => body.append("images", file));
 
+      const res  = await fetch(`${API}/products/${product._id}`, { method: "PUT", body });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      Swal.fire({
-        icon: "success",
-        title: "Product Updated",
-        confirmButtonColor: "#4f46e5",
-      });
-
+      Swal.fire({ icon: "success", title: "Product Updated", confirmButtonColor: "#4f46e5" });
       onUpdated(data.data);
     } catch (err) {
       Swal.fire({ icon: "error", title: err.message || "Update failed" });
@@ -455,79 +444,44 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-white rounded-4xl border border-slate-200 shadow-2xl flex flex-col max-h-[95vh] overflow-hidden">
+      <div className="relative w-full max-w-5xl bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col max-h-[95vh] overflow-hidden">
 
-        {/* HEADER */}
+        {/* Header */}
         <div className="shrink-0 px-6 md:px-8 py-5 border-b border-slate-100 bg-white flex items-center justify-between">
           <div>
             <h2 className="text-2xl md:text-3xl font-black text-slate-900">Edit Product</h2>
             <p className="text-sm text-slate-400 mt-1">Update your product information</p>
           </div>
-          <button
-            onClick={onClose}
-            className="w-11 h-11 rounded-2xl border border-slate-200 hover:bg-slate-100 flex items-center justify-center transition"
-          >
+          <button onClick={onClose}
+            className="w-11 h-11 rounded-2xl border border-slate-200 hover:bg-slate-100 flex items-center justify-center transition">
             <X className="w-5 h-5 text-slate-500" />
           </button>
         </div>
 
-        {/* FORM */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-
-          {/* SCROLL AREA */}
           <div className="flex-1 overflow-y-auto px-6 md:px-8 py-6 space-y-8">
 
-            {/* BASIC */}
+            {/* BASIC FIELDS */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <div className="lg:col-span-2">
-                <label className={labelCls}>Product Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  className={inputCls}
-                />
+                <label className={labelCls}>Product Title <span className="text-rose-400 normal-case">*</span></label>
+                <input type="text" name="title" value={formData.title} onChange={handleChange} className={inputCls} />
               </div>
               <div>
                 <label className={labelCls}>Price</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  className={inputCls}
-                />
+                <input type="number" name="price" value={formData.price} onChange={handleChange} className={inputCls} />
               </div>
               <div>
                 <label className={labelCls}>Stock</label>
-                <input
-                  type="number"
-                  name="stock"
-                  value={formData.stock}
-                  onChange={handleChange}
-                  className={inputCls}
-                />
+                <input type="number" name="stock" value={formData.stock} onChange={handleChange} className={inputCls} />
               </div>
               <div>
                 <label className={labelCls}>Vendor</label>
-                <input
-                  type="text"
-                  name="vendor"
-                  value={formData.vendor}
-                  onChange={handleChange}
-                  className={inputCls}
-                />
+                <input type="text" name="vendor" value={formData.vendor} onChange={handleChange} className={inputCls} />
               </div>
               <div>
                 <label className={labelCls}>Product Type</label>
-                <input
-                  type="text"
-                  name="productType"
-                  value={formData.productType}
-                  onChange={handleChange}
-                  className={inputCls}
-                />
+                <input type="text" name="productType" value={formData.productType} onChange={handleChange} className={inputCls} />
               </div>
             </div>
 
@@ -535,12 +489,8 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
             <div>
               <label className={labelCls}>Status</label>
               <div className="relative">
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className={`${inputCls} appearance-none`}
-                >
+                <select name="status" value={formData.status} onChange={handleChange}
+                  className={`${inputCls} appearance-none`}>
                   <option value="active">Active</option>
                   <option value="draft">Draft</option>
                 </select>
@@ -548,43 +498,31 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
               </div>
             </div>
 
-            {/* ✅ FIX: MULTI-CHIP FEATURE SELECTOR */}
+            {/* FEATURES */}
             <div>
               <label className={labelCls}>Product Features</label>
               <div className="flex flex-wrap gap-2">
                 {FEATURE_OPTIONS.map((feature) => {
                   const selected = formData.featured.includes(feature);
                   return (
-                    <button
-                      key={feature}
-                      type="button"
-                      onClick={() => toggleFeature(feature)}
+                    <button key={feature} type="button" onClick={() => toggleFeature(feature)}
                       className={`h-10 px-4 rounded-xl border text-sm font-semibold transition-all flex items-center gap-2 ${
                         selected
                           ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200"
                           : "bg-white border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600"
-                      }`}
-                    >
-                      <Sparkles size={14} />
-                      {feature}
+                      }`}>
+                      <Sparkles size={14} />{feature}
                     </button>
                   );
                 })}
               </div>
-
               {formData.featured.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-4">
                   {formData.featured.map((item) => (
-                    <span
-                      key={item}
-                      className="px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold border border-indigo-100 flex items-center gap-1.5"
-                    >
+                    <span key={item}
+                      className="px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold border border-indigo-100 flex items-center gap-1.5">
                       {item}
-                      <button
-                        type="button"
-                        onClick={() => toggleFeature(item)}
-                        className="text-indigo-400 hover:text-indigo-700"
-                      >
+                      <button type="button" onClick={() => toggleFeature(item)}>
                         <X size={10} />
                       </button>
                     </span>
@@ -596,50 +534,29 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
             {/* DESCRIPTION */}
             <div>
               <label className={labelCls}>Description</label>
-              <textarea
-                rows={5}
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm outline-none resize-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400"
-              />
+              <textarea rows={5} name="description" value={formData.description} onChange={handleChange}
+                className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm outline-none resize-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400" />
             </div>
 
-            {/* IMAGES */}
+            {/* IMAGES — drag to reorder */}
             <div>
               <label className={labelCls}>Product Images</label>
-              <label className="rounded-3xl border-2 border-dashed border-slate-300 hover:border-indigo-400 bg-slate-50 transition p-8 flex flex-col items-center justify-center cursor-pointer">
-                <UploadCloud className="w-10 h-10 text-indigo-500" />
-                <h3 className="mt-4 font-bold text-slate-800">Upload Images</h3>
-                <p className="text-sm text-slate-400 mt-1">PNG, JPG, WEBP</p>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
+              <p className="text-xs text-slate-400 mb-3 flex items-center gap-1">
+                <GripVertical size={12} /> Drag images to reorder · first image is the cover
+              </p>
+              <label className="rounded-3xl border-2 border-dashed border-slate-300 hover:border-indigo-400 bg-slate-50 transition p-6 flex flex-col items-center justify-center cursor-pointer">
+                <UploadCloud className="w-8 h-8 text-indigo-500" />
+                <h3 className="mt-3 font-bold text-slate-800 text-sm">Upload Images</h3>
+                <p className="text-xs text-slate-400 mt-1">PNG, JPG, WEBP</p>
+                <input type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" />
               </label>
 
-              {previewImages.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
-                  {previewImages.map((img, i) => (
-                    <div key={i} className="relative group">
-                      <img
-                        src={img}
-                        alt=""
-                        className="w-full h-32 rounded-3xl object-cover border border-slate-200"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(i)}
-                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+              {images.length > 0 && (
+                <DraggableImageList
+                  images={images}
+                  onReorder={handleReorder}
+                  onRemove={handleRemove}
+                />
               )}
             </div>
 
@@ -647,8 +564,7 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
             <div>
               <label className={labelCls}>Collections</label>
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <select
-                  multiple
+                <select multiple
                   value={formData.collections.map((c) => c._id)}
                   onChange={(e) => {
                     const ids = Array.from(e.target.selectedOptions).map((o) => o.value);
@@ -657,27 +573,19 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
                       collections: collections.filter((c) => ids.includes(c._id)),
                     }));
                   }}
-                  className="w-full min-h-45 bg-white rounded-2xl border border-slate-200 p-4 text-sm outline-none"
-                >
+                  className="w-full min-h-45 bg-white rounded-2xl border border-slate-200 p-4 text-sm outline-none">
                   {collections.map((col) => (
-                    <option key={col._id} value={col._id} className="py-2">
-                      {col.name}
-                    </option>
+                    <option key={col._id} value={col._id}>{col.name}</option>
                   ))}
                 </select>
 
                 {formData.collections.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-4">
                     {formData.collections.map((col) => (
-                      <div
-                        key={col._id}
-                        className="px-3 py-2 rounded-2xl bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center gap-2"
-                      >
+                      <div key={col._id}
+                        className="px-3 py-2 rounded-2xl bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center gap-2">
                         {col.name}
-                        <button
-                          type="button"
-                          onClick={() => removeCollection(col._id)}
-                        >
+                        <button type="button" onClick={() => removeCollection(col._id)}>
                           <X className="w-3 h-3" />
                         </button>
                       </div>
@@ -688,20 +596,14 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
             </div>
           </div>
 
-          {/* FOOTER */}
+          {/* Footer */}
           <div className="shrink-0 px-6 md:px-8 py-5 border-t border-slate-100 bg-white flex flex-col sm:flex-row justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-12 px-6 rounded-2xl border border-slate-200 bg-white text-sm font-semibold hover:bg-slate-100 transition"
-            >
+            <button type="button" onClick={onClose}
+              className="h-12 px-6 rounded-2xl border border-slate-200 bg-white text-sm font-semibold hover:bg-slate-100 transition">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="h-12 px-7 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 disabled:opacity-60"
-            >
+            <button type="submit" disabled={saving}
+              className="h-12 px-7 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 disabled:opacity-60">
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               {saving ? "Saving..." : "Save Changes"}
             </button>

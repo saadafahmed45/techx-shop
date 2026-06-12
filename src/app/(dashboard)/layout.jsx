@@ -31,16 +31,12 @@ export default function DashboardLayout({ children }) {
   // Loading state
   if (authLoading) {
     return (
-      <html lang="en">
-        <body>
-          <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-gray-400">Checking access…</p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-gray-400">Checking access…</p>
+        </div>
+      </div>
     );
   }
 
@@ -51,13 +47,9 @@ export default function DashboardLayout({ children }) {
 
   // ✅ Admin confirmed — dashboard দেখাও
   return (
-    <html lang="en">
-      <body>
-        <div className="flex min-h-screen bg-gray-100">
-          <Sidebar />
-          <main className="flex-1">{children}</main>
-        </div>
-      </body>
-    </html>
+    <div className="flex min-h-screen bg-gray-100">
+      <Sidebar />
+      <main className="flex-1">{children}</main>
+    </div>
   );
 }

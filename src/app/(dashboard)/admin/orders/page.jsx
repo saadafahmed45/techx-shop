@@ -337,7 +337,7 @@ const OrdersPage = () => {
                       Download Invoice
                     </button> */}
 
-                                       <button className="w-full flex items-center justify-center gap-2 rounded-2xl bg-slate-900 text-white py-3 font-semibold hover:bg-slate-800 transition"
+                                       <button className="w-full cursor-pointer flex items-center justify-center gap-2 rounded-2xl bg-slate-900 text-white py-3 font-semibold hover:bg-slate-800 transition"
                         onClick={() =>
                           generateInvoice(order)
                         }

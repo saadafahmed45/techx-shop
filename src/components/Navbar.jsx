@@ -22,6 +22,7 @@ import { useCart } from "@/context/CartContext";
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Product", href: "/product" },
+  { label: "Dashboard", href: "/admin" },
   // { label: "Dashboard", href: "/admin" },
   { label: "Track Order", href: "/track-order" },
   {
@@ -147,7 +148,7 @@ export default function Navbar() {
     <>
       {/* ════ NAVBAR ════ */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0f0f0f] border-b border-white/6">
-        <div className="mx-auto px-5 md:px-10 h-16 flex items-center justify-between gap-6">
+        <div className="max-w-7xl mx-auto px-5 md:px-10 h-16 flex items-center justify-between gap-6">
 
           {/* ── Logo (Left) ── */}
           <Link href="/" className="flex flex-col leading-none shrink-0">
@@ -331,9 +332,9 @@ export default function Navbar() {
               <AiOutlineUser className="text-[18px]" />
             </Link>
 
-             <Link href="/login" className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
+             {/* <Link href="/login" className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
               <AiOutlineUser className="text-[18px]" />
-            </Link>
+            </Link> */}
             <Link href="/wishlist" className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
               <AiOutlineHeart className="text-[18px]" />
             </Link>
