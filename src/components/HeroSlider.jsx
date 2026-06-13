@@ -1,5 +1,6 @@
 "use client";
 
+import { FloatingWhatsApp } from "@digicroz/react-floating-whatsapp";
 import Image from "next/image";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
@@ -107,6 +108,19 @@ export default function HeroSlider() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
+
+          <FloatingWhatsApp
+      phoneNumber='1234567890'
+      accountName='TechX Shop'
+      avatar='techx-img.jpg'
+      statusMessage='Typically replies within 1 hour'
+      chatMessage='Hello! 👋 How can we help you today?'
+      darkMode={false}
+      allowClickAway={true}
+      allowEsc={true}
+      notification={true}
+      notificationSound={true}
+    />
       {/* ── Main stage ── */}
       <div className="relative w-full h-[55vw] max-h-[88vh] min-h-65 overflow-hidden bg-neutral-900">
 
