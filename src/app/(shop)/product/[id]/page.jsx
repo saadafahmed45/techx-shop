@@ -13,7 +13,8 @@ import {
 import { HiArrowLeft } from "react-icons/hi2";
 import AddReview from "@/components/AddReview";
 import AddToCartButton from "@/components/AddToCartButton";
-import { ProductCard } from "@/components/FeatureProduct";
+import ProductCard from "@/components/ProductCard";
+// import { ProductCard } from "@/components/FeatureProduct";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const FALLBACK = "https://picsum.photos/600/600";
@@ -184,7 +185,7 @@ const ProductDetailsPage = () => {
                     <button
                       key={i}
                       onClick={() => setActiveImage(img)}
-                      className={`shrink-0 w-17 h-17 rounded-lg overflow-hidden border-2 transition-all ${
+                      className={`shrink-0 w-17 h-17 rounded-lg overflow-hidden border-2  transition-all ${
                         activeImage === img
                           ? "border-stone-700"
                           : "border-stone-200 hover:border-stone-400"
@@ -377,7 +378,7 @@ const ProductDetailsPage = () => {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {relatedProducts.map((item) => (
-                <ProductCard key={item._id} product={item} />
+                <ProductCard key={item.slug || item._id} product={item} />
               ))}
             </div>
           </div>

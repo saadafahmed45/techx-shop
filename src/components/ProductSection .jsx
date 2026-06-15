@@ -59,7 +59,7 @@ export function ProductCard({ product, index }) {
     >
       {/* IMAGE */}
       <Link
-        href={`/product/${product?._id}`}
+        href={`/product/${product?.slug || product?._id}`}
         className="block relative aspect-square bg-linear-to-b from-slate-50 to-slate-100 overflow-hidden"
       >
         <img
@@ -106,7 +106,7 @@ export function ProductCard({ product, index }) {
         </div>
 
         {/* TITLE */}
-        <Link href={`/product/${product?._id}`}>
+        <Link href={`/product/${product?.slug || product?._id}`}>
           <h3 className="font-semibold text-slate-900 line-clamp-2 transition">
             {product?.title || "Untitled Product"}
           </h3>
@@ -208,7 +208,7 @@ useEffect(() => {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
             {filtered.map((product, i) => (
               <ProductCard
-                key={product?._id || i}
+                key={product?.slug || product?._id || i}
                 product={product}
                 index={i}
               />

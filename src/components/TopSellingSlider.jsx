@@ -216,7 +216,7 @@ export default function TopSellingSlider() {
                       )}
 
                       {/* IMAGE */}
-                      <Link href={`/product/${product._id}`}>
+                      <Link href={`/product/${product.slug}`} className="relative mb-6 h-56 overflow-hidden rounded-2xl bg-[#f7f7f7]">
                         <div className="relative mb-6 h-56 overflow-hidden rounded-2xl bg-[#f7f7f7]">
                           <Image
                             src={
@@ -234,9 +234,9 @@ export default function TopSellingSlider() {
 
                       {/* CONTENT */}
                       <div>
-                        <h3 className="line-clamp-2 text-lg font-bold leading-snug text-black">
+                        <Link href={`/product/${product.slug}`} className="line-clamp-2 text-lg font-bold leading-snug text-black">
                           {product.title}
-                        </h3>
+                        </Link>
 
                         <div className="mt-4 flex items-center justify-between">
                           <p className="text-2xl font-extrabold text-black">

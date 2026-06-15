@@ -21,12 +21,12 @@ export default function ProductCard({ product, index = 0 }) {
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
       {/* Image */}
-      <Link href={`/product/${product.id}`} className="relative block overflow-hidden aspect-4/3 bg-gray-50">
+      <Link href={`/product/${product.slug || product._id}`} className="relative block overflow-hidden aspect-4/3 bg-gray-50">
         <img
           src={cleanImage}
           alt={product.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          onError={(e) => { e.target.src = `https://picsum.photos/seed/${product.id}/400/300`; }}
+          onError={(e) => { e.target.src = `https://picsum.photos/seed/${product.slug || product._id}/400/300`; }}
         />
         {/* Overlay */}
         <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -48,8 +48,8 @@ export default function ProductCard({ product, index = 0 }) {
 
       {/* Info */}
       <div className="flex flex-col gap-2 p-4 flex-1">
-        <Link href={`/product/${product.id}`}>
-          <h3 className="text-[14px] font-semibold text-gray-900 line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">
+        <Link href={`/product/${product.slug || product._id}`}>
+          <h3 className="text-[14px] font-semibold text-gray-900 line-clamp-3 leading-snug group-hover:text-blue-600 transition-colors">
             {product.title}
           </h3>
         </Link>
@@ -64,7 +64,7 @@ export default function ProductCard({ product, index = 0 }) {
         <div className="flex items-center justify-between mt-1">
           <span className="text-[18px] font-bold text-gray-900">${price.toFixed(2)}</span>
           <Link
-            href={`/product/${product.id}`}
+            href={`/product/${product.slug || product._id}`}
             className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:gap-2 transition-all duration-200"
           >
             View <HiArrowRight className="text-[12px]" />

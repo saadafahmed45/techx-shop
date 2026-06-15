@@ -216,7 +216,7 @@ function ProductCard({
         </p>
 
         <Link
-          href={`/product/${product._id}`}
+          href={`/product/${product.slug}`}
         >
           <h3 className="text-[15px] font-bold text-gray-900 leading-snug line-clamp-3 hover:text-blue-600 transition-colors">
             {product.title}

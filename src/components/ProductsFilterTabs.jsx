@@ -206,12 +206,12 @@ export default function ProductsFilterTabs() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: product.length * 0.05 }}
-                key={product._id}
+                key={product.slug || product._id}
                 className="group bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-2xl transition-all duration-500"
               >
 
                 {/* IMAGE */}
-                <Link href={`/product/${product._id}`} className="relative overflow-hidden bg-slate-100">
+                <Link href={`/product/${product.slug || product._id}`} className="relative overflow-hidden bg-slate-100">
 
                   <img
                     src={
@@ -237,7 +237,7 @@ export default function ProductsFilterTabs() {
 
                 {/* CONTENT */}
                 <div className="p-4 md:p-5">
-            <Link href={`/product/${product._id}`} className="transition-colors duration-300 hover:text-slate-700">
+            <Link href={`/product/${product.slug || product._id}`} className="transition-colors duration-300 hover:text-slate-700">
              <h3 className="text-sm md:text-lg font-semibold text-slate-900 line-clamp-2 leading-snug">
                 {product.title}
                </h3>
