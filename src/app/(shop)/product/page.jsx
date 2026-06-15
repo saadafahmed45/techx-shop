@@ -8,6 +8,7 @@ import {
 } from "react";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 import {
   useSearchParams,
@@ -150,7 +151,11 @@ function ProductCard({
     product.rating?.count || 0;
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: product.length * 0.05 }}
       className="group bg-white rounded-xl overflow-hidden border border-gray-100 flex flex-col"
       style={{
         boxShadow:
@@ -213,7 +218,7 @@ function ProductCard({
         <Link
           href={`/product/${product._id}`}
         >
-          <h3 className="text-[15px] font-bold text-gray-900 leading-snug line-clamp-1 hover:text-blue-600 transition-colors">
+          <h3 className="text-[15px] font-bold text-gray-900 leading-snug line-clamp-3 hover:text-blue-600 transition-colors">
             {product.title}
           </h3>
         </Link>
@@ -255,7 +260,7 @@ function ProductCard({
           </span>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

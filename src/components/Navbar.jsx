@@ -148,7 +148,7 @@ export default function Navbar() {
     <>
       {/* ════ NAVBAR ════ */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0f0f0f] border-b border-white/6">
-        <div className="max-w-7xl mx-auto px-5 md:px-10 h-16 flex items-center justify-between gap-6">
+        <div className=" mx-auto px-5 md:px-32 h-16 flex items-center justify-between gap-6">
 
           {/* ── Logo (Left) ── */}
           <Link href="/" className="flex flex-col leading-none shrink-0">

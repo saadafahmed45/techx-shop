@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { motion } from "framer-motion";
 
 import {
   Loader2,
@@ -200,7 +201,11 @@ export default function ProductsFilterTabs() {
 
           {filteredProducts.map(
             (product) => (
-              <div
+         <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: product.length * 0.05 }}
                 key={product._id}
                 className="group bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-2xl transition-all duration-500"
               >
@@ -261,7 +266,7 @@ export default function ProductsFilterTabs() {
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )
           )}
         </div>

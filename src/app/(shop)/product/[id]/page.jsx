@@ -137,7 +137,7 @@ const ProductDetailsPage = () => {
 
   return (
     <div className="min-h-screen bg-stone-50 pt-8 md:pt-2">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-14">
+      <div className=" mx-auto px-4= sm:px-6 md:px-32 py-8 md:py-14">
 
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-stone-400 mb-8 font-medium">
@@ -253,13 +253,14 @@ const ProductDetailsPage = () => {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-2.5 mb-7">
+              <div className="grid grid-cols-2 gap-2.5 mb-6">
                 <InfoCard icon={<HiOutlineTruck />} title="Free Delivery" sub="2–5 business days" />
                 <InfoCard icon={<HiOutlineShieldCheck />} title="Secure Payment" sub="100% protected" />
                 <InfoCard icon={<HiOutlineRefresh />} title="Easy Returns" sub="7-day return policy" />
                 <InfoCard icon={<HiOutlineBadgeCheck />} title="Premium Quality" sub="Export standard" />
               </div>
-
+              <p className="text-stone-700 leading-relaxed text-md line-clamp-8  mb-8">{product.description}</p>
+ 
               <div className="flex flex-col sm:flex-row gap-3 mt-auto">
                 <AddToCartButton product={product} />
                 <button className="h-13 px-7 rounded-xl border-2 border-stone-200 hover:border-stone-400 hover:bg-stone-50 transition font-semibold text-stone-700 text-sm">
@@ -364,7 +365,7 @@ const ProductDetailsPage = () => {
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <div className="mt-8">
+          <div className="mt-8 px-6 py-6 ">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="text-xl font-bold text-stone-900">You Might Also Like</h2>

@@ -307,7 +307,7 @@ export default function TrackOrderPage() {
   const meta = order ? STATUS_META[order.status] || STATUS_META.Pending : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-16 mt-4 px-4">
 
       {/* Header */}
       <div className="flex flex-col items-center mb-8 text-center">
