@@ -1,6 +1,8 @@
 "use client"
 import { useEffect, useState, useCallback, useMemo, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import { useShopData } from "@/context/ShopDataContext";
 import {
   Search, X, SlidersHorizontal, Package, Star,
   ChevronDown, ShoppingCart, Heart, Tag,
@@ -44,8 +46,7 @@ function SearchParamsWriter({ query }) {
 }
 
 export default function ProductSearch() {
-  const [products, setProducts]       = useState([]);
-  const [loading, setLoading]         = useState(true);
+  const { products, loading } = useShopData();
   const [error, setError]             = useState(null);
   const [query, setQuery]             = useState("");
   const [statusFilter, setStatus]     = useState("all");
@@ -58,25 +59,6 @@ export default function ProductSearch() {
 
   const debouncedQuery = useDebounce(query, 350);
   const inputRef = useRef(null);
-
-  // ── Fetch products ──
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await fetch(`${API}/products`);
-        if (!res.ok) throw new Error("Failed to fetch products");
-        const data = await res.json();
-        setProducts(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
 
   const productTypes = useMemo(() => {
     return [...new Set(products.map(p => p.productType).filter(Boolean))];
@@ -388,11 +370,13 @@ function GridCard({ product, wishlisted, onWishlist }) {
     <div className="group bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 flex flex-col">
       <div className="relative overflow-hidden bg-slate-50 aspect-square">
         {product.images?.[0] && !imgErr ? (
-          <img
+          <Image
             src={product.images[0]}
             alt={product.title}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             onError={() => setImgErr(true)}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-300">
@@ -457,10 +441,12 @@ function ListCard({ product, wishlisted, onWishlist }) {
 
   return (
     <div className="group bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 flex items-center gap-4 p-4">
-      <div className="w-20 h-20 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
+      <div className="w-20 h-20 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0 relative">
         {product.images?.[0] && !imgErr ? (
-          <img src={product.images[0]} alt={product.title} onError={() => setImgErr(true)}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          <Image src={product.images[0]} alt={product.title} onError={() => setImgErr(true)}
+            fill
+            sizes="80px"
+            className="object-cover group-hover:scale-105 transition-transform duration-300" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-300">
             <Package size={24} strokeWidth={1.5} />

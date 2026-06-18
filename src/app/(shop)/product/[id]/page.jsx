@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { useShopData } from "@/context/ShopDataContext";
 import { AiFillStar, AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import {
   HiOutlineTruck,
@@ -68,6 +70,8 @@ const ProductDetailsPage = () => {
   const params = useParams();
   const id = params.id;
 
+  const { products: allProducts } = useShopData();
+
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,10 +89,8 @@ const ProductDetailsPage = () => {
         setProduct(p);
         setActiveImage(p.images?.[0] || FALLBACK);
 
-        const allRes = await fetch(`${API}/products`);
-        const all = await allRes.json();
-        const related = Array.isArray(all)
-          ? all.filter(
+        const related = Array.isArray(allProducts)
+          ? allProducts.filter(
               (item) =>
                 item._id !== p._id &&
                 item.status === "active" &&
@@ -97,14 +99,14 @@ const ProductDetailsPage = () => {
                 )
             )
           : [];
-        setRelatedProducts(related.slice(0, 4));
+        setRelatedProducts(related.slice(0, 5));
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     })();
-  }, [id]);
+  }, [id, allProducts]);
 
   if (loading) {
     return (
@@ -155,14 +157,17 @@ const ProductDetailsPage = () => {
             {/* Left — Images */}
             <div className="p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-stone-100">
               <div className="relative rounded-xl overflow-hidden bg-stone-50 border border-stone-100 aspect-square">
-                <img
+                <Image
                   src={activeImage}
                   alt={product.title}
-                  className="w-full h-full object-cover transition-all duration-500"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover transition-all duration-500"
+                  priority
                 />
                 <button
                   onClick={() => setWished(!wished)}
-                  className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white shadow border border-stone-100 flex items-center justify-center hover:scale-105 transition-transform"
+                  className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white shadow border border-stone-100 flex items-center justify-center hover:scale-105 transition-transform z-10"
                   aria-label="Toggle wishlist"
                 >
                   {wished ? (
@@ -172,7 +177,7 @@ const ProductDetailsPage = () => {
                   )}
                 </button>
                 {featureBadges.length > 0 && (
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute top-3 left-3 z-10">
                     <Badge label={featureBadges[0]} />
                   </div>
                 )}
@@ -184,13 +189,19 @@ const ProductDetailsPage = () => {
                     <button
                       key={i}
                       onClick={() => setActiveImage(img)}
-                      className={`shrink-0 w-17 h-17 rounded-lg overflow-hidden border-2  transition-all ${
+                      className={`shrink-0 w-17 h-17 rounded-lg overflow-hidden border-2 relative transition-all ${
                         activeImage === img
                           ? "border-stone-700"
                           : "border-stone-200 hover:border-stone-400"
                       }`}
                     >
-                      <img src={img} alt={`thumb-${i}`} className="w-full h-full object-cover" />
+                      <Image
+                        src={img}
+                        alt={`thumb-${i}`}
+                        fill
+                        sizes="68px"
+                        className="object-cover"
+                      />
                     </button>
                   ))}
                 </div>

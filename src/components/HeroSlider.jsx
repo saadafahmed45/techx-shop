@@ -46,13 +46,33 @@ export default function HeroSlider() {
 
   // ── Fetch ──
   useEffect(() => {
+    const CACHE_KEY = "shopdata_herosliders";
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { data, expiresAt } = JSON.parse(cached);
+        if (Date.now() < expiresAt) {
+          setSlides(data);
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (e) {}
+
     fetch(`${API}/hero-sliders`)
       .then((r) => r.json())
       .then((data) => {
         const active = Array.isArray(data)
           ? data.filter((s) => s.status === "active" && s.image)
           : [];
-        setSlides(active.length > 0 ? active : DUMMY_SLIDES);
+        const finalSlides = active.length > 0 ? active : DUMMY_SLIDES;
+        setSlides(finalSlides);
+        try {
+          sessionStorage.setItem(
+            CACHE_KEY,
+            JSON.stringify({ data: finalSlides, expiresAt: Date.now() + 5 * 60 * 1000 })
+          );
+        } catch (e) {}
       })
       .catch(() => setSlides(DUMMY_SLIDES))
       .finally(() => setLoading(false));

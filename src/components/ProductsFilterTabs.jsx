@@ -1,77 +1,16 @@
 "use client";
 
 import Link from "next/link";
-
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import Image from "next/image";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-
-import {
-  Loader2,
-  ArrowRight,
-} from "lucide-react";
-
-const API =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000";
+import { Loader2, ArrowRight } from "lucide-react";
+import { useShopData } from "@/context/ShopDataContext";
 
 export default function ProductsFilterTabs() {
-  const [products, setProducts] =
-    useState([]);
+  const { products, collections, loading } = useShopData();
 
-  const [collections, setCollections] =
-    useState([]);
-
-  const [activeCollection, setActiveCollection] =
-    useState("All");
-
-  const [loading, setLoading] =
-    useState(true);
-
-  // =========================================
-  // FETCH
-  // =========================================
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [
-          productRes,
-          collectionRes,
-        ] = await Promise.all([
-          fetch(`${API}/products`),
-          fetch(`${API}/collections`),
-        ]);
-
-        const productData =
-          await productRes.json();
-
-        const collectionData =
-          await collectionRes.json();
-
-        setProducts(
-          Array.isArray(productData)
-            ? productData
-            : []
-        );
-
-        setCollections(
-          Array.isArray(collectionData)
-            ? collectionData
-            : []
-        );
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const [activeCollection, setActiveCollection] = useState("All");
 
   // =========================================
   // FILTER PRODUCTS
@@ -211,18 +150,14 @@ export default function ProductsFilterTabs() {
               >
 
                 {/* IMAGE */}
-                <Link href={`/product/${product.slug || product._id}`} className="relative overflow-hidden bg-slate-100">
+                <Link href={`/product/${product.slug || product._id}`} className="relative block aspect-square overflow-hidden bg-slate-100">
 
-                  <img
-                    src={
-                      product
-                        .images?.[0] ||
-                      "/placeholder.png"
-                    }
-                    alt={
-                      product.title
-                    }
-                    className="w-full h-64 md:h-80 object-cover group-hover:scale-105 transition duration-700"
+                  <Image
+                    src={product.images?.[0] || "/placeholder.png"}
+                    alt={product.title}
+                    fill
+                    sizes="(max-width: 640px) 50vw, 20vw"
+                    className="object-cover group-hover:scale-105 transition duration-700"
                   />
 
                   {/* TYPE */}

@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useShopData } from "@/context/ShopDataContext";
 import { motion } from "framer-motion";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { TbHeadphones, TbDeviceMobile, TbDeviceWatch, TbEar } from "react-icons/tb";
@@ -62,10 +64,12 @@ export function ProductCard({ product, index }) {
         href={`/product/${product?.slug || product?._id}`}
         className="block relative aspect-square bg-linear-to-b from-slate-50 to-slate-100 overflow-hidden"
       >
-        <img
+        <Image
           src={image}
           alt={product?.title || "product"}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
         {/* WISHLIST BUTTON */}
@@ -142,40 +146,11 @@ export default function ProductSection({
   accentColor = "bg-indigo-500",
   emptyMessage,
 }) {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
+  const { products: allProducts, loading } = useShopData();
 
-      const res = await fetch(`${API}/products`, {
-        signal: AbortSignal.timeout(20000), // 20s — cold start এর জন্য
-        cache: "no-store",
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      if (Array.isArray(data)) {
-        setProducts(
-          data.filter(
-            (p) => p && p.status === "active" && Array.isArray(p.featured)
-          )
-        );
-      } else {
-        setProducts([]);
-      }
-    } catch (error) {
-      console.error("Fetch failed:", error.message);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchProducts();
-}, []);
+  const products = allProducts.filter(
+    (p) => p && p.status === "active" && Array.isArray(p.featured)
+  );
   // Filter by the given filterValue prop (e.g. "Featured", "Trending Now", "New Arrival")
   const filtered = filterValue
     ? products.filter((p) => p.featured?.includes(filterValue))

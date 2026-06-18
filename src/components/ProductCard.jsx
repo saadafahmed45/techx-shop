@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -9,6 +10,7 @@ import { HiArrowRight } from "react-icons/hi";
 export default function ProductCard({ product, index = 0 }) {
   const image = Array.isArray(product.images) ? product.images[0] : product.images;
   const cleanImage = image?.replace(/[\[\]"]/g, "") || "/placeholder.png";
+  const [imgSrc, setImgSrc] = useState(cleanImage);
   const price = product.price ?? 0;
   const category = product.category?.name ?? "General";
 
@@ -22,11 +24,13 @@ export default function ProductCard({ product, index = 0 }) {
     >
       {/* Image */}
       <Link href={`/product/${product.slug || product._id}`} className="relative block overflow-hidden aspect-4/3 bg-gray-50">
-        <img
-          src={cleanImage}
+        <Image
+          src={imgSrc}
           alt={product.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          onError={(e) => { e.target.src = `https://picsum.photos/seed/${product.slug || product._id}/400/300`; }}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={() => { setImgSrc(`https://picsum.photos/seed/${product.slug || product._id}/400/300`); }}
         />
         {/* Overlay */}
         <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

@@ -8,6 +8,8 @@ import {
 } from "react";
 
 import Link from "next/link";
+import Image from "next/image";
+import { useShopData } from "@/context/ShopDataContext";
 import { motion } from "framer-motion";
 
 import {
@@ -185,10 +187,12 @@ function ProductCard({
           aspectRatio: "1/1",
         }}
       >
-        <img
+        <Image
           src={img}
           alt={product.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
         <button
@@ -475,17 +479,10 @@ function SidebarContent({
 // ========================================
 
 function ProductPageInner() {
-  const [allProducts, setAllProducts] =
-    useState([]);
-
-  const [collections, setCollections] =
-    useState([]);
+  const { products: allProducts, collections, loading } = useShopData();
 
   const [filtered, setFiltered] =
     useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
 
   const [price, setPrice] =
     useState(5000);
@@ -513,52 +510,6 @@ function ProductPageInner() {
     searchParams.getAll(
       "brand"
     );
-
-  // ====================================
-  // FETCH DATA
-  // ====================================
-
-  useEffect(() => {
-    setLoading(true);
-
-    Promise.all([
-      fetch(`${API}/products`),
-      fetch(`${API}/collections`),
-    ])
-      .then(
-        async ([
-          productsRes,
-          collectionsRes,
-        ]) => {
-          const productsData =
-            await productsRes.json();
-
-          const collectionsData =
-            await collectionsRes.json();
-
-          setAllProducts(
-            Array.isArray(
-              productsData
-            )
-              ? productsData
-              : []
-          );
-
-          setCollections(
-            Array.isArray(
-              collectionsData
-            )
-              ? collectionsData
-              : []
-          );
-
-          setLoading(false);
-        }
-      )
-      .catch(() => {
-        setLoading(false);
-      });
-  }, []);
 
   // ====================================
   // DYNAMIC BRANDS

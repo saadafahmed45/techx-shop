@@ -1,13 +1,16 @@
 "use client";
 
 import { CartProvider } from "@/context/CartContext";
+import { ShopDataProvider } from "@/context/ShopDataContext";
 
 export default function Providers({
   children,
 }) {
   return (
-    <CartProvider>
-      {children}
-    </CartProvider>
+    <ShopDataProvider>
+      <CartProvider>
+        {children}
+      </CartProvider>
+    </ShopDataProvider>
   );
 }

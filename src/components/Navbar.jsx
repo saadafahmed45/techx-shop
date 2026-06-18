@@ -14,7 +14,9 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 import { HiMagnifyingGlass } from "react-icons/hi2";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { useShopData } from "@/context/ShopDataContext";
 
 // ─────────────────────────────────────────────
 // Nav Data
@@ -50,36 +52,17 @@ export default function Navbar() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [collections, setCollections] = useState([]);
+  const { products: allProducts, collections } = useShopData();
 
   // ── Live Search State ──
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [allProducts, setAllProducts] = useState([]);
   const searchRef = useRef(null);
   const inputRef = useRef(null);
 
   const debouncedQuery = useDebounce(searchQuery, 300);
-
-  const API = process.env.NEXT_PUBLIC_API_URL;
-
-  // ── Fetch collections for dropdown ──
-  useEffect(() => {
-    fetch(`${API}/collections`, { cache: "no-store" })
-      .then((r) => r.json())
-      .then(setCollections)
-      .catch(() => {});
-  }, []);
-
-  // ── Fetch all products once for live search ──
-  useEffect(() => {
-    fetch(`${API}/products`, { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data) => setAllProducts(Array.isArray(data) ? data : []))
-      .catch(() => {});
-  }, []);
 
   // ── Filter products on debounced query ──
   useEffect(() => {
@@ -273,9 +256,11 @@ export default function Navbar() {
                           className="w-full cursor-pointer  flex items-center gap-3 px-3 py-2.5 hover:bg-white/6 transition-all text-left"
                         >
                           {product.images?.[0] ? (
-                            <img
+                            <Image
                               src={product.images[0]}
                               alt={product.title}
+                              width={36}
+                              height={36}
                               className="w-9 h-9 rounded-lg object-cover bg-white/10 shrink-0"
                             />
                           ) : (

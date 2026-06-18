@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useShopData } from "@/context/ShopDataContext";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
@@ -18,55 +19,20 @@ import "swiper/css";
 import "swiper/css/navigation";
 
 export default function TopSellingSlider() {
-  const API = process.env.NEXT_PUBLIC_API_URL;
-
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-
-        const res = await fetch(`${API}/products`, {
-          cache: "no-store",
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch products");
-        }
-
-        const data = await res.json();
-
-        if (Array.isArray(data)) {
-          const filteredProducts = data.filter(
-            (product) =>
-              product &&
-              product.status === "active" &&
-              Array.isArray(product.featured)
-          );
-
-          setProducts(filteredProducts);
-        } else {
-          setProducts([]);
-        }
-      } catch (error) {
-        console.log(error);
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (API) {
-      fetchProducts();
-    }
-  }, [API]);
+  const { products: allProducts, loading } = useShopData();
 
   // Top Selling Products
-  const topSellingProducts = products.filter((product) =>
-    product.featured?.includes("Top Selling Products")
-  );
+  const topSellingProducts = useMemo(() => {
+    const active = allProducts.filter(
+      (product) =>
+        product &&
+        product.status === "active" &&
+        Array.isArray(product.featured)
+    );
+    return active.filter((product) =>
+      product.featured?.includes("Top Selling Products")
+    );
+  }, [allProducts]);
 
   return (
     <section className="relative overflow-hidden  px-4 md:px-32 bg-[#f7f8fc] py-18">
