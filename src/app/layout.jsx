@@ -1,5 +1,6 @@
 import Providers from "@/providers/Providers";
 import "./globals.css";
+import WelcomePopup from "@/components/WelcomePopup";
 
 
 export default function RootLayout({
@@ -9,6 +10,8 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>
+                  <WelcomePopup />
+
           {children}
         </Providers>
       </body>

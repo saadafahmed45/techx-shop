@@ -42,9 +42,9 @@ const Category = async () => {
         <h1 className="text-3xl md:text-4xl font-bold">
           Featured Categories
         </h1>
-        <p className="text-gray-500 mt-3">
+        {/* <p className="text-gray-500 mt-3">
           Discover our most popular product categories curated just for you.
-        </p>
+        </p> */}
          <div className="w-16 h-1 bg-indigo-500 mx-auto mt-5 rounded-full" />
       </div>
 
