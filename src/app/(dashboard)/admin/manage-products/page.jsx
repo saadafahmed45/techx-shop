@@ -346,6 +346,7 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
 
   const [formData, setFormData] = useState({
     title:       product.title       || "",
+    slug:        product.slug        || "",
     price:       product.price       || "",
     vendor:      product.vendor      || "",
     stock:       product.stock       || 0,
@@ -466,6 +467,10 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
               <div className="lg:col-span-2">
                 <label className={labelCls}>Product Title <span className="text-rose-400 normal-case">*</span></label>
                 <input type="text" name="title" value={formData.title} onChange={handleChange} className={inputCls} />
+              </div>
+              <div className="lg:col-span-2">
+                <label className={labelCls}>Product Slug</label>
+                <input type="text" name="slug" value={formData.slug} onChange={handleChange} className={inputCls} />
               </div>
               <div>
                 <label className={labelCls}>Price</label>

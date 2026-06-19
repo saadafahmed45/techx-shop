@@ -223,7 +223,7 @@ export default function HeroSlider() {
             <button
               onClick={handlePrev}
               aria-label="Previous"
-              className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
+              className="absolute cursor-pointer left-3 sm:left-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
@@ -232,7 +232,7 @@ export default function HeroSlider() {
             <button
               onClick={handleNext}
               aria-label="Next"
-              className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
+              className="absolute cursor-pointer right-3 sm:right-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6" />
@@ -281,10 +281,10 @@ export default function HeroSlider() {
 
         {/* ── Progress bar ── */}
         {slides.length > 1 && !paused && (
-          <div className="absolute bottom-0 left-0 right-0 z-30 h-0.5 bg-white/10">
+          <div className="absolute bottom-0 left-0 right-0 z-30 h-1 bg-white/10">
             <div
               key={current}
-              className="h-full bg-white/60 animate-[progress_4.5s_linear_forwards]"
+              className="h-full bg-blue-700 animate-[progress_4.5s_linear_forwards]"
             />
           </div>
         )}
