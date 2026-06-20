@@ -15,7 +15,7 @@ import {
 import { HiArrowLeft } from "react-icons/hi2";
 import AddReview from "@/components/AddReview";
 import AddToCartButton from "@/components/AddToCartButton";
-import { ProductCard } from "@/components/ProductSection ";
+import ProductCard from "@/components/ProductCard";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const FALLBACK = "https://picsum.photos/600/600";

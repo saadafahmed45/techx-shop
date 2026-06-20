@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, ArrowRight } from "lucide-react";
 import { useShopData } from "@/context/ShopDataContext";
+import ProductCard from "@/components/ProductCard";
 
 export default function ProductsFilterTabs() {
   const { products, collections, loading } = useShopData();
@@ -139,69 +140,12 @@ export default function ProductsFilterTabs() {
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-5 mt-16">
 
           {filteredProducts.map(
-            (product) => (
-         <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: product.length * 0.05 }}
+            (product, i) => (
+              <ProductCard
                 key={product.slug || product._id}
-                className="group bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-2xl transition-all duration-500"
-              >
-
-                {/* IMAGE */}
-                <Link href={`/product/${product.slug || product._id}`} className="relative block aspect-square overflow-hidden bg-slate-100">
-
-                  <Image
-                    src={product.images?.[0] || "/placeholder.png"}
-                    alt={product.title}
-                    fill
-                    sizes="(max-width: 640px) 50vw, 20vw"
-                    className="object-cover group-hover:scale-105 transition duration-700"
-                  />
-
-                  {/* TYPE */}
-                  {product.productType && (
-                    <span className="absolute top-4 right-4 bg-black text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full">
-                      {
-                        product.productType
-                      }
-                    </span>
-                  )}
-                </Link>
-
-                {/* CONTENT */}
-                <div className="p-4 md:p-5">
-            <Link href={`/product/${product.slug || product._id}`} className="transition-colors duration-300 hover:text-slate-700">
-             <h3 className="text-sm md:text-lg font-semibold text-slate-900 line-clamp-2 leading-snug">
-                {product.title}
-               </h3>
-            </Link>
-
-                  <div className="mt-4 flex items-center justify-between">
-
-                    <span className="text-lg md:text-xl font-black text-blue-700">
-                      $
-                      {Number(
-                        product.price
-                      ).toFixed(
-                        2
-                      )}
-                    </span>
-
-                    {product
-                      .collections?.[0] && (
-                      <span className="hidden md:flex text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full">
-                        {
-                          product
-                            .collections[0]
-                            .name
-                        }
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
+                product={product}
+                index={i}
+              />
             )
           )}
         </div>

@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { useShopData } from "@/context/ShopDataContext";
+import ProductCard from "@/components/ProductCard";
 import { motion } from "framer-motion";
 
 import {
@@ -132,141 +133,7 @@ function Checkbox({
   );
 }
 
-// ========================================
-// PRODUCT CARD
-// ========================================
 
-function ProductCard({
-  product,
-}) {
-  const [wished, setWished] =
-    useState(false);
-
-  const img = cleanImg(
-    product.images
-  );
-
-  const averageRating =
-    product.rating?.average || 0;
-
-  const totalRating =
-    product.rating?.count || 0;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: product.length * 0.05 }}
-      className="group bg-white rounded-xl overflow-hidden border border-gray-100 flex flex-col"
-      style={{
-        boxShadow:
-          "0 1px 4px rgba(0,0,0,0.06)",
-        transition:
-          "box-shadow 0.3s, transform 0.3s",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow =
-          "0 12px 40px rgba(26,58,255,0.1)";
-
-        e.currentTarget.style.transform =
-          "translateY(-2px)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow =
-          "0 1px 4px rgba(0,0,0,0.06)";
-
-        e.currentTarget.style.transform =
-          "translateY(0)";
-      }}
-    >
-      <Link
-        href={`/product/${product._id}`}
-        className="relative block overflow-hidden bg-gray-50"
-        style={{
-          aspectRatio: "1/1",
-        }}
-      >
-        <Image
-          src={img}
-          alt={product.title}
-          fill
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-
-            setWished(
-              (w) => !w
-            );
-          }}
-          className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white shadow-md"
-        >
-          {wished ? (
-            <AiFillHeart className="text-red-500 text-sm" />
-          ) : (
-            <AiOutlineHeart className="text-gray-400 text-sm" />
-          )}
-        </button>
-      </Link>
-
-      <div className="flex flex-col gap-1 px-4 pt-3.5 pb-4">
-        <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-gray-400">
-          {product.productType ||
-            "General"}
-        </p>
-
-        <Link
-          href={`/product/${product.slug}`}
-        >
-          <h3 className="text-[15px] font-bold text-gray-900 leading-snug line-clamp-3 hover:text-blue-600 transition-colors">
-            {product.title}
-          </h3>
-        </Link>
-
-        <div className="flex items-center gap-1 mt-0.5">
-          {[1, 2, 3, 4, 5].map(
-            (s) => (
-              <AiFillStar
-                key={s}
-                className={`text-[11px] ${
-                  s <=
-                  Math.round(
-                    averageRating
-                  )
-                    ? "text-amber-400"
-                    : "text-gray-200"
-                }`}
-              />
-            )
-          )}
-
-          <span className="text-[11px] text-gray-400 ml-1">
-            {averageRating} (
-            {totalRating})
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 mt-1.5">
-          <span
-            className="text-[17px] font-extrabold"
-            style={{
-              color: "#1a3aff",
-            }}
-          >
-            $
-            {Number(
-              product.price || 0
-            ).toFixed(2)}
-          </span>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
 // ========================================
 // SKELETON

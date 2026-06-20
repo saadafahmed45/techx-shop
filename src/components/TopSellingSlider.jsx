@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import { useShopData } from "@/context/ShopDataContext";
+import ProductCard from "@/components/ProductCard";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
@@ -160,61 +161,9 @@ export default function TopSellingSlider() {
                   },
                 }}
               >
-                {topSellingProducts.map((product) => (
-                  <SwiperSlide key={product._id}>
-                    <div className="group relative overflow-hidden rounded-[28px] border border-gray-200 bg-white p-5 transition duration-300 hover:-translate-y-2 hover:shadow-2xl">
-                      {/* TOP */}
-                      <div className="mb-5 flex items-start justify-between">
-                        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gray-600">
-                          {product.productType || "Product"}
-                        </span>
-
-                        <button className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 transition hover:bg-red-500 hover:text-white">
-                          <FiHeart size={18} />
-                        </button>
-                      </div>
-
-                      {/* BADGE */}
-                      {product.badge && (
-                        <span className="absolute left-5 top-16 rounded-full bg-orange-500 px-3 py-1 text-xs font-semibold text-white shadow">
-                          {product.badge}
-                        </span>
-                      )}
-
-                      {/* IMAGE */}
-                      <Link href={`/product/${product.slug}`} className="relative mb-6 h-56 overflow-hidden rounded-2xl bg-[#f7f7f7]">
-                        <div className="relative mb-6 h-56 overflow-hidden rounded-2xl bg-[#f7f7f7]">
-                          <Image
-                            src={
-                              product?.images?.[0] ||
-                              "https://via.placeholder.com/300"
-                            }
-                            alt={product?.title || "product"}
-                            fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-
-                            className="object-cover transition duration-500 group-hover:scale-110"
-                          />
-                        </div>
-                      </Link>
-
-                      {/* CONTENT */}
-                      <div>
-                        <Link href={`/product/${product.slug}`} className="line-clamp-2 text-lg font-bold leading-snug text-black">
-                          {product.title}
-                        </Link>
-
-                        <div className="mt-4 flex items-center justify-between">
-                          <p className="text-2xl font-extrabold text-black">
-                            ${Number(product.price || 0).toFixed(2)}
-                          </p>
-
-                          <button className="flex h-11 w-11 items-center justify-center rounded-full bg-black text-white transition hover:scale-110 hover:bg-gray-800">
-                            <FiShoppingCart size={18} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                {topSellingProducts.map((product, i) => (
+                  <SwiperSlide key={product._id} className="py-4">
+                    <ProductCard product={product} index={i} />
                   </SwiperSlide>
                 ))}
               </Swiper>
