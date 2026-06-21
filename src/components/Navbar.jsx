@@ -130,7 +130,7 @@ export default function Navbar() {
   return (
     <>
       {/* ════ NAVBAR ════ */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0f0f0f] border-b border-white/6">
+      <header className=" top-0 left-0 right-0 z-50 bg-[#0f0f0f] border-b border-white/6">
         <div className=" mx-auto px-5 md:px-32 h-16 flex items-center justify-between gap-6">
 
           {/* ── Logo (Left) ── */}
@@ -450,8 +450,6 @@ export default function Navbar() {
         </>
       )}
 
-      {/* Spacer */}
-      <div className="h-16" />
     </>
   );
 }
