@@ -1,8 +1,9 @@
 "use client";
 
-import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
+import api from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "@/lib/firebase";
 import {
   createContext,
   useContext,
@@ -76,64 +77,158 @@ export const CartProvider = ({ children }) => {
   // ============================
 
   const [user, setUser] = useState(null);       // logged in user object
-  const [authLoading, setAuthLoading] = useState(true); // Firebase init loading
+  const [authLoading, setAuthLoading] = useState(true); // JWT init loading
   const [authError, setAuthError] = useState("");
   const router = useRouter();
 
-  // Firebase auth state listener — reload এও user থাকবে
+  // Check user session on mount
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
+    const checkUserSession = async () => {
+      try {
+        const response = await api.get("/api/auth/me");
+        if (response.data?.success && response.data?.user) {
+          const userData = {
+            uid: response.data.user._id,
+            name: response.data.user.name,
+            email: response.data.user.email,
+            photo: response.data.user.photoURL,
+            role: response.data.user.role,
+            status: response.data.user.status,
+          };
+          setUser(userData);
+          localStorage.setItem("user", JSON.stringify(userData));
+        } else {
+          setUser(null);
+          localStorage.removeItem("user");
+        }
+      } catch (err) {
+        // Not logged in or expired token — silent fail
+        setUser(null);
+        localStorage.removeItem("user");
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkUserSession();
+  }, []);
+
+  // Email/Password Login
+  const handleLogin = async (email, password) => {
+    try {
+      setAuthLoading(true);
+      setAuthError("");
+      const response = await api.post("/api/auth/login", { email, password });
+      if (response.data?.success && response.data?.user) {
         const userData = {
-          uid: firebaseUser.uid,
-          name: firebaseUser.displayName,
-          email: firebaseUser.email,
-          photo: firebaseUser.photoURL,
+          uid: response.data.user._id,
+          name: response.data.user.name,
+          email: response.data.user.email,
+          photo: response.data.user.photoURL,
+          role: response.data.user.role,
+          status: response.data.user.status,
         };
         setUser(userData);
         localStorage.setItem("user", JSON.stringify(userData));
-      } else {
-        setUser(null);
-        localStorage.removeItem("user");
+        if (userData.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
+        return { success: true };
       }
-      setAuthLoading(false);
-    });
-
-    return () => unsubscribe(); // cleanup
-  }, []);
-
-  // Google Login
-  const handleGoogleLogin = async () => {
-    try {
-      setAuthError("");
-      const result = await signInWithPopup(auth, googleProvider);
-      const firebaseUser = result.user;
-
-      const userData = {
-        uid: firebaseUser.uid,
-        name: firebaseUser.displayName,
-        email: firebaseUser.email,
-        photo: firebaseUser.photoURL,
-      };
-
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-      router.push("/");
+      return { success: false, error: "Login failed" };
     } catch (err) {
       console.error(err);
-      setAuthError("Google login failed. Please try again.");
+      const errMsg = err.response?.data?.message || "Invalid email or password";
+      setAuthError(errMsg);
+      return { success: false, error: errMsg };
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Register
+  const handleRegister = async (name, email, password, photoURL) => {
+    try {
+      setAuthLoading(true);
+      setAuthError("");
+      const response = await api.post("/api/auth/register", {
+        name,
+        email,
+        password,
+        photoURL,
+      });
+      if (response.data?.success) {
+        return { success: true };
+      }
+      return { success: false, error: "Registration failed" };
+    } catch (err) {
+      console.error(err);
+      const errMsg = err.response?.data?.message || "Registration failed. Please try again.";
+      setAuthError(errMsg);
+      return { success: false, error: errMsg };
+    } finally {
+      setAuthLoading(false);
     }
   };
 
   // Logout
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      setAuthLoading(true);
+      await api.post("/api/auth/logout");
       setUser(null);
       localStorage.removeItem("user");
       router.push("/login");
     } catch (err) {
+      console.error("Logout failed:", err);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Google Login (Hybrid)
+  const handleGoogleLogin = async () => {
+    try {
+      setAuthLoading(true);
+      setAuthError("");
+      const result = await signInWithPopup(auth, googleProvider);
+      const firebaseUser = result.user;
+
+      const response = await api.post("/api/auth/google-login", {
+        name: firebaseUser.displayName,
+        email: firebaseUser.email,
+        photoURL: firebaseUser.photoURL,
+      });
+
+      if (response.data?.success && response.data?.user) {
+        const userData = {
+          uid: response.data.user._id,
+          name: response.data.user.name,
+          email: response.data.user.email,
+          photo: response.data.user.photoURL,
+          role: response.data.user.role,
+          status: response.data.user.status,
+        };
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        
+        if (userData.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
+        return { success: true };
+      }
+      return { success: false, error: "Google verification failed" };
+    } catch (err) {
       console.error(err);
+      const errMsg = err.response?.data?.message || err.message || "Google login failed. Please try again.";
+      setAuthError(errMsg);
+      return { success: false, error: errMsg };
+    } finally {
+      setAuthLoading(false);
     }
   };
 
@@ -160,6 +255,8 @@ export const CartProvider = ({ children }) => {
         user,
         authLoading,
         authError,
+        handleLogin,
+        handleRegister,
         handleGoogleLogin,
         handleLogout,
       }}

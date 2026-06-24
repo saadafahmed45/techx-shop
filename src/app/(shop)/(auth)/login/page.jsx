@@ -2,39 +2,112 @@
 
 import { useCart } from "@/context/CartContext";
 import { useState } from "react";
-
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
+import Link from "next/link";
 
 export default function Login() {
- 
- const {handleGoogleLogin, authError,authLoading}= useCart()
+  const { handleLogin, handleGoogleLogin, authError, authLoading } = useCart();
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [validationError, setValidationError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setValidationError("");
+
+    if (!email || !password) {
+      setValidationError("Please fill in all fields");
+      return;
+    }
+
+    const res = await handleLogin(email, password);
+    if (res?.success) {
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="w-full max-w-md p-8 space-y-6 rounded-xl bg-gray-50 text-gray-800 shadow-md">
-
+    <div className="bg-gray-100 flex items-center justify-center px-4 py-14 md:py-18 ">
+      <div className="w-full max-w-md p-8 space-y-6 rounded-3xl bg-white text-gray-800 shadow-xl border border-gray-100">
+        
         {/* HEADER */}
-        <h1 className="text-2xl font-bold text-center">Login</h1>
+        <div>
+          <h1 className="text-3xl font-black text-center text-slate-900">Welcome Back</h1>
+          <p className="text-sm text-slate-400 text-center mt-1">Sign in to your account</p>
+        </div>
 
-        {/* ERROR */}
-        {authError && (
-          <p className="text-sm text-red-500 text-center bg-red-50 border border-red-200 rounded-md py-2 px-3">
-            {authError}
+        {/* ERROR SUMMARY */}
+        {(validationError || authError) && (
+          <p className="text-sm text-red-500 text-center bg-red-50 border border-red-200 rounded-2xl py-3 px-4">
+            {validationError || authError}
           </p>
         )}
 
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              Email Address
+            </label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full h-11 px-4 text-sm rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition-all"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                Password
+              </label>
+              <a href="/forgot-password" className="text-xs text-indigo-600 hover:underline">
+                Forgot password?
+              </a>
+            </div>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full h-11 px-4 text-sm rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition-all"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={authLoading}
+            className="w-full h-12 mt-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold flex items-center justify-center shadow-lg shadow-indigo-100 transition-all disabled:opacity-60 cursor-pointer"
+          >
+            {authLoading ? "Signing in..." : "Sign In"}
+          </button>
+        </form>
+
         {/* DIVIDER */}
-        <div className="flex items-center space-x-1">
-          <div className="flex-1 h-px bg-gray-300" />
-          <p className="px-3 text-sm text-gray-500">Continue with</p>
-          <div className="flex-1 h-px bg-gray-300" />
+        <div className="flex items-center space-x-1 py-1">
+          <div className="flex-1 h-px bg-slate-200" />
+          <p className="px-3 text-xs text-slate-400">or</p>
+          <div className="flex-1 h-px bg-slate-200" />
         </div>
 
         {/* GOOGLE BUTTON */}
         <button
+          type="button"
           onClick={handleGoogleLogin}
           disabled={authLoading}
-          className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 px-4 bg-white hover:bg-gray-50 transition text-sm font-medium text-gray-700 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-3 border border-slate-200 rounded-2xl py-3 px-4 bg-white hover:bg-slate-50 transition text-sm font-semibold text-slate-700 shadow-xs disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
         >
-          {/* Google Icon */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 48 48"
@@ -45,15 +118,15 @@ export default function Login() {
             <path fill="#FBBC05" d="M10.72 28.31A14.57 14.57 0 0 1 9.5 24c0-1.5.26-2.95.72-4.31l-7.08-5.5A23.94 23.94 0 0 0 .5 24c0 3.87.93 7.52 2.64 10.72l7.58-6.41z" />
             <path fill="#34A853" d="M24 46.5c5.55 0 10.21-1.84 13.61-4.99l-7.18-5.58c-1.84 1.23-4.19 1.96-6.43 1.96-6.24 0-11.57-4.11-13.28-9.69l-7.58 6.41C7.07 41.52 14.82 46.5 24 46.5z" />
           </svg>
-          {authLoading ? "Signing in..." : "Continue with Google"}
+          Continue with Google
         </button>
 
         {/* SIGNUP LINK */}
-        <p className="text-xs text-center text-gray-500">
+        <p className="text-xs text-center text-slate-400">
           Don't have an account?{" "}
-          <a href="/register" className="underline text-gray-800 font-medium">
+          <Link href="/register" className="underline text-slate-900 font-semibold">
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>

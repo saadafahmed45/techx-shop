@@ -6,15 +6,12 @@ import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-// ✅ শুধু এই email admin হবে
-const ADMIN_EMAIL = "mohammadhaolader1@gmail.com";
-
 export default function DashboardLayout({ children }) {
   const { user, authLoading } = useCart();
   const router = useRouter();
 
   useEffect(() => {
-    if (authLoading) return; // Firebase এখনো check করছে — wait করো
+    if (authLoading) return; // Firebase/JWT এখনো check করছে — wait করো
 
     if (!user) {
       // লগিন নেই → login page এ পাঠাও
@@ -22,7 +19,7 @@ export default function DashboardLayout({ children }) {
       return;
     }
 
-    if (user.email !== ADMIN_EMAIL) {
+    if (user.role !== "admin") {
       // লগিন আছে কিন্তু admin না → home এ পাঠাও
       router.replace("/");
     }
@@ -41,7 +38,7 @@ export default function DashboardLayout({ children }) {
   }
 
   // Admin না হলে কিছু render করবে না (redirect হচ্ছে)
-  if (!user || user.email !== ADMIN_EMAIL) {
+  if (!user || user.role !== "admin") {
     return null;
   }
 

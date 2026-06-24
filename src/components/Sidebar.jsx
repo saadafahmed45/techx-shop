@@ -14,6 +14,7 @@ import {
   Layers3,
   Home,
   ChevronRight,
+  Users,
 } from "lucide-react";
 
 const menuGroups = [
@@ -23,6 +24,7 @@ const menuGroups = [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
       { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
       { href: "/admin/order-list", label: "Order List", icon: ShoppingBag },
+      { href: "/admin/users", label: "Manage Users", icon: Users },
     ],
   },
     {

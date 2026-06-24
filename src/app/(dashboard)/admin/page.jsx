@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   Package, Layers3, ShoppingCart,
   TrendingUp, DollarSign, Activity,
+  Users, UserCheck, UserX, ShieldAlert,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area,
@@ -17,24 +18,28 @@ export default function AdminPage() {
   const [products,    setProducts]    = useState([]);
   const [collections, setCollections] = useState([]);
   const [orders,      setOrders]      = useState([]);
+  const [users,       setUsers]       = useState([]);
   const [loading,     setLoading]     = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productRes, collectionRes, orderRes] = await Promise.all([
+        const [productRes, collectionRes, orderRes, userRes] = await Promise.all([
           fetch(`${API}/products`),
           fetch(`${API}/collections`),
           fetch(`${API}/orders`),
+          fetch(`${API}/api/users?limit=1000`, { credentials: "include" }),
         ]);
 
         const productData    = await productRes.json();
         const collectionData = await collectionRes.json();
         const orderData      = await orderRes.json();
+        const userData       = await userRes.json();
 
         if (Array.isArray(productData))    setProducts(productData);
         if (Array.isArray(collectionData)) setCollections(collectionData);
         if (Array.isArray(orderData))      setOrders(orderData);
+        if (userData && userData.success && Array.isArray(userData.data)) setUsers(userData.data);
       } catch (error) {
         console.error(error);
       } finally {
@@ -143,6 +148,69 @@ export default function AdminPage() {
               ${totalRevenue.toFixed(0)}
             </h2>
             <p className="mt-2 text-sm text-slate-400">Total earnings</p>
+          </div>
+        </div>
+
+        {/* USER STATS */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-xl font-black text-slate-900">User Statistics</h2>
+            <p className="text-slate-400 text-xs mt-1">Platform user registrations and roles summary</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+            {/* TOTAL USERS */}
+            <div className="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm hover:shadow-lg transition">
+              <div className="flex items-center justify-between">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center">
+                  <Users className="w-7 h-7 text-indigo-600" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-indigo-500">Total Users</span>
+              </div>
+              <h2 className="mt-6 text-4xl font-black text-slate-900">{users.length}</h2>
+              <p className="mt-2 text-sm text-slate-400">Registered accounts</p>
+            </div>
+
+            {/* ACTIVE USERS */}
+            <div className="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm hover:shadow-lg transition">
+              <div className="flex items-center justify-between">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                  <UserCheck className="w-7 h-7 text-emerald-600" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-emerald-500">Active</span>
+              </div>
+              <h2 className="mt-6 text-4xl font-black text-slate-900">
+                {users.filter(u => u.status === "active").length}
+              </h2>
+              <p className="mt-2 text-sm text-slate-400">Active status accounts</p>
+            </div>
+
+            {/* BLOCKED USERS */}
+            <div className="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm hover:shadow-lg transition">
+              <div className="flex items-center justify-between">
+                <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center">
+                  <UserX className="w-7 h-7 text-red-600" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-red-500">Blocked</span>
+              </div>
+              <h2 className="mt-6 text-4xl font-black text-slate-900">
+                {users.filter(u => u.status === "blocked").length}
+              </h2>
+              <p className="mt-2 text-sm text-slate-400">Restricted access users</p>
+            </div>
+
+            {/* ADMIN COUNT */}
+            <div className="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm hover:shadow-lg transition">
+              <div className="flex items-center justify-between">
+                <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center">
+                  <ShieldAlert className="w-7 h-7 text-amber-600" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-amber-500">Admins</span>
+              </div>
+              <h2 className="mt-6 text-4xl font-black text-slate-900">
+                {users.filter(u => u.role === "admin").length}
+              </h2>
+              <p className="mt-2 text-sm text-slate-400">Authorized administrators</p>
+            </div>
           </div>
         </div>
 
