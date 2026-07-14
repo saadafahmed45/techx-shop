@@ -1,28 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import {
-  FiSearch, FiTruck, FiCalendar, FiCreditCard,
-  FiInfo, FiPackage, FiHelpCircle, FiDownload,
-} from "react-icons/fi";
+import { FiSearch, FiTruck, FiCalendar, FiCreditCard, FiInfo, FiPackage, FiHelpCircle, FiDownload } from "react-icons/fi";
 import { BsBoxSeam } from "react-icons/bs";
-import jsPDF from "jspdf";
+import dynamic from "next/dynamic";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
-
-const STEPS = ["Pending", "Confirmed", "Processing", "Shipped", "Delivered"];
-
-const STATUS_META = {
-  Pending:    { label: "Pending",    desc: "Your order is placed and awaiting confirmation.", step: 0, bg: "bg-gray-50",    border: "border-gray-200",   icon: "text-gray-500",   badge: "bg-gray-100 text-gray-600"    },
-  Confirmed:  { label: "Confirmed",  desc: "Your order has been confirmed by the seller.",    step: 1, bg: "bg-blue-50",    border: "border-blue-200",   icon: "text-blue-500",   badge: "bg-blue-100 text-blue-600"    },
-  Processing: { label: "Processing", desc: "Your order is being packed and prepared.",        step: 2, bg: "bg-indigo-50",  border: "border-indigo-200", icon: "text-indigo-500", badge: "bg-indigo-100 text-indigo-600" },
-  Shipped:    { label: "Shipped",    desc: "Your order is on the way!",                       step: 3, bg: "bg-yellow-50",  border: "border-yellow-200", icon: "text-yellow-500", badge: "bg-yellow-100 text-yellow-600" },
-  Delivered:  { label: "Delivered",  desc: "Your order has been delivered! 🎉",               step: 4, bg: "bg-green-50",   border: "border-green-200",  icon: "text-green-500",  badge: "bg-green-100 text-green-600"  },
-  Cancelled:  { label: "Cancelled",  desc: "This order has been cancelled.",                  step: -1, bg: "bg-red-50",   border: "border-red-200",    icon: "text-red-500",    badge: "bg-red-100 text-red-500"      },
-};
-
-// ─── INVOICE GENERATOR ────────────────────────────────────────────────────────
-const generateInvoice = (order) => {
+const jsPDF = () => import("jspdf");
+const generateInvoice = async (order) => {
+  const { default: jsPDF } = await import("jspdf");
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -196,7 +181,17 @@ const generateInvoice = (order) => {
   doc.save(`TechX-Invoice-${order._id?.slice(-8).toUpperCase()}.pdf`);
 };
 
-// ─── STEPPER ──────────────────────────────────────────────────────────────────
+const STEPS = ["Pending", "Confirmed", "Processing", "Shipped", "Delivered"];
+
+const STATUS_META = {
+  Pending:    { label: "Pending",    desc: "Your order is placed and awaiting confirmation.", step: 0, bg: "bg-gray-50",    border: "border-gray-200",   icon: "text-gray-500",   badge: "bg-gray-100 text-gray-600"    },
+  Confirmed:  { label: "Confirmed",  desc: "Your order has been confirmed by the seller.",    step: 1, bg: "bg-blue-50",    border: "border-blue-200",   icon: "text-blue-500",   badge: "bg-blue-100 text-blue-600"    },
+  Processing: { label: "Processing", desc: "Your order is being packed and prepared.",        step: 2, bg: "bg-indigo-50",  border: "border-indigo-200", icon: "text-indigo-500", badge: "bg-indigo-100 text-indigo-600" },
+  Shipped:    { label: "Shipped",    desc: "Your order is on the way!",                       step: 3, bg: "bg-yellow-50",  border: "border-yellow-200", icon: "text-yellow-500", badge: "bg-yellow-100 text-yellow-600" },
+  Delivered:  { label: "Delivered",  desc: "Your order has been delivered! 🎉",               step: 4, bg: "bg-green-50",   border: "border-green-200",  icon: "text-green-500",  badge: "bg-green-100 text-green-600"  },
+  Cancelled:  { label: "Cancelled",  desc: "This order has been cancelled.",                  step: -1, bg: "bg-red-50",   border: "border-red-200",    icon: "text-red-500",    badge: "bg-red-100 text-red-500"      },
+};
+
 function Stepper({ status }) {
   if (status === "Cancelled") {
     return (
@@ -256,7 +251,6 @@ function Stepper({ status }) {
   );
 }
 
-// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function TrackOrderPage() {
   const [query,   setQuery]   = useState("");
   const [order,   setOrder]   = useState(null);
@@ -273,22 +267,14 @@ export default function TrackOrderPage() {
       setError("");
       setOrder(null);
 
-      const res = await fetch(`${API}/orders`);
-      if (!res.ok) throw new Error("Failed to fetch orders");
+      const res = await fetch(`/api/track-order?q=${encodeURIComponent(searchValue)}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Order not found");
+      }
 
-      const orders = await res.json();
-      const foundOrder = orders.find((item) => {
-        const fullId  = item._id?.toLowerCase();
-        const shortId = item._id?.slice(-6).toLowerCase();
-        return (
-          fullId === searchValue.toLowerCase() ||
-          shortId === searchValue.toLowerCase() ||
-          fullId.includes(searchValue.toLowerCase())
-        );
-      });
-
-      if (!foundOrder) throw new Error("Order not found");
-      setOrder(foundOrder);
+      const data = await res.json();
+      setOrder(data);
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -309,7 +295,6 @@ export default function TrackOrderPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-16 mt-4 px-4">
 
-      {/* Header */}
       <div className="flex flex-col items-center mb-8 text-center">
         <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mb-4">
           <FiTruck className="w-8 h-8 text-blue-500" />
@@ -318,7 +303,6 @@ export default function TrackOrderPage() {
         <p className="text-sm text-gray-500 mt-1">Enter your Order ID to get live updates</p>
       </div>
 
-      {/* Search */}
       <form onSubmit={handleTrack}
         className="w-full max-w-xl flex items-center border border-gray-200 rounded-full bg-white shadow-sm px-4 py-1 mb-6">
         <FiSearch className="text-gray-400 w-5 h-5 shrink-0" />
@@ -337,18 +321,15 @@ export default function TrackOrderPage() {
         </button>
       </form>
 
-      {/* Error */}
       {error && (
         <div className="w-full max-w-xl bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3 mb-4 flex items-center gap-2">
           ⚠️ {error}
         </div>
       )}
 
-      {/* Result */}
       {order && meta && (
         <div className="w-full max-w-xl bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-          {/* Status Banner */}
           <div className={`flex items-center gap-4 px-5 py-4 ${meta.bg} border-b ${meta.border}`}>
             <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
               <FiTruck className={`w-5 h-5 ${meta.icon}`} />
@@ -364,12 +345,10 @@ export default function TrackOrderPage() {
             </div>
           </div>
 
-          {/* Stepper */}
           <div className="px-4">
             <Stepper status={order.status} />
           </div>
 
-          {/* Order Details */}
           <div className="px-5 pb-5">
             <div className="border border-gray-100 rounded-xl p-4 space-y-4">
 
@@ -411,7 +390,6 @@ export default function TrackOrderPage() {
 
               <div className="border-t border-gray-100" />
 
-              {/* Products */}
               {order.products?.length > 0 && (
                 <div>
                   <p className="text-xs text-gray-400 flex items-center gap-1 mb-3">
@@ -450,7 +428,6 @@ export default function TrackOrderPage() {
                 </div>
               )}
 
-              {/* Total */}
               <div className="flex justify-between items-center pt-3 border-t border-gray-100">
                 <span className="text-sm font-semibold text-gray-700">Total</span>
                 <span className="text-base font-bold text-gray-800">
@@ -460,10 +437,7 @@ export default function TrackOrderPage() {
             </div>
           </div>
 
-          {/* ── Download Invoice + Help ── */}
           <div className="flex items-center justify-between px-5 pb-5 gap-3">
-
-            {/* Download Invoice Button */}
             <button
               type="button"
               onClick={() => generateInvoice(order)}
@@ -473,14 +447,12 @@ export default function TrackOrderPage() {
               Download Invoice
             </button>
 
-            {/* Need Help Button */}
             <button
               type="button"
               className="flex items-center gap-2 text-sm text-gray-500 border border-gray-200 rounded-full px-4 py-2.5 hover:bg-gray-50 transition-colors"
             >
               <FiHelpCircle className="w-4 h-4" /> Need Help?
             </button>
-
           </div>
 
         </div>

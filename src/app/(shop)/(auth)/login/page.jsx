@@ -1,13 +1,16 @@
 "use client";
 
-import { useCart } from "@/context/CartContext";
+import { useAuthStore } from "@/stores/authStore";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import Link from "next/link";
 
 export default function Login() {
-  const { handleLogin, handleGoogleLogin, authError, authLoading } = useCart();
+  const handleLogin = useAuthStore((s) => s.handleLogin);
+  const handleGoogleLogin = useAuthStore((s) => s.handleGoogleLogin);
+  const authError = useAuthStore((s) => s.authError);
+  const authLoading = useAuthStore((s) => s.authLoading);
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -31,6 +34,7 @@ export default function Login() {
         timer: 1200,
         showConfirmButton: false,
       });
+      router.push(res.role === "admin" ? "/admin" : "/");
     }
   };
 

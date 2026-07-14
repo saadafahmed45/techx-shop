@@ -1,12 +1,14 @@
 "use client";
 
-import { useCart } from "@/context/CartContext";
+import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Image from "next/image";
 
 export default function ProfilePage() {
-  const { user, authLoading, handleLogout } = useCart();
+  const user = useAuthStore((s) => s.user);
+  const authLoading = useAuthStore((s) => s.authLoading);
+  const handleLogout = useAuthStore((s) => s.handleLogout);
   const router = useRouter();
 
   // লগিন না থাকলে login page এ পাঠাবে

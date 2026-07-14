@@ -2,15 +2,14 @@
 
 import { CartProvider } from "@/context/CartContext";
 import { ShopDataProvider } from "@/context/ShopDataContext";
+import QueryProvider from "./QueryProvider";
 
-export default function Providers({
-  children,
-}) {
+export default function Providers({ children }) {
   return (
-    <ShopDataProvider>
-      <CartProvider>
-        {children}
-      </CartProvider>
-    </ShopDataProvider>
+    <QueryProvider>
+      <ShopDataProvider>
+        <CartProvider>{children}</CartProvider>
+      </ShopDataProvider>
+    </QueryProvider>
   );
 }

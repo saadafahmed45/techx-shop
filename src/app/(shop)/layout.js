@@ -1,9 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
-// import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import CartDrawer from "@/components/CartDrawer";
 import AnnouncementBar from "@/components/announcementBar";
+import ClientOnlyWidgets from "@/components/ClientOnlyWidgets";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +22,7 @@ export const metadata = {
 
   description:
     "Shop the latest electronics, gaming accessories, headphones, speakers, PC components, laptops, and gadgets at TechX Shop. Fast delivery across Bangladesh.",
- icons: {
+  icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
@@ -98,32 +97,27 @@ export const metadata = {
   category: "technology",
 };
 
-export default function RootLayout({ children }) {
+export default function ShopLayout({ children }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-         <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{
-                __html: JSON.stringify({
-                  "@context": "https://schema.org",
-                  "@type": "OnlineStore",
-                  name: "TechX Shop",
-                  url: "https://techx-shop.vercel.app",
-                  description:
-                    "Online electronics and gadget store in Bangladesh.",
-                }),
-              }}
-            />
-       <AnnouncementBar/>
-        <Navbar/>
-        <CartDrawer />
-        {children}
-        <Footer/>
-        </body>
-    </html>
+    <div className={`${geistSans.variable} ${geistMono.variable} min-h-full flex flex-col`}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "OnlineStore",
+            name: "TechX Shop",
+            url: "https://techx-shop.vercel.app",
+            description:
+              "Online electronics and gadget store in Bangladesh.",
+          }),
+        }}
+      />
+      <AnnouncementBar />
+      <Navbar />
+      <ClientOnlyWidgets />
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </div>
   );
 }

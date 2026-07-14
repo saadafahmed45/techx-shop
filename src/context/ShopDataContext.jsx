@@ -55,18 +55,18 @@ export const ShopDataProvider = ({ children }) => {
     try {
       setLoading(true);
       const [productRes, collectionRes] = await Promise.all([
-        fetch(`${API}/products`, { signal: AbortSignal.timeout(15000) }),
+        fetch(`${API}/products?limit=200`, { signal: AbortSignal.timeout(15000) }),
         fetch(`${API}/collections`, { signal: AbortSignal.timeout(15000) }),
       ]);
 
       if (!productRes.ok) throw new Error(`Products API responded with ${productRes.status}`);
       if (!collectionRes.ok) throw new Error(`Collections API responded with ${collectionRes.status}`);
 
-      const productData = await productRes.json();
+      const productJson = await productRes.json();
       const collectionData = await collectionRes.json();
 
-      const products = Array.isArray(productData) ? productData : [];
-      const collections = Array.isArray(collectionData) ? collectionData : [];
+      const products = Array.isArray(productJson) ? productJson : (productJson?.data || []);
+      const collections = Array.isArray(collectionData) ? collectionData : (collectionData?.data || []);
 
       setProducts(products);
       setCollections(collections);

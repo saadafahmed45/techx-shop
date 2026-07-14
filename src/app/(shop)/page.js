@@ -1,34 +1,52 @@
+import { Suspense } from "react";
 import Category from "@/components/Category";
-import HeroBanner from "@/components/HeroBanner";
 import HeroSlider from "@/components/HeroSlider";
-import ProductSection from "@/components/ProductSection ";
+import ProductSection from "@/components/ProductSection";
 import ProductsFilterTabs from "@/components/ProductsFilterTabs";
-import ProductSlider from "@/components/ProductSlider";
 import TopSellingSlider from "@/components/TopSellingSlider";
+
+function SectionFallback({ height = "h-64" }) {
+  return (
+    <div className={`${height} bg-slate-50 animate-pulse rounded-2xl mx-5 md:mx-32 my-8`} />
+  );
+}
 
 export default function Home() {
   return (
-  <div >
-    <HeroSlider/>
- {/* <HeroBanner/> */}
- <Category/>
- {/* <TrendingProducts/> */}
-   <ProductSection
-        title="Trending Products"
-        filterValue="Trending Now"
-        bgColor="bg-white"
-        accentColor="bg-indigo-500"
-      />
+    <div>
+      <Suspense fallback={<SectionFallback height="h-[55vw] max-h-[88vh]" />}>
+        <HeroSlider />
+      </Suspense>
 
-       {/* Featured Products */}
-      <ProductSection
-        title="Featured Products"
-        filterValue="Featured"
-        bgColor="bg-slate-50"
-        accentColor="bg-indigo-500"
-      />
- <ProductsFilterTabs/>
- <TopSellingSlider/>
-  </div>
+      <Suspense fallback={<SectionFallback height="h-96" />}>
+        <Category />
+      </Suspense>
+
+      <Suspense fallback={<SectionFallback height="h-96" />}>
+        <ProductSection
+          title="Trending Products"
+          filterValue="Trending Now"
+          bgColor="bg-white"
+          accentColor="bg-indigo-500"
+        />
+      </Suspense>
+
+      <Suspense fallback={<SectionFallback height="h-96" />}>
+        <ProductSection
+          title="Featured Products"
+          filterValue="Featured"
+          bgColor="bg-slate-50"
+          accentColor="bg-indigo-500"
+        />
+      </Suspense>
+
+      <Suspense fallback={<SectionFallback height="h-96" />}>
+        <ProductsFilterTabs />
+      </Suspense>
+
+      <Suspense fallback={<SectionFallback height="h-80" />}>
+        <TopSellingSlider />
+      </Suspense>
+    </div>
   );
 }

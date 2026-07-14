@@ -1,8 +1,9 @@
 "use client"
-import { useEffect, useState, useCallback, useMemo, useRef, Suspense } from "react";
+
+import { useState, useCallback, useMemo, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { useShopData } from "@/context/ShopDataContext";
+import { useQuery } from "@tanstack/react-query";
 import {
   Search, X, SlidersHorizontal, Package, Star,
   ChevronDown, ShoppingCart, Heart, Tag,
@@ -10,54 +11,69 @@ import {
   DollarSign,
 } from "lucide-react";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
-
 function useDebounce(value, delay = 350) {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
   }, [value, delay]);
   return debounced;
 }
 
-/* ── Isolated component that reads ?q= from the URL ── */
 function SearchParamsReader({ onQuery }) {
   const searchParams = useSearchParams();
+  const initialized = useRef(false);
   useEffect(() => {
-    onQuery(searchParams.get("q") || "");
-  }, [searchParams]);
+    if (!initialized.current) {
+      initialized.current = true;
+      onQuery(searchParams.get("q") || "");
+    }
+  }, [searchParams, onQuery]);
   return null;
 }
 
-/* ── Isolated component that syncs query → URL ── */
 function SearchParamsWriter({ query }) {
   const router = useRouter();
-  const debouncedQuery = useDebounce(query, 350);
 
   useEffect(() => {
     const params = new URLSearchParams();
-    if (debouncedQuery.trim()) params.set("q", debouncedQuery.trim());
+    if (query.trim()) params.set("q", query.trim());
     const newUrl = params.toString() ? `/search?${params.toString()}` : "/search";
     router.replace(newUrl, { scroll: false });
-  }, [debouncedQuery]);
+  }, [query, router]);
 
   return null;
 }
 
-export default function ProductSearch() {
-  const { products, loading } = useShopData();
-  const [error, setError]             = useState(null);
-  const [query, setQuery]             = useState("");
-  const [statusFilter, setStatus]     = useState("all");
-  const [sortBy, setSortBy]           = useState("default");
-  const [typeFilter, setTypeFilter]   = useState("all");
-  const [priceMax, setPriceMax]       = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [view, setView]               = useState("grid");
-  const [wishlist, setWishlist]       = useState([]);
-
+function useProducts(query) {
   const debouncedQuery = useDebounce(query, 350);
+  return useQuery({
+    queryKey: ["search", debouncedQuery],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (debouncedQuery.trim()) params.set("q", debouncedQuery.trim());
+      const url = `/api/search${params.toString() ? "?" + params.toString() : ""}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Search failed");
+      const data = await res.json();
+      return data.results || [];
+    },
+    staleTime: 60_000,
+    placeholderData: (prev) => prev,
+  });
+}
+
+export default function ProductSearch() {
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("default");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [priceMax, setPriceMax] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [view, setView] = useState("grid");
+  const [wishlist, setWishlist] = useState([]);
+
+  const { data: products = [], isLoading } = useProducts(query);
   const inputRef = useRef(null);
 
   const productTypes = useMemo(() => {
@@ -66,16 +82,6 @@ export default function ProductSearch() {
 
   const results = useMemo(() => {
     let list = [...products];
-
-    if (debouncedQuery.trim()) {
-      const q = debouncedQuery.toLowerCase();
-      list = list.filter(p =>
-        p.title?.toLowerCase().includes(q) ||
-        p.vendor?.toLowerCase().includes(q) ||
-        p.productType?.toLowerCase().includes(q) ||
-        p.description?.toLowerCase().includes(q)
-      );
-    }
 
     if (statusFilter !== "all") list = list.filter(p => p.status === statusFilter);
     if (typeFilter !== "all")   list = list.filter(p => p.productType === typeFilter);
@@ -88,7 +94,7 @@ export default function ProductSearch() {
     if (sortBy === "stock-desc") list.sort((a, b) => Number(b.stock) - Number(a.stock));
 
     return list;
-  }, [products, debouncedQuery, statusFilter, typeFilter, priceMax, sortBy]);
+  }, [products, statusFilter, typeFilter, priceMax, sortBy]);
 
   const toggleWishlist = useCallback((id) => {
     setWishlist(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
@@ -112,23 +118,19 @@ export default function ProductSearch() {
   return (
     <div className="min-h-screen bg-slate-50">
 
-      {/* ── Read ?q= from URL on mount (Suspense required by Next.js) ── */}
       <Suspense fallback={null}>
         <SearchParamsReader onQuery={setQuery} />
       </Suspense>
 
-      {/* ── Sync query → URL (Suspense required by Next.js) ── */}
       <Suspense fallback={null}>
         <SearchParamsWriter query={query} />
       </Suspense>
 
-      {/* ── Search Hero ── */}
       <div className="bg-white border-b border-slate-200 shadow-sm sticky top-16 z-30">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
 
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
 
-            {/* Search input */}
             <div className="relative flex-1">
               <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
@@ -150,7 +152,6 @@ export default function ProductSearch() {
               )}
             </div>
 
-            {/* Filter toggle */}
             <button
               onClick={() => setShowFilters(p => !p)}
               className={`h-12 px-4 rounded-2xl border text-sm font-semibold flex items-center gap-2 transition-all shrink-0 ${
@@ -168,7 +169,6 @@ export default function ProductSearch() {
               )}
             </button>
 
-            {/* View toggle */}
             <div className="flex rounded-xl border border-slate-200 overflow-hidden bg-white shrink-0">
               <button
                 onClick={() => setView("grid")}
@@ -185,7 +185,6 @@ export default function ProductSearch() {
             </div>
           </div>
 
-          {/* Expandable filters */}
           {showFilters && (
             <div className="flex flex-wrap gap-3 mt-3 pt-3 border-t border-slate-100">
 
@@ -242,26 +241,20 @@ export default function ProductSearch() {
         </div>
       </div>
 
-      {/* ── Body ── */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
 
-        {/* Result meta */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            {loading ? (
+            {isLoading ? (
               <div className="h-4 w-40 bg-slate-200 rounded-full animate-pulse" />
             ) : (
               <p className="text-sm text-slate-500">
                 <span className="font-bold text-slate-800">{results.length}</span>
                 {" "}product{results.length !== 1 ? "s" : ""} found
-                {debouncedQuery && (
-                  <span> for "<span className="text-indigo-600 font-semibold">{debouncedQuery}</span>"</span>
-                )}
               </p>
             )}
           </div>
 
-          {/* Active filter pills */}
           <div className="flex flex-wrap gap-2">
             {statusFilter !== "all" && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-semibold">
@@ -284,8 +277,7 @@ export default function ProductSearch() {
           </div>
         </div>
 
-        {/* Loading skeletons */}
-        {loading && (
+        {isLoading && (
           <div className={`grid gap-4 ${view === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" : "grid-cols-1"}`}>
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden animate-pulse">
@@ -300,27 +292,13 @@ export default function ProductSearch() {
           </div>
         )}
 
-        {/* Error */}
-        {!loading && error && (
-          <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-            <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center mb-4">
-              <X size={28} className="text-rose-400" />
-            </div>
-            <p className="font-bold text-slate-600 text-lg">Something went wrong</p>
-            <p className="text-sm mt-1">{error}</p>
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!loading && !error && results.length === 0 && (
+        {!isLoading && results.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 text-slate-400">
             <div className="w-20 h-20 rounded-3xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-5">
               <Package size={36} strokeWidth={1.5} className="text-slate-300" />
             </div>
             <p className="font-bold text-slate-600 text-lg">No products found</p>
-            <p className="text-sm mt-1 text-slate-400">
-              {debouncedQuery ? `No results for "${debouncedQuery}"` : "Try adjusting your filters"}
-            </p>
+            <p className="text-sm mt-1 text-slate-400">Try adjusting your filters</p>
             <button
               onClick={clearFilters}
               className="mt-5 h-10 px-5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition-all shadow-md shadow-indigo-200"
@@ -330,8 +308,7 @@ export default function ProductSearch() {
           </div>
         )}
 
-        {/* Grid View */}
-        {!loading && !error && results.length > 0 && view === "grid" && (
+        {!isLoading && results.length > 0 && view === "grid" && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {results.map(product => (
               <GridCard
@@ -344,8 +321,7 @@ export default function ProductSearch() {
           </div>
         )}
 
-        {/* List View */}
-        {!loading && !error && results.length > 0 && view === "list" && (
+        {!isLoading && results.length > 0 && view === "list" && (
           <div className="space-y-3">
             {results.map(product => (
               <ListCard
@@ -362,7 +338,6 @@ export default function ProductSearch() {
   );
 }
 
-/* ── Grid Card ── */
 function GridCard({ product, wishlisted, onWishlist }) {
   const [imgErr, setImgErr] = useState(false);
 
@@ -435,7 +410,6 @@ function GridCard({ product, wishlisted, onWishlist }) {
   );
 }
 
-/* ── List Card ── */
 function ListCard({ product, wishlisted, onWishlist }) {
   const [imgErr, setImgErr] = useState(false);
 

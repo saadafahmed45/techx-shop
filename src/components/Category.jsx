@@ -27,7 +27,8 @@ async function getCategories() {
     throw new Error("Failed to fetch categories");
   }
 
-  return res.json();
+  const json = await res.json();
+  return Array.isArray(json) ? json : (json?.data || []);
 }
 
 

@@ -79,7 +79,7 @@ export default function Navbar() {
           p.title?.toLowerCase().includes(q) ||
           p.vendor?.toLowerCase().includes(q) ||
           p.productType?.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q)
+          p.description?.toLowerCase().includes(q),
       )
       .slice(0, 6);
     setSearchResults(filtered);
@@ -105,7 +105,7 @@ export default function Navbar() {
         setSearchQuery("");
       }
     },
-    [searchQuery, router]
+    [searchQuery, router],
   );
 
   const handleResultClick = useCallback(
@@ -114,7 +114,7 @@ export default function Navbar() {
       setSearchOpen(false);
       setSearchQuery("");
     },
-    [router]
+    [router],
   );
 
   const handleSearchIconClick = () => {
@@ -132,7 +132,6 @@ export default function Navbar() {
       {/* ════ NAVBAR ════ */}
       <header className=" top-0 left-0 right-0 z-50 bg-[#0f0f0f] border-b border-white/6">
         <div className=" mx-auto px-5 md:px-32 h-16 flex items-center justify-between gap-6">
-
           {/* ── Logo (Left) ── */}
           <Link href="/" className="flex flex-col leading-none shrink-0">
             <span
@@ -199,7 +198,6 @@ export default function Navbar() {
 
           {/* ── Right: Search + Icons (Desktop) ── */}
           <div className="hidden md:flex items-center gap-3 shrink-0">
-
             {/* Live Search Bar */}
             <div ref={searchRef} className="relative">
               <div className="flex items-center gap-2 h-9 px-3 rounded-xl bg-white/6 border border-white/10 hover:border-white/20 focus-within:border-white/25 focus-within:bg-white/8 transition-all w-52">
@@ -285,7 +283,7 @@ export default function Navbar() {
                         <button
                           onClick={() => {
                             router.push(
-                              `/search?q=${encodeURIComponent(searchQuery.trim())}`
+                              `/search?q=${encodeURIComponent(searchQuery.trim())}`,
                             );
                             setSearchOpen(false);
                             setSearchQuery("");
@@ -313,19 +311,27 @@ export default function Navbar() {
             </div>
 
             {/* Icons */}
-            <Link href="/profile" className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
+            <Link
+              href="/profile"
+              className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all"
+            >
               <AiOutlineUser className="text-[18px]" />
             </Link>
 
-             {/* <Link href="/login" className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
+            {/* <Link href="/login" className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
               <AiOutlineUser className="text-[18px]" />
             </Link> */}
-            <Link href="/wishlist" className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
+            <Link
+              href="/wishlist"
+              className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all"
+            >
               <AiOutlineHeart className="text-[18px]" />
             </Link>
 
-
-            <Link href="/cart" className="relative w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all">
+            <Link
+              href="/cart"
+              className="relative w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/6 transition-all"
+            >
               <AiOutlineShopping className="text-[18px]" />
               {cart.length > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-white text-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
@@ -340,7 +346,10 @@ export default function Navbar() {
             <button className="w-9 h-9 flex items-center justify-center rounded-lg text-white/50 hover:text-white">
               <AiOutlineHeart className="text-[20px]" />
             </button>
-            <Link href="/cart" className="relative w-9 h-9 flex items-center justify-center rounded-lg text-white/50 hover:text-white">
+            <Link
+              href="/cart"
+              className="relative w-9 h-9 flex items-center justify-center rounded-lg text-white/50 hover:text-white"
+            >
               <AiOutlineShopping className="text-[20px]" />
               {cart.length > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-white text-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
@@ -375,7 +384,9 @@ export default function Navbar() {
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && searchQuery.trim()) {
-                    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                    router.push(
+                      `/search?q=${encodeURIComponent(searchQuery.trim())}`,
+                    );
                     setSearchOpen(false);
                     setSearchQuery("");
                   }
@@ -449,7 +460,6 @@ export default function Navbar() {
           </div>
         </>
       )}
-
     </>
   );
 }

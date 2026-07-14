@@ -1,12 +1,14 @@
 "use client";
 
-import { useCart } from "@/context/CartContext";
+import { useAuthStore } from "@/stores/authStore";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 
 export default function Register() {
-  const { handleRegister, authError, authLoading } = useCart();
+  const handleRegister = useAuthStore((s) => s.handleRegister);
+  const authError = useAuthStore((s) => s.authError);
+  const authLoading = useAuthStore((s) => s.authLoading);
   const router = useRouter();
 
   const [name, setName] = useState("");

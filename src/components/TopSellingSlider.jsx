@@ -147,7 +147,7 @@ export default function TopSellingSlider() {
                   delay: 3000,
                   disableOnInteraction: false,
                 }}
-                loop={true}
+                loop={topSellingProducts.length > 3}
                 spaceBetween={20}
                 breakpoints={{
                   0: {

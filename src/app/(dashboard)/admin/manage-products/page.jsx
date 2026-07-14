@@ -1,25 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import {
   Search, Edit2, Trash2, Plus, RefreshCw,
   CheckCircle2, Clock3, Loader2, ImageIcon,
-  Package, X, ChevronDown, Star, UploadCloud, Sparkles, GripVertical,
+  Package, X, ChevronDown, Star, GripVertical,
 } from "lucide-react";
 import Swal from "sweetalert2";
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+import { useAdminProducts, useAdminCollections, useDeleteProduct } from "@/lib/admin-hooks";
 
 const FEATURE_OPTIONS = [
   "Featured", "Best Seller", "New Arrivals", "Popular Sales",
   "Limited Edition", "Top Selling Products", "Trending Now",
 ];
 
-// ─── Product image with fallback ─────────────────────────────────────────────
 const ProductThumb = ({ src, alt, className }) => {
   const [error, setError] = useState(false);
-  useEffect(() => { setError(false); }, [src]);
+  useMemo(() => setError(false), [src]);
 
   if (!src || error) {
     return (
@@ -34,7 +32,6 @@ const ProductThumb = ({ src, alt, className }) => {
   );
 };
 
-// ─── Draggable image list ─────────────────────────────────────────────────────
 const DraggableImageList = ({ images, onReorder, onRemove }) => {
   const dragIndex = useRef(null);
   const [dragOver, setDragOver] = useState(null);
@@ -71,18 +68,12 @@ const DraggableImageList = ({ images, onReorder, onRemove }) => {
             alt={`image-${i}`}
             className="w-full h-32 object-cover"
           />
-
-          {/* Drag handle */}
           <div className="absolute top-2 left-2 bg-black/50 rounded-lg p-1 opacity-0 group-hover:opacity-100 transition">
             <GripVertical size={14} className="text-white" />
           </div>
-
-          {/* Order badge */}
           <div className="absolute top-2 right-8 bg-black/50 text-white text-[10px] font-bold rounded-md px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition">
             #{i + 1}
           </div>
-
-          {/* Remove */}
           <button
             type="button"
             onClick={() => onRemove(i)}
@@ -96,41 +87,15 @@ const DraggableImageList = ({ images, onReorder, onRemove }) => {
   );
 };
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ManageProducts() {
-  const [products,         setProducts]         = useState([]);
-  const [collections,      setCollections]      = useState([]);
-  const [loading,          setLoading]          = useState(true);
-  const [search,           setSearch]           = useState("");
-  const [status,           setStatus]           = useState("all");
-  const [editModal,        setEditModal]        = useState(false);
-  const [selectedProduct,  setSelectedProduct]  = useState(null);
+  const { data: products = [], isLoading: productsLoading, refetch: refetchProducts } = useAdminProducts();
+  const { data: collections = [] } = useAdminCollections();
+  const deleteProduct = useDeleteProduct();
 
-  const fetchProducts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res  = await fetch(`${API}/products`);
-      const data = await res.json();
-      setProducts(Array.isArray(data) ? data : []);
-    } catch {
-      Swal.fire({ icon: "error", title: "Failed to fetch products" });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchCollections = useCallback(async () => {
-    try {
-      const res  = await fetch(`${API}/collections`);
-      const data = await res.json();
-      setCollections(Array.isArray(data) ? data : []);
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-    fetchCollections();
-  }, [fetchProducts, fetchCollections]);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("all");
+  const [editModal, setEditModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const filteredProducts = useMemo(() => {
     const q = search.toLowerCase();
@@ -155,9 +120,7 @@ export default function ManageProducts() {
     });
     if (!result.isConfirmed) return;
     try {
-      const res = await fetch(`${API}/products/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
-      setProducts((prev) => prev.filter((p) => p._id !== id));
+      await deleteProduct.mutateAsync(id);
       Swal.fire({ icon: "success", title: "Deleted", timer: 1400, showConfirmButton: false });
     } catch {
       Swal.fire({ icon: "error", title: "Delete Failed" });
@@ -167,7 +130,7 @@ export default function ManageProducts() {
   const activeCount = products.filter((p) => p.status === "active").length;
   const draftCount  = products.filter((p) => p.status === "draft").length;
 
-  if (loading) {
+  if (productsLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
         <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
@@ -180,7 +143,6 @@ export default function ManageProducts() {
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* HEADER */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h1 className="text-4xl font-black tracking-tight text-slate-900">Products</h1>
@@ -189,7 +151,7 @@ export default function ManageProducts() {
             </p>
           </div>
           <div className="flex gap-3">
-            <button onClick={fetchProducts}
+            <button onClick={() => refetchProducts()}
               className="h-11 px-5 rounded-2xl border border-slate-200 bg-white text-sm font-medium flex items-center gap-2 hover:border-indigo-300 hover:text-indigo-600 transition">
               <RefreshCw className="w-4 h-4" /> Refresh
             </button>
@@ -200,7 +162,6 @@ export default function ManageProducts() {
           </div>
         </div>
 
-        {/* STATS */}
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-white rounded-3xl border border-slate-200 p-5">
             <h3 className="text-slate-400 text-xs uppercase tracking-widest font-bold">Total</h3>
@@ -216,7 +177,6 @@ export default function ManageProducts() {
           </div>
         </div>
 
-        {/* FILTER */}
         <div className="bg-white rounded-3xl border border-slate-200 p-4 flex flex-col md:flex-row gap-3">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -236,7 +196,6 @@ export default function ManageProducts() {
           </div>
         </div>
 
-        {/* TABLE */}
         <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden">
           <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-widest text-slate-400 font-bold">
             <div className="col-span-1">#</div>
@@ -328,7 +287,6 @@ export default function ManageProducts() {
           collections={collections}
           onClose={() => setEditModal(false)}
           onUpdated={(updated) => {
-            setProducts((prev) => prev.map((p) => p._id === updated._id ? updated : p));
             setEditModal(false);
           }}
         />
@@ -337,13 +295,9 @@ export default function ManageProducts() {
   );
 }
 
-// ─── Edit Modal ───────────────────────────────────────────────────────────────
 function EditProductModal({ product, collections, onClose, onUpdated }) {
   const [saving, setSaving] = useState(false);
-
-  // images: mix of strings (existing URLs) and File objects (new uploads)
   const [images, setImages] = useState(product.images || []);
-
   const [formData, setFormData] = useState({
     title:       product.title       || "",
     slug:        product.slug        || "",
@@ -357,258 +311,151 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
     collections: product.collections || [],
   });
 
-  // close on Escape
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    const handler = (e) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handler);
-    return () => {
-      document.body.style.overflow = "auto";
-      window.removeEventListener("keydown", handler);
-    };
-  }, [onClose]);
-
-  const inputCls = "w-full h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition";
-  const labelCls = "block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2";
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const toggleFeature = (feature) => {
-    setFormData((prev) => ({
-      ...prev,
-      featured: prev.featured.includes(feature)
-        ? prev.featured.filter((f) => f !== feature)
-        : [...prev.featured, feature],
-    }));
-  };
-
-  // Add new images (File objects appended to list)
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
+  const handleImageUpload = useCallback((e) => {
+    const files = Array.from(e.target.files || []);
     setImages((prev) => [...prev, ...files]);
-  };
-
-  // Reorder images (both strings and Files)
-  const handleReorder = (newOrder) => setImages(newOrder);
-
-  // Remove image by index
-  const handleRemove = (index) => setImages((prev) => prev.filter((_, i) => i !== index));
-
-  const removeCollection = (id) => {
-    setFormData((prev) => ({
-      ...prev,
-      collections: prev.collections.filter((c) => c._id !== id),
-    }));
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title.trim()) {
-      Swal.fire({ icon: "warning", title: "Title is required" });
-      return;
-    }
+    setSaving(true);
     try {
-      setSaving(true);
-      const body = new FormData();
-
+      const fd = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        if (key === "collections" || key === "featured") {
-          body.append(key, JSON.stringify(value));
+        if (key === "featured") {
+          fd.append(key, JSON.stringify(value));
+        } else if (key === "collections") {
+          fd.append(key, JSON.stringify(value.map((c) => c._id || c)));
         } else {
-          body.append(key, value);
+          fd.append(key, value);
         }
       });
+      const existingImages = images.filter((img) => typeof img === "string");
+      fd.append("existingImages", JSON.stringify(existingImages));
+      const newFiles = images.filter((img) => img instanceof File);
+      newFiles.forEach((file) => fd.append("images", file));
 
-      // existing image URLs as JSON
-      const existingUrls = images.filter((img) => typeof img === "string");
-      body.append("existingImages", JSON.stringify(existingUrls));
-
-      // new File objects
-      images.filter((img) => img instanceof File)
-            .forEach((file) => body.append("images", file));
-
-      const res  = await fetch(`${API}/products/${product._id}`, { method: "PUT", body });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-
-      Swal.fire({ icon: "success", title: "Product Updated", confirmButtonColor: "#4f46e5" });
-      onUpdated(data.data);
-    } catch (err) {
-      Swal.fire({ icon: "error", title: err.message || "Update failed" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/products/${product._id}`, {
+        method: "PUT",
+        body: fd,
+      });
+      if (!res.ok) throw new Error("Update failed");
+      const updated = await res.json();
+      onUpdated(updated);
+    } catch {
+      Swal.fire({ icon: "error", title: "Update Failed" });
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col max-h-[95vh] overflow-hidden">
-
-        {/* Header */}
-        <div className="shrink-0 px-6 md:px-8 py-5 border-b border-slate-100 bg-white flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-black text-slate-900">Edit Product</h2>
-            <p className="text-sm text-slate-400 mt-1">Update your product information</p>
-          </div>
-          <button onClick={onClose}
-            className="w-11 h-11 rounded-2xl border border-slate-200 hover:bg-slate-100 flex items-center justify-center transition">
-            <X className="w-5 h-5 text-slate-500" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={onClose}>
+      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[90vh] overflow-auto p-8" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-black text-slate-900">Edit Product</h2>
+          <button onClick={onClose} className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1 overflow-y-auto px-6 md:px-8 py-6 space-y-8">
-
-            {/* BASIC FIELDS */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              <div className="lg:col-span-2">
-                <label className={labelCls}>Product Title <span className="text-rose-400 normal-case">*</span></label>
-                <input type="text" name="title" value={formData.title} onChange={handleChange} className={inputCls} />
-              </div>
-              <div className="lg:col-span-2">
-                <label className={labelCls}>Product Slug</label>
-                <input type="text" name="slug" value={formData.slug} onChange={handleChange} className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}>Price</label>
-                <input type="number" name="price" value={formData.price} onChange={handleChange} className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}>Stock</label>
-                <input type="number" name="stock" value={formData.stock} onChange={handleChange} className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}>Vendor</label>
-                <input type="text" name="vendor" value={formData.vendor} onChange={handleChange} className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}>Product Type</label>
-                <input type="text" name="productType" value={formData.productType} onChange={handleChange} className={inputCls} />
-              </div>
-            </div>
-
-            {/* STATUS */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className={labelCls}>Status</label>
-              <div className="relative">
-                <select name="status" value={formData.status} onChange={handleChange}
-                  className={`${inputCls} appearance-none`}>
-                  <option value="active">Active</option>
-                  <option value="draft">Draft</option>
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              </div>
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Title</label>
+              <input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1" />
             </div>
-
-            {/* FEATURES */}
             <div>
-              <label className={labelCls}>Product Features</label>
-              <div className="flex flex-wrap gap-2">
-                {FEATURE_OPTIONS.map((feature) => {
-                  const selected = formData.featured.includes(feature);
-                  return (
-                    <button key={feature} type="button" onClick={() => toggleFeature(feature)}
-                      className={`h-10 px-4 rounded-xl border text-sm font-semibold transition-all flex items-center gap-2 ${
-                        selected
-                          ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200"
-                          : "bg-white border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600"
-                      }`}>
-                      <Sparkles size={14} />{feature}
-                    </button>
-                  );
-                })}
-              </div>
-              {formData.featured.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {formData.featured.map((item) => (
-                    <span key={item}
-                      className="px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold border border-indigo-100 flex items-center gap-1.5">
-                      {item}
-                      <button type="button" onClick={() => toggleFeature(item)}>
-                        <X size={10} />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Slug</label>
+              <input value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                className="w-full h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1" />
             </div>
-
-            {/* DESCRIPTION */}
             <div>
-              <label className={labelCls}>Description</label>
-              <textarea rows={5} name="description" value={formData.description} onChange={handleChange}
-                className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm outline-none resize-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400" />
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Price</label>
+              <input type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className="w-full h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1" />
             </div>
-
-            {/* IMAGES — drag to reorder */}
             <div>
-              <label className={labelCls}>Product Images</label>
-              <p className="text-xs text-slate-400 mb-3 flex items-center gap-1">
-                <GripVertical size={12} /> Drag images to reorder · first image is the cover
-              </p>
-              <label className="rounded-3xl border-2 border-dashed border-slate-300 hover:border-indigo-400 bg-slate-50 transition p-6 flex flex-col items-center justify-center cursor-pointer">
-                <UploadCloud className="w-8 h-8 text-indigo-500" />
-                <h3 className="mt-3 font-bold text-slate-800 text-sm">Upload Images</h3>
-                <p className="text-xs text-slate-400 mt-1">PNG, JPG, WEBP</p>
-                <input type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" />
-              </label>
-
-              {images.length > 0 && (
-                <DraggableImageList
-                  images={images}
-                  onReorder={handleReorder}
-                  onRemove={handleRemove}
-                />
-              )}
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Vendor</label>
+              <input value={formData.vendor} onChange={(e) => setFormData({ ...formData, vendor: e.target.value })}
+                className="w-full h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1" />
             </div>
-
-            {/* COLLECTIONS */}
             <div>
-              <label className={labelCls}>Collections</label>
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <select multiple
-                  value={formData.collections.map((c) => c._id)}
-                  onChange={(e) => {
-                    const ids = Array.from(e.target.selectedOptions).map((o) => o.value);
-                    setFormData((prev) => ({
-                      ...prev,
-                      collections: collections.filter((c) => ids.includes(c._id)),
-                    }));
-                  }}
-                  className="w-full min-h-45 bg-white rounded-2xl border border-slate-200 p-4 text-sm outline-none">
-                  {collections.map((col) => (
-                    <option key={col._id} value={col._id}>{col.name}</option>
-                  ))}
-                </select>
-
-                {formData.collections.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {formData.collections.map((col) => (
-                      <div key={col._id}
-                        className="px-3 py-2 rounded-2xl bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center gap-2">
-                        {col.name}
-                        <button type="button" onClick={() => removeCollection(col._id)}>
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Stock</label>
+              <input type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                className="w-full h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1" />
+            </div>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Product Type</label>
+              <input value={formData.productType} onChange={(e) => setFormData({ ...formData, productType: e.target.value })}
+                className="w-full h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1" />
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="shrink-0 px-6 md:px-8 py-5 border-t border-slate-100 bg-white flex flex-col sm:flex-row justify-end gap-3">
+          <div>
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Description</label>
+            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={5}
+              className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Status</label>
+              <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="w-full h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1">
+                <option value="active">Active</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Featured Tags</label>
+              <select multiple value={formData.featured} onChange={(e) => setFormData({ ...formData, featured: Array.from(e.target.selectedOptions, (o) => o.value) })}
+                className="w-full h-32 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1">
+                {FEATURE_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt} className="py-1">{opt}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Collections</label>
+              <select multiple value={formData.collections.map((c) => c._id || c)} onChange={(e) => {
+                const selectedIds = Array.from(e.target.selectedOptions, (o) => o.value);
+                const selected = collections.filter((c) => selectedIds.includes(c._id));
+                setFormData({ ...formData, collections: selected });
+              }}
+                className="w-full h-32 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1">
+                {collections.map((col) => (
+                  <option key={col._id} value={col._id} className="py-1">{col.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Images (drag to reorder)</label>
+            <label className="mt-2 flex items-center justify-center h-28 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 cursor-pointer hover:border-indigo-300 hover:bg-indigo-50 transition">
+              <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="hidden" />
+              <div className="flex flex-col items-center gap-1 text-slate-400">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="text-xs font-medium">Click to upload images</span>
+              </div>
+            </label>
+            {images.length > 0 && (
+              <DraggableImageList images={images} onReorder={setImages} onRemove={(i) => setImages((prev) => prev.filter((_, idx) => idx !== i))} />
+            )}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
             <button type="button" onClick={onClose}
-              className="h-12 px-6 rounded-2xl border border-slate-200 bg-white text-sm font-semibold hover:bg-slate-100 transition">
+              className="h-12 px-6 rounded-2xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition">
               Cancel
             </button>
             <button type="submit" disabled={saving}
-              className="h-12 px-7 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 disabled:opacity-60">
+              className="h-12 px-6 rounded-2xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-500 transition disabled:opacity-50 flex items-center gap-2">
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               {saving ? "Saving..." : "Save Changes"}
             </button>
