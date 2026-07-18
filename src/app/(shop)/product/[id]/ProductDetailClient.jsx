@@ -11,6 +11,9 @@ import {
   HiOutlineShieldCheck,
   HiOutlineRefresh,
   HiOutlineBadgeCheck,
+  HiChevronLeft,
+  HiChevronRight,
+  HiX,
 } from "react-icons/hi";
 import { HiArrowLeft } from "react-icons/hi2";
 import AddReview from "@/components/AddReview";
@@ -76,6 +79,8 @@ export default function ProductDetailClient({ product: serverProduct }) {
     serverProduct?.images?.[0] || FALLBACK
   );
   const [activeTab, setActiveTab] = useState("description");
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // Only use client-side fetch as fallback if server fetch didn't work
   useEffect(() => {
@@ -137,17 +142,27 @@ export default function ProductDetailClient({ product: serverProduct }) {
         <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-stone-100">
-              <div className="relative rounded-xl overflow-hidden bg-stone-50 border border-stone-100 aspect-square">
+              <div 
+                onClick={() => {
+                  const idx = images.indexOf(activeImage);
+                  setLightboxIndex(idx !== -1 ? idx : 0);
+                  setIsLightboxOpen(true);
+                }}
+                className="relative rounded-xl overflow-hidden bg-white border border-stone-100 aspect-square flex items-center justify-center p-4 cursor-zoom-in group"
+              >
                 <Image
                   src={activeImage}
                   alt={product.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover transition-all duration-500"
+                  className="object-contain p-4 transition-all duration-300 group-hover:scale-[1.03]"
                   priority
                 />
                 <button
-                  onClick={() => setWished(!wished)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setWished(!wished);
+                  }}
                   className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white shadow border border-stone-100 flex items-center justify-center hover:scale-105 transition-transform z-10"
                   aria-label="Toggle wishlist"
                 >
@@ -165,24 +180,27 @@ export default function ProductDetailClient({ product: serverProduct }) {
               </div>
 
               {images.length > 1 && (
-                <div className="flex gap-2.5 mt-4 overflow-x-auto pb-1">
+                <div className="flex flex-wrap justify-center gap-2 mt-4">
                   {images.map((img, i) => (
                     <button
                       key={i}
+                      onMouseEnter={() => setActiveImage(img)}
                       onClick={() => setActiveImage(img)}
-                      className={`shrink-0 w-17 h-17 rounded-lg overflow-hidden border-2 relative transition-all ${
+                      className={`shrink-0 w-14 h-14 rounded-lg overflow-hidden border transition-all bg-white p-1 flex items-center justify-center ${
                         activeImage === img
-                          ? "border-stone-700"
-                          : "border-stone-200 hover:border-stone-400"
+                          ? "border-indigo-600 shadow-sm ring-1 ring-indigo-600/30"
+                          : "border-stone-200 hover:border-indigo-450"
                       }`}
                     >
-                      <Image
-                        src={img}
-                        alt={`thumb-${i}`}
-                        fill
-                        sizes="68px"
-                        className="object-cover"
-                      />
+                      <div className="relative w-full h-full">
+                        <Image
+                          src={img}
+                          alt={`thumb-${i}`}
+                          fill
+                          sizes="52px"
+                          className="object-contain"
+                        />
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -372,6 +390,76 @@ export default function ProductDetailClient({ product: serverProduct }) {
           </div>
         )}
       </div>
+
+      {/* LIGHTBOX MODAL */}
+      {isLightboxOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center select-none"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Close button */}
+          <button 
+            onClick={() => setIsLightboxOpen(false)}
+            className="absolute top-4 right-4 z-50 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all border border-white/10"
+            aria-label="Close gallery"
+          >
+            <HiX size={22} />
+          </button>
+
+          {/* Left Arrow */}
+          {images.length > 1 && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+              }}
+              className="absolute left-4 md:left-8 z-50 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all border border-white/10"
+              aria-label="Previous image"
+            >
+              <HiChevronLeft size={26} />
+            </button>
+          )}
+
+          {/* Main Image container */}
+          <div 
+            className="relative w-full max-w-[90vw] h-[70vh] md:max-w-3xl md:h-[75vh] flex flex-col items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative w-full h-full">
+              <Image 
+                src={images[lightboxIndex]}
+                alt={product.title}
+                fill
+                className="object-contain"
+                sizes="100vw"
+                priority
+              />
+            </div>
+            
+            {/* Gallery Info Bar (StarTech style) */}
+            <div className="w-full text-center mt-6 text-white">
+              <h3 className="text-sm font-semibold tracking-wide truncate px-4">{product.title}</h3>
+              <p className="text-xs text-white/50 mt-1.5 font-medium">
+                Image {lightboxIndex + 1} of {images.length}
+              </p>
+            </div>
+          </div>
+
+          {/* Right Arrow */}
+          {images.length > 1 && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+              }}
+              className="absolute right-4 md:right-8 z-50 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all border border-white/10"
+              aria-label="Next image"
+            >
+              <HiChevronRight size={26} />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

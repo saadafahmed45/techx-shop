@@ -6,6 +6,7 @@ import {
   Search, Edit2, Trash2, Plus, RefreshCw,
   CheckCircle2, Clock3, Loader2, ImageIcon,
   Package, X, ChevronDown, Star, GripVertical,
+  ToggleLeft, ToggleRight,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { useAdminProducts, useAdminCollections, useDeleteProduct } from "@/lib/admin-hooks";
@@ -286,8 +287,9 @@ export default function ManageProducts() {
           product={selectedProduct}
           collections={collections}
           onClose={() => setEditModal(false)}
-          onUpdated={(updated) => {
+          onUpdated={() => {
             setEditModal(false);
+            refetchProducts();
           }}
         />
       )}
@@ -298,17 +300,21 @@ export default function ManageProducts() {
 function EditProductModal({ product, collections, onClose, onUpdated }) {
   const [saving, setSaving] = useState(false);
   const [images, setImages] = useState(product.images || []);
+  // Stock toggle
+  const [showStock, setShowStock] = useState(
+    product.stock !== undefined && product.stock !== null && product.stock !== 0
+  );
   const [formData, setFormData] = useState({
     title:       product.title       || "",
     slug:        product.slug        || "",
     price:       product.price       || "",
     vendor:      product.vendor      || "",
-    stock:       product.stock       || 0,
+    stock:       product.stock       ?? 0,
     productType: product.productType || "",
     description: product.description || "",
     status:      product.status      || "draft",
     featured:    Array.isArray(product.featured) ? product.featured : [],
-    collections: product.collections || [],
+    collections: Array.isArray(product.collections) ? product.collections : [],
   });
 
   const handleImageUpload = useCallback((e) => {
@@ -321,29 +327,40 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
     setSaving(true);
     try {
       const fd = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key === "featured") {
-          fd.append(key, JSON.stringify(value));
-        } else if (key === "collections") {
-          fd.append(key, JSON.stringify(value.map((c) => c._id || c)));
-        } else {
-          fd.append(key, value);
-        }
-      });
+
+      // Append all scalar fields
+      fd.append("title", formData.title);
+      fd.append("slug", formData.slug);
+      fd.append("price", formData.price);
+      fd.append("vendor", formData.vendor);
+      fd.append("stock", showStock ? formData.stock : 0);
+      fd.append("productType", formData.productType);
+      fd.append("description", formData.description);
+      fd.append("status", formData.status);
+      fd.append("featured", JSON.stringify(formData.featured));
+
+      // Send collections as array of full objects (server's parseCollections handles it)
+      fd.append("collections", JSON.stringify(formData.collections));
+
+      // Separate existing URL strings from new File objects
       const existingImages = images.filter((img) => typeof img === "string");
-      fd.append("existingImages", JSON.stringify(existingImages));
       const newFiles = images.filter((img) => img instanceof File);
+
+      fd.append("existingImages", JSON.stringify(existingImages));
       newFiles.forEach((file) => fd.append("images", file));
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/products/${product._id}`, {
-        method: "PUT",
-        body: fd,
-      });
-      if (!res.ok) throw new Error("Update failed");
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/products/${product._id}`,
+        { method: "PUT", body: fd }
+      );
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || "Update failed");
+      }
       const updated = await res.json();
       onUpdated(updated);
-    } catch {
-      Swal.fire({ icon: "error", title: "Update Failed" });
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Update Failed", text: err.message });
     } finally {
       setSaving(false);
     }
@@ -382,9 +399,32 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
                 className="w-full h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1" />
             </div>
             <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Stock</label>
-              <input type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                className="w-full h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1" />
+              {/* Stock with toggle */}
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Stock</label>
+                <button type="button"
+                  onClick={() => {
+                    setShowStock((p) => !p);
+                    if (showStock) setFormData((p) => ({ ...p, stock: 0 }));
+                  }}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold transition-all border ${
+                    showStock
+                      ? "bg-indigo-50 border-indigo-200 text-indigo-600"
+                      : "bg-slate-50 border-slate-200 text-slate-400 hover:border-indigo-200 hover:text-indigo-500"
+                  }`}>
+                  {showStock ? <ToggleRight size={14} className="text-indigo-500" /> : <ToggleLeft size={14} />}
+                  {showStock ? "On" : "Off"}
+                </button>
+              </div>
+              {showStock ? (
+                <input type="number" min="0" value={formData.stock}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  className="w-full h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400" />
+              ) : (
+                <div className="w-full h-12 rounded-2xl border border-slate-100 bg-slate-50 px-4 flex items-center text-sm text-slate-400">
+                  Toggle on to track stock
+                </div>
+              )}
             </div>
             <div>
               <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Product Type</label>
@@ -411,25 +451,56 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
             </div>
             <div>
               <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Featured Tags</label>
-              <select multiple value={formData.featured} onChange={(e) => setFormData({ ...formData, featured: Array.from(e.target.selectedOptions, (o) => o.value) })}
-                className="w-full h-32 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1">
-                {FEATURE_OPTIONS.map((opt) => (
-                  <option key={opt} value={opt} className="py-1">{opt}</option>
-                ))}
-              </select>
+              <div className="mt-1 flex flex-wrap gap-1.5 p-2 rounded-2xl border border-slate-200 min-h-[48px]">
+                {FEATURE_OPTIONS.map((opt) => {
+                  const active = formData.featured.includes(opt);
+                  return (
+                    <button key={opt} type="button"
+                      onClick={() => setFormData((prev) => ({
+                        ...prev,
+                        featured: active
+                          ? prev.featured.filter((f) => f !== opt)
+                          : [...prev.featured, opt],
+                      }))}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all border ${
+                        active
+                          ? "bg-indigo-600 text-white border-indigo-600"
+                          : "bg-white text-slate-500 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <div>
               <label className="text-xs font-bold uppercase tracking-widest text-slate-400">Collections</label>
-              <select multiple value={formData.collections.map((c) => c._id || c)} onChange={(e) => {
-                const selectedIds = Array.from(e.target.selectedOptions, (o) => o.value);
-                const selected = collections.filter((c) => selectedIds.includes(c._id));
-                setFormData({ ...formData, collections: selected });
-              }}
-                className="w-full h-32 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1">
-                {collections.map((col) => (
-                  <option key={col._id} value={col._id} className="py-1">{col.name}</option>
-                ))}
-              </select>
+              <div className="mt-1 flex flex-wrap gap-1.5 p-2 rounded-2xl border border-slate-200 min-h-[48px] max-h-32 overflow-y-auto">
+                {collections.map((col) => {
+                  const active = formData.collections.some((c) => (c._id || c) === col._id);
+                  return (
+                    <button key={col._id} type="button"
+                      onClick={() => setFormData((prev) => ({
+                        ...prev,
+                        collections: active
+                          ? prev.collections.filter((c) => (c._id || c) !== col._id)
+                          : [...prev.collections, { _id: col._id, name: col.name, slug: col.slug, imageUrl: col.imageUrl || "" }],
+                      }))}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all border ${
+                        active
+                          ? "bg-indigo-600 text-white border-indigo-600"
+                          : "bg-white text-slate-500 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"
+                      }`}
+                    >
+                      {col.name}
+                    </button>
+                  );
+                })}
+                {collections.length === 0 && (
+                  <span className="text-xs text-slate-400 p-1">No collections available</span>
+                )}
+              </div>
             </div>
           </div>
 

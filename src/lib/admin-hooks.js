@@ -67,7 +67,26 @@ export function useDeleteCollection() {
   return useMutation({
     mutationFn: (id) =>
       fetchJSON(`${API}/collections/${id}`, { method: "DELETE" }),
-    onSuccess: () => {
+    // Optimistic update — remove instantly before server responds
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["admin", "collections"] });
+      const previous = queryClient.getQueryData(["admin", "collections"]);
+      queryClient.setQueryData(["admin", "collections"], (old) => {
+        if (!old) return old;
+        // Handle both raw array and paginated {data:[]} shapes
+        if (Array.isArray(old)) return old.filter((c) => c._id !== id);
+        if (Array.isArray(old?.data))
+          return { ...old, data: old.data.filter((c) => c._id !== id) };
+        return old;
+      });
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      // Roll back on error
+      if (context?.previous)
+        queryClient.setQueryData(["admin", "collections"], context.previous);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "collections"] });
     },
   });
