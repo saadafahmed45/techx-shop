@@ -1,70 +1,53 @@
 # 🚀 TechX Shop
 
-Modern Full Stack E-Commerce Website built with **Next.js, React, Node.js, Express & MongoDB**.
+TechX Shop is a modern, production-ready full-stack eCommerce platform designed for scalability, performance, and a seamless shopping experience.
 
-TechX Shop is a fast, modern, mobile responsive online store with powerful admin dashboard, product management, collections system, featured products, image uploads, and bKash payment integration.
+Built with Next.js, Express.js, MongoDB, and Firebase Authentication, the project includes a customer storefront, secure authentication, a dynamic admin dashboard, product management, order management, and optimized API architecture.
 
----
+## ✨ Features
 
-# ✨ Features
+- Modern & Responsive UI
+- Product Catalog
+- Product Search & Filtering
+- Product Details
+- Shopping Cart
+- Secure Checkout
+- Firebase Authentication
+- User Profile
+- Order Management
+- Dynamic Admin Dashboard
+- Product CRUD
+- Category Management
+- Image Upload
+- REST API
+- Performance Optimized
+- SEO Friendly
+- Mobile Responsive
 
-## 🛍️ User Features
+## 🛠 Tech Stack
 
-- Modern Responsive UI
-- Product Listing
-- Product Details Page
-- Collections / Categories
-- Featured Products
-- Best Seller Products
-- New Arrival Products
-- Add to Cart
-- Checkout System
-- bKash Payment Integration
-- Search & Filtering
-- Mobile Friendly Design
-
----
-
-## ⚙️ Admin Features
-
-- Admin Dashboard
-- Add Products
-- Edit Products
-- Delete Products
-- Product Status Management
-- Featured Product Selection
-- Collection Management
-- Image Upload System
-- Inventory / Stock Management
-
----
-
-# 🧰 Tech Stack
-
-## Frontend
-
-- Next.js
-- React.js
+### Frontend
+- Next.js 15 (App Router)
+- React
 - Tailwind CSS
-- Lucide React
-- SweetAlert2
+- Shadcn UI
+- Framer Motion
+- Axios
+- React Hook Form
+- Zod
+- TanStack Query
+- Zustand
 
-## Backend
-
+### Backend
 - Node.js
 - Express.js
 - MongoDB
 - Mongoose
+- Firebase Admin SDK
+- JWT Authentication
 - Multer
 - Cloudinary
-- JWT Authentication
 
----
+## 🎯 Goal
 
-# 📸 Screenshots
-
-Add your screenshots here.
-
-```bash
-/public/screenshots/home.png
-/public/screenshots/admin.png
+Build a scalable, secure, and production-ready eCommerce platform following modern development best practices.
