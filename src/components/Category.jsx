@@ -37,7 +37,7 @@ const Category = async () => {
         <div className="w-16 h-1 bg-indigo-500 mx-auto mt-5 rounded-full" />
       </div>
 
-      {/* Grid */}
+      {/* Grid ffd*/}
       <div
         className={`grid grid-cols-2 md:grid-cols-${categories.length} gap-6 mt-12`}
       >
