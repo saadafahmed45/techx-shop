@@ -21,6 +21,7 @@ const ManageCollections = () => {
     data: collections = [],
     isLoading: collectionsLoading,
     isFetching,
+    refetch: refetchCollections,
   } = useAdminCollections();
   const { data: products = [] } = useAdminProducts();
   const deleteCollection = useDeleteCollection();
