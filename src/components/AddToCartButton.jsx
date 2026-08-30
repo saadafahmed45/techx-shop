@@ -2,56 +2,51 @@
 
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
-import { HiOutlineShoppingBag } from "react-icons/hi";
-import { motion } from "framer-motion";
+import { ShoppingBag, Loader2 } from "lucide-react";
 
 export default function AddToCartButton({ product }) {
   const { addToCart, openCart } = useCart();
   const [loading, setLoading] = useState(false);
+  const [added, setAdded] = useState(false);
 
   const handleAdd = () => {
+    if (product?.stock === 0) return;
     setLoading(true);
-
     setTimeout(() => {
       addToCart(product);
       openCart();
       setLoading(false);
-    }, 300);
+      setAdded(true);
+      setTimeout(() => setAdded(false), 1500);
+    }, 250);
   };
 
   return (
-    <motion.button
-      whileTap={{ scale: 0.95 }}
+    <button
       onClick={handleAdd}
-      disabled={loading}
-      className="
-        relative w-full sm:w-auto
-        flex items-center justify-center gap-2
-        px-4 py-2.5 sm:px-5 sm:py-2.5
-        rounded-xl
-        bg-black text-white
-        font-semibold text-sm
-        transition-all duration-300
-        hover:bg-slate-900
-        disabled:opacity-60 disabled:cursor-not-allowed
-      "
+      disabled={loading || product?.stock === 0}
+      className={`relative flex-1 flex items-center justify-center gap-2 h-11 px-6 rounded-lg font-medium text-xs transition-all cursor-pointer ${
+        product?.stock === 0
+          ? "bg-neutral-100 text-neutral-400 border border-neutral-200 cursor-not-allowed"
+          : added
+          ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+          : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20"
+      } disabled:opacity-70`}
     >
-      {/* ICON */}
-      <HiOutlineShoppingBag className="text-lg" />
-
-      {/* TEXT */}
-      <span className="whitespace-nowrap">
-        {loading ? "Adding..." : "Add to Cart"}
-      </span>
-
-      {/* LOADING DOT */}
-      {loading && (
-        <span className="absolute right-3 flex gap-1">
-          <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" />
-          <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce delay-150" />
-          <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce delay-300" />
-        </span>
+      {loading ? (
+        <Loader2 className="w-4 h-4 animate-spin" />
+      ) : (
+        <ShoppingBag className="w-4 h-4" />
       )}
-    </motion.button>
+      <span>
+        {product?.stock === 0
+          ? "Out of Stock"
+          : loading
+          ? "Adding..."
+          : added
+          ? "Added!"
+          : "Add to Cart"}
+      </span>
+    </button>
   );
 }

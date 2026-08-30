@@ -1,17 +1,13 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AnnouncementBar from "@/components/announcementBar";
 import ClientOnlyWidgets from "@/components/ClientOnlyWidgets";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata = {
@@ -99,7 +95,7 @@ export const metadata = {
 
 export default function ShopLayout({ children }) {
   return (
-    <div className={`${geistSans.variable} ${geistMono.variable} min-h-full flex flex-col`}>
+    <div className={`${inter.variable} min-h-full flex flex-col`} style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

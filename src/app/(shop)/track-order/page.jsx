@@ -3,9 +3,7 @@
 import { useState } from "react";
 import { FiSearch, FiTruck, FiCalendar, FiCreditCard, FiInfo, FiPackage, FiHelpCircle, FiDownload } from "react-icons/fi";
 import { BsBoxSeam } from "react-icons/bs";
-import dynamic from "next/dynamic";
 
-const jsPDF = () => import("jspdf");
 const generateInvoice = async (order) => {
   const { default: jsPDF } = await import("jspdf");
   const doc = new jsPDF();
@@ -185,8 +183,8 @@ const STEPS = ["Pending", "Confirmed", "Processing", "Shipped", "Delivered"];
 
 const STATUS_META = {
   Pending:    { label: "Pending",    desc: "Your order is placed and awaiting confirmation.", step: 0, bg: "bg-gray-50",    border: "border-gray-200",   icon: "text-gray-500",   badge: "bg-gray-100 text-gray-600"    },
-  Confirmed:  { label: "Confirmed",  desc: "Your order has been confirmed by the seller.",    step: 1, bg: "bg-blue-50",    border: "border-blue-200",   icon: "text-blue-500",   badge: "bg-blue-100 text-blue-600"    },
-  Processing: { label: "Processing", desc: "Your order is being packed and prepared.",        step: 2, bg: "bg-indigo-50",  border: "border-indigo-200", icon: "text-indigo-500", badge: "bg-indigo-100 text-indigo-600" },
+  Confirmed:  { label: "Confirmed",  desc: "Your order has been confirmed by the seller.",    step: 1, bg: "bg-indigo-50",  border: "border-indigo-200", icon: "text-indigo-600", badge: "bg-indigo-100 text-indigo-700"  },
+  Processing: { label: "Processing", desc: "Your order is being packed and prepared.",        step: 2, bg: "bg-indigo-50",  border: "border-indigo-200", icon: "text-indigo-600", badge: "bg-indigo-100 text-indigo-700"  },
   Shipped:    { label: "Shipped",    desc: "Your order is on the way!",                       step: 3, bg: "bg-yellow-50",  border: "border-yellow-200", icon: "text-yellow-500", badge: "bg-yellow-100 text-yellow-600" },
   Delivered:  { label: "Delivered",  desc: "Your order has been delivered! 🎉",               step: 4, bg: "bg-green-50",   border: "border-green-200",  icon: "text-green-500",  badge: "bg-green-100 text-green-600"  },
   Cancelled:  { label: "Cancelled",  desc: "This order has been cancelled.",                  step: -1, bg: "bg-red-50",   border: "border-red-200",    icon: "text-red-500",    badge: "bg-red-100 text-red-500"      },
@@ -217,8 +215,8 @@ function Stepper({ status }) {
           <div key={step} className="flex items-center flex-1 last:flex-none">
             <div className="flex flex-col items-center gap-1.5 shrink-0">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all
-                ${done   ? "bg-blue-600 border-blue-500 text-white"
-                : active ? "bg-white border-blue-500 text-blue-500"
+                ${done   ? "bg-indigo-600 border-indigo-600 text-white"
+                : active ? "bg-white border-indigo-600 text-indigo-600"
                 :          "bg-white border-gray-200"}`}
               >
                 {done ? (
@@ -239,7 +237,7 @@ function Stepper({ status }) {
             {i < STEPS.length - 1 && (
               <div className="flex-1 h-0.5 mx-1 mb-5 rounded-full bg-gray-200 overflow-hidden">
                 <div
-                  className="h-full bg-blue-600 rounded-full transition-all duration-500"
+                  className="h-full bg-indigo-600 rounded-full transition-all duration-500"
                   style={{ width: i < currentStep ? "100%" : "0%" }}
                 />
               </div>
@@ -296,15 +294,15 @@ export default function TrackOrderPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-16 mt-4 px-4">
 
       <div className="flex flex-col items-center mb-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mb-4">
-          <FiTruck className="w-8 h-8 text-blue-500" />
+        <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
+          <FiTruck className="w-8 h-8 text-indigo-600" />
         </div>
         <h1 className="text-2xl font-bold text-gray-800">Track Your Order</h1>
         <p className="text-sm text-gray-500 mt-1">Enter your Order ID to get live updates</p>
       </div>
 
       <form onSubmit={handleTrack}
-        className="w-full max-w-xl flex items-center border border-gray-200 rounded-full bg-white shadow-sm px-4 py-1 mb-6">
+        className="w-full max-w-xl flex items-center border border-gray-200 rounded-full bg-white shadow-sm px-4 py-1 mb-6 focus-within:border-indigo-600 transition-colors">
         <FiSearch className="text-gray-400 w-5 h-5 shrink-0" />
         <input
           type="text"
@@ -314,7 +312,7 @@ export default function TrackOrderPage() {
           className="flex-1 px-3 py-2 text-sm outline-none bg-transparent text-gray-700"
         />
         <button type="submit" disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-semibold px-5 py-2 rounded-full flex items-center gap-2 transition-all disabled:opacity-60 shrink-0">
+          className="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-semibold px-5 py-2 rounded-full flex items-center gap-2 transition-all disabled:opacity-60 shrink-0 cursor-pointer">
           {loading
             ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             : <>→ Track</>}
@@ -353,7 +351,7 @@ export default function TrackOrderPage() {
             <div className="border border-gray-100 rounded-xl p-4 space-y-4">
 
               <h3 className="font-semibold text-sm text-gray-800 flex items-center gap-2">
-                <FiPackage className="text-blue-500 w-4 h-4" /> Order Details
+                <FiPackage className="text-indigo-600 w-4 h-4" /> Order Details
               </h3>
 
               <div className="grid grid-cols-2 gap-x-6 gap-y-3">
@@ -441,7 +439,7 @@ export default function TrackOrderPage() {
             <button
               type="button"
               onClick={() => generateInvoice(order)}
-              className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all"
+              className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all cursor-pointer"
             >
               <FiDownload className="w-4 h-4" />
               Download Invoice
@@ -449,7 +447,7 @@ export default function TrackOrderPage() {
 
             <button
               type="button"
-              className="flex items-center gap-2 text-sm text-gray-500 border border-gray-200 rounded-full px-4 py-2.5 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 text-sm text-gray-500 border border-gray-200 rounded-full px-4 py-2.5 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <FiHelpCircle className="w-4 h-4" /> Need Help?
             </button>

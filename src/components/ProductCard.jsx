@@ -1,28 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { AiFillStar, AiOutlineStar } from "react-icons/ai";
-import { TbShoppingBag, TbHeart, TbHeartFilled, TbArrowUpRight } from "react-icons/tb";
+import { Star, Heart, ShoppingBag, ArrowUpRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useWishlistStore } from "@/stores/wishlistStore";
 
-export default function ProductCard({ product, index = 0, showQuickAdd = true, showWishlist = true, showRating = true }) {
+export default function ProductCard({
+  product,
+  index = 0,
+  showQuickAdd = true,
+  showWishlist = true,
+  showRating = true,
+}) {
   const { addToCart, openCart } = useCart();
-  const [wished, setWished] = useState(false);
+  const { items, toggleWishlist, hydrate } = useWishlistStore();
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
 
   if (!product) return null;
 
-  // Handle image URLs and array shapes
-  const image = Array.isArray(product.images) ? product.images[0] : product.images;
-  const cleanImage = image?.replace(/[\[\]"]/g, "") || "/placeholder.png";
-  const [imgSrc, setImgSrc] = useState(cleanImage);
+  const isWished = items.some((item) => item._id === product._id);
 
-  const price = product.price ?? 0;
-  const category = product.category?.name || product.productType || "General";
-  const averageRating = product.rating?.average || 4.2; // default fallback if none
-  const totalRating = product.rating?.count || 12;
+  // Clean image resolution
+  const rawImage = Array.isArray(product.images) ? product.images[0] : product.images;
+  const cleanImage =
+    typeof rawImage === "string" ? rawImage.replace(/[\[\]"]/g, "") : null;
+  const initialImg =
+    cleanImage || `https://picsum.photos/seed/${product.slug || product._id}/500/500`;
+
+  const [imgSrc, setImgSrc] = useState(initialImg);
+
+  const price = Number(product.price ?? 0);
+  const comparePrice = product.compareAtPrice || product.originalPrice || (price > 0 ? price * 1.2 : 0);
+  const hasDiscount = comparePrice > price;
+  
+  const category =
+    product.category?.name || product.productType || product.collections?.[0]?.name || "Device";
+  const averageRating = product.rating?.average || 4.5;
+  const totalReviews = product.rating?.count || product.rating?.reviews?.length || 8;
 
   const handleQuickAdd = (e) => {
     e.preventDefault();
@@ -34,36 +53,34 @@ export default function ProductCard({ product, index = 0, showQuickAdd = true, s
   const handleWishlist = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setWished(!wished);
+    toggleWishlist(product);
   };
 
+  const productUrl = `/product/${product.slug || product._id}`;
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.05, duration: 0.4, ease: "easeOut" }}
-      className="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-slate-100 hover:border-slate-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] hover:shadow-[0_16px_36px_rgba(58,90,255,0.05)] transition-all duration-300"
-      style={{ fontFamily: "'Inter', sans-serif" }}
-    >
-      {/* Image Section */}
-      <Link href={`/product/${product.slug || product._id}`} className="relative block overflow-hidden aspect-square bg-slate-50/60 p-3">
-        <div className="relative w-full h-full rounded-xl overflow-hidden">
+    <div className="group relative flex flex-col bg-white rounded-xl border border-neutral-200/80 hover:border-neutral-300 transition-all duration-300 overflow-hidden">
+      {/* Image Area */}
+      <Link
+        href={productUrl}
+        className="relative block aspect-square w-full bg-[#f6f6f7] p-4 overflow-hidden"
+      >
+        <div className="relative w-full h-full">
           <Image
             src={imgSrc}
-            alt={product.title}
+            alt={product.title || "Product"}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-contain mix-blend-multiply transition-transform duration-500 ease-out group-hover:scale-105"
             onError={() => {
               setImgSrc(`https://picsum.photos/seed/${product.slug || product._id}/500/500`);
             }}
           />
         </div>
 
-        {/* Floating Badges */}
+        {/* Featured Tag */}
         {product.badge && (
-          <span className="absolute top-5 left-5 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase bg-indigo-600 text-white shadow-sm z-10">
+          <span className="absolute top-3 left-3 px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wide uppercase bg-neutral-900 text-white z-10">
             {product.badge}
           </span>
         )}
@@ -72,84 +89,91 @@ export default function ProductCard({ product, index = 0, showQuickAdd = true, s
         {showWishlist && (
           <button
             onClick={handleWishlist}
-            className="absolute top-5 right-5 w-8.5 h-8.5 rounded-full flex items-center justify-center bg-white/90 hover:bg-white border border-slate-100 shadow-sm transition-all duration-200 hover:scale-110 z-10 cursor-pointer"
-            style={{ backdropFilter: "blur(8px)" }}
-            aria-label="Add to wishlist"
+            className={`absolute top-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center border transition-all z-10 ${
+              isWished
+                ? "bg-red-50 border-red-200 text-red-500"
+                : "bg-white/90 backdrop-blur-xs border-neutral-200 text-neutral-400 hover:text-neutral-900 hover:bg-white"
+            }`}
+            aria-label="Wishlist"
           >
-            {wished ? (
-              <TbHeartFilled className="text-red-500 text-[16px] animate-pulse" />
-            ) : (
-              <TbHeart className="text-slate-500 hover:text-slate-800 text-[16px]" />
-            )}
+            <Heart
+              className={`w-4 h-4 ${isWished ? "fill-current text-red-500" : ""}`}
+            />
           </button>
         )}
 
-        {/* Quick Add Button (Fades & slides up on hover) */}
-        {showQuickAdd && product.stock > 0 && (
-          <div className="absolute bottom-5 left-5 right-5 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10">
+        {/* Quick Add Button on Hover */}
+        {showQuickAdd && product.stock !== 0 && (
+          <div className="absolute inset-x-3 bottom-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 z-10">
             <button
               onClick={handleQuickAdd}
-              className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-black text-white text-xs font-semibold py-2.5 px-4 rounded-xl shadow-lg transition-all duration-200 cursor-pointer"
+              className="w-full flex items-center justify-center gap-1.5 h-9 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium shadow-sm shadow-indigo-600/20 transition-colors cursor-pointer"
             >
-              <TbShoppingBag className="text-[14px]" />
-              Add to Cart
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>Add to Cart</span>
             </button>
           </div>
         )}
-        
-        {/* Out of Stock Badge */}
-        {product.stock <= 0 && (
-          <span className="absolute bottom-5 left-5 right-5 py-2 rounded-xl text-[10px] font-bold text-center uppercase tracking-wider bg-slate-100 text-slate-400 border border-slate-200 z-10">
+
+        {/* Out of Stock Label */}
+        {product.stock === 0 && (
+          <div className="absolute inset-x-3 bottom-3 py-1.5 bg-neutral-100/90 border border-neutral-200 text-neutral-500 text-[11px] font-medium text-center rounded-lg">
             Out of Stock
-          </span>
+          </div>
         )}
       </Link>
 
-      {/* Info Section */}
-      <div className="flex flex-col flex-1 p-4.5 pt-2">
-        {/* Category / Type */}
-        <span className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase mb-1">
+      {/* Content Area */}
+      <div className="flex flex-col flex-1 p-3.5 sm:p-4">
+        {/* Category Tag */}
+        <span className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-1">
           {category}
         </span>
 
-        {/* Title */}
-        <Link href={`/product/${product.slug || product._id}`} className="mb-2">
-          <h3 className="text-[13.5px] font-medium text-slate-800 line-clamp-2 leading-snug hover:text-indigo-600 transition-colors">
+        {/* Product Title */}
+        <Link href={productUrl} className="mb-2">
+          <h3 className="text-xs sm:text-[13px] font-medium text-neutral-900 line-clamp-2 leading-snug hover:text-indigo-600 transition-colors">
             {product.title}
           </h3>
         </Link>
 
-        {/* Rating Row */}
+        {/* Rating */}
         {showRating && (
-          <div className="flex items-center gap-1 mb-3.5 mt-auto">
-            <div className="flex items-center">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <span key={s}>
-                  {s <= Math.round(averageRating) ? (
-                    <AiFillStar className="text-amber-400 text-[12px]" />
-                  ) : (
-                    <AiOutlineStar className="text-slate-200 text-[12px]" />
-                  )}
-                </span>
-              ))}
+          <div className="flex items-center gap-1.5 mb-3 mt-auto">
+            <div className="flex items-center text-amber-400">
+              <Star className="w-3 h-3 fill-amber-400" />
             </div>
-            <span className="text-[10.5px] text-slate-400 font-medium">({totalRating})</span>
+            <span className="text-[11px] font-semibold text-neutral-800">
+              {Number(averageRating).toFixed(1)}
+            </span>
+            <span className="text-[10px] text-neutral-400">
+              ({totalReviews})
+            </span>
           </div>
         )}
 
-        {/* Price & Action */}
-        <div className={`flex items-center justify-between mt-auto ${!showRating ? "pt-2" : ""}`}>
-          <span className="text-[16px] font-bold text-slate-900">
-            ৳{price.toLocaleString()}
-          </span>
+        {/* Price Row */}
+        <div className="flex items-baseline justify-between pt-1 border-t border-neutral-100 mt-auto">
+          <div className="flex items-baseline gap-2">
+            <span className="text-sm sm:text-base font-semibold text-neutral-950">
+              ৳{price.toLocaleString()}
+            </span>
+            {hasDiscount && (
+              <span className="text-xs text-neutral-400 line-through">
+                ৳{Math.round(comparePrice).toLocaleString()}
+              </span>
+            )}
+          </div>
+
           <Link
-            href={`/product/${product.slug || product._id}`}
-            className="w-7 h-7 rounded-lg bg-slate-50 group-hover:bg-indigo-50 border border-slate-100 group-hover:border-indigo-100 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 transition-all duration-300"
+            href={productUrl}
+            className="text-neutral-400 group-hover:text-indigo-600 transition-colors p-1"
+            aria-label="View Details"
           >
-            <TbArrowUpRight className="text-[14px]" />
+            <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

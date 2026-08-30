@@ -169,8 +169,8 @@ export default function HeroSlider() {
           {/* Badge */}
           {slide.badge && (
             <div className="mb-3 sm:mb-4 inline-flex items-center gap-1.5 self-start">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-blue-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-indigo-300">
                 {slide.badge}
               </span>
             </div>
@@ -190,15 +190,15 @@ export default function HeroSlider() {
 
           {/* CTA */}
           <div className="flex items-center gap-3">
-            <button className="group relative overflow-hidden bg-white text-black text-xs sm:text-sm font-extrabold px-5 sm:px-7 py-2.5 sm:py-3 rounded-full tracking-wider transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-white/20">
+            <button className="group relative overflow-hidden bg-white text-black text-xs sm:text-sm font-extrabold px-5 sm:px-7 py-2.5 sm:py-3 rounded-full tracking-wider transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-white/20 cursor-pointer">
               <span className="relative z-10">{slide.buttonText || "SHOP NOW"}</span>
-              <span className="absolute inset-0 bg-blue-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-full" />
+              <span className="absolute inset-0 bg-indigo-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-full" />
               <span className="absolute inset-0 z-10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-extrabold text-xs sm:text-sm tracking-wider">
                 {slide.buttonText || "SHOP NOW"}
               </span>
             </button>
 
-            <button className="text-white/60 hover:text-white text-xs sm:text-sm font-semibold tracking-wide transition-colors underline underline-offset-4">
+            <button className="text-white/60 hover:text-white text-xs sm:text-sm font-semibold tracking-wide transition-colors underline underline-offset-4 cursor-pointer">
               Learn more
             </button>
           </div>
@@ -259,7 +259,7 @@ export default function HeroSlider() {
                   className="object-cover"
                 />
                 {idx === current && (
-                  <div className="absolute inset-0 bg-blue-500/20" />
+                  <div className="absolute inset-0 bg-indigo-600/20" />
                 )}
               </button>
             ))}
@@ -271,7 +271,7 @@ export default function HeroSlider() {
           <div className="absolute bottom-0 left-0 right-0 z-30 h-1 bg-white/10">
             <div
               key={current}
-              className="h-full bg-blue-700 animate-[progress_4.5s_linear_forwards]"
+              className="h-full bg-indigo-600 animate-[progress_4.5s_linear_forwards]"
             />
           </div>
         )}

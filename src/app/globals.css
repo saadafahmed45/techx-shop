@@ -2,3 +2,42 @@
 @import "swiper/css";
 @import "swiper/css/navigation";
 @import "swiper/css/pagination";
+
+:root {
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: #eef2ff;
+}
+
+@layer base {
+  * {
+    border-color: #e4e4e7;
+  }
+  body {
+    background-color: #ffffff;
+    color: #09090b;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection {
+    background-color: #4f46e5;
+    color: #ffffff;
+  }
+}
+
+/* Minimalist scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4f46e5;
+}
