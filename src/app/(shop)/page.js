@@ -8,6 +8,15 @@ import PromoBanner from "@/components/PromoBanner";
 import WhyTechX from "@/components/WhyTechX";
 import FadeIn from "@/components/FadeIn";
 
+export const metadata = {
+  title: "TechX Shop | #1 Online Tech, Electronics & Gadgets Store Bangladesh",
+  description:
+    "Shop authentic tech gadgets, mechanical keyboards, gaming mice, headphones, PC components, and smart electronics with fast nationwide delivery at TechX Shop Bangladesh.",
+  alternates: {
+    canonical: "/",
+  },
+};
+
 function SectionFallback({ height = "h-72" }) {
   return (
     <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10`}>
