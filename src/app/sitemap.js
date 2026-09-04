@@ -46,6 +46,31 @@ export default async function sitemap() {
     },
   ];
 
+  // Dynamic Collection routes from backend API
+  let collectionEntries = [];
+  try {
+    const res = await fetch(`${API}/collections`, {
+      next: { revalidate: 3600 },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const collections = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.data)
+        ? data.data
+        : [];
+
+      collectionEntries = collections.map((cat) => ({
+        url: `${SITE_URL}/product?category=${encodeURIComponent(cat.slug || cat.name)}`,
+        lastModified: currentDate,
+        changeFrequency: "weekly",
+        priority: 0.85,
+      }));
+    }
+  } catch (error) {
+    console.error("Sitemap collections fetch error:", error);
+  }
+
   // Dynamic Product routes from backend API
   let productEntries = [];
   try {
@@ -71,5 +96,5 @@ export default async function sitemap() {
     console.error("Sitemap product fetch error:", error);
   }
 
-  return [...routes, ...productEntries];
+  return [...routes, ...collectionEntries, ...productEntries];
 }

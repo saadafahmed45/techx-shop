@@ -27,9 +27,13 @@ export async function generateMetadata({ params }) {
     };
   }
 
+  const formattedPrice = product.price
+    ? `BDT ${Number(product.price).toLocaleString("en-BD")}`
+    : "";
+
   const cleanDescription = product.description
-    ? product.description.replace(/<[^>]*>?/gm, "").slice(0, 160)
-    : `Buy authentic ${product.title} at best price in Bangladesh from TechX Shop. Fast delivery & official warranty.`;
+    ? product.description.replace(/<[^>]*>?/gm, "").slice(0, 155)
+    : `Buy authentic ${product.title} at best price (${formattedPrice}) in Bangladesh from TechX Shop. 100% genuine tech gear, official warranty & fast delivery.`;
 
   const imageUrl =
     Array.isArray(product.images) && product.images.length > 0
@@ -37,7 +41,7 @@ export async function generateMetadata({ params }) {
       : `${SITE_URL}/techx-banner.jpg`;
 
   return {
-    title: `${product.title} - Price in Bangladesh | TechX Shop`,
+    title: `${product.title} Price in Bangladesh | TechX Shop`,
     description: cleanDescription,
     keywords: [
       product.title,
@@ -46,15 +50,16 @@ export async function generateMetadata({ params }) {
       "TechX Shop",
       "price in bd",
       "buy online bangladesh",
-      "authentic tech gear",
+      "authentic tech gear bd",
     ].filter(Boolean),
     alternates: {
       canonical: `/product/${id}`,
     },
     openGraph: {
-      title: `${product.title} | TechX Shop`,
+      title: `${product.title} Price in Bangladesh | TechX Shop`,
       description: cleanDescription,
       url: `${SITE_URL}/product/${id}`,
+      siteName: "TechX Shop",
       type: "website",
       images: [
         {
@@ -67,7 +72,7 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product.title} | TechX Shop`,
+      title: `${product.title} Price in Bangladesh | TechX Shop`,
       description: cleanDescription,
       images: [imageUrl],
     },
@@ -83,10 +88,13 @@ export default async function ProductPage({ params }) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.title,
-    image: Array.isArray(product.images) && product.images.length > 0 ? product.images : [`${SITE_URL}/techx-banner.jpg`],
+    image:
+      Array.isArray(product.images) && product.images.length > 0
+        ? product.images
+        : [`${SITE_URL}/techx-banner.jpg`],
     description: product.description
       ? product.description.replace(/<[^>]*>?/gm, "").slice(0, 300)
-      : `Buy ${product.title} at TechX Shop`,
+      : `Buy ${product.title} at TechX Shop Bangladesh with official warranty.`,
     sku: product._id,
     mpn: product._id,
     brand: {
@@ -107,6 +115,41 @@ export default async function ProductPage({ params }) {
       seller: {
         "@type": "Organization",
         name: "TechX Shop",
+      },
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: "60.00",
+          currency: "BDT",
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "BD",
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 1,
+            unitCode: "DAY",
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: 1,
+            maxValue: 3,
+            unitCode: "DAY",
+          },
+        },
+      },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "BD",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 7,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn",
       },
     },
     ...(product.rating?.count > 0 && {

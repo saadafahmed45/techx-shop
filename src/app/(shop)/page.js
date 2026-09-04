@@ -32,7 +32,12 @@ export default function Home() {
       <Suspense fallback={<SectionFallback height="h-96" />}>
         <HeroSlider />
       </Suspense>
-
+      {/* 6. Filter Tabs */}
+      <FadeIn delay={100}>
+        <Suspense fallback={<SectionFallback height="h-96" />}>
+          <ProductsFilterTabs />
+        </Suspense>
+      </FadeIn>
       {/* 2. Curated Categories */}
       <FadeIn>
         <Suspense fallback={<SectionFallback height="h-64" />}>
@@ -69,12 +74,7 @@ export default function Home() {
         </Suspense>
       </FadeIn>
 
-      {/* 6. Filter Tabs */}
-      <FadeIn delay={100}>
-        <Suspense fallback={<SectionFallback height="h-96" />}>
-          <ProductsFilterTabs />
-        </Suspense>
-      </FadeIn>
+
 
       {/* 7. Top Selling Carousel */}
       <FadeIn delay={80}>

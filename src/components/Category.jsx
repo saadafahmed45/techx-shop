@@ -32,19 +32,19 @@ export default async function Category() {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
-              Browse by Department
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">
+              Top Departments
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-950 mt-1">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-950 mt-2">
               Curated Categories
             </h2>
           </div>
           <Link
-            href="/product"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-700 hover:text-neutral-950 transition-colors group self-start md:self-auto"
+            href="/collections"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-700 hover:text-indigo-600 transition-colors group self-start md:self-auto"
           >
-            <span>View All Collections</span>
-            <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <span>View All Categories</span>
+            <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Link>
         </div>
 

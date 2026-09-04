@@ -7,23 +7,24 @@ const API = process.env.NEXT_PUBLIC_API_URL || "https://techx-server-tau.vercel.
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://techx-shop.vercel.app";
 
 export const metadata = {
-  title: "Curated Tech Collections & Categories | TechX Shop Bangladesh",
+  title: "Explore Tech Categories & Collections | TechX Shop Bangladesh",
   description:
-    "Explore top tech collections at TechX Shop: Keyboards, Gaming Mice, Audio Devices, PC Hardware, Smart Gadgets, and Accessories. Shop authentic tech in Bangladesh.",
+    "Discover authentic gaming gear, mechanical keyboards, studio-grade audio, PC hardware, and premium accessories categorized for your ultimate tech setup.",
   keywords: [
     "tech collections",
     "electronics categories",
     "gaming gear categories",
     "computer parts bangladesh",
     "TechX shop collections",
+    "mechanical keyboards bd",
   ],
   alternates: {
     canonical: "/collections",
   },
   openGraph: {
-    title: "Curated Tech Collections & Categories | TechX Shop",
+    title: "Explore Tech Categories & Collections | TechX Shop",
     description:
-      "Discover handpicked electronics, gaming gear, PC components, and audio equipment by category at TechX Shop.",
+      "Discover authentic gaming gear, mechanical keyboards, audio equipment, and PC components by category at TechX Shop.",
     url: `${SITE_URL}/collections`,
     type: "website",
   },
@@ -78,43 +79,46 @@ export default async function CollectionsPage() {
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold uppercase tracking-wider mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Curated Departments</span>
+        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold uppercase tracking-wider mb-3.5 shadow-2xs">
+            <Sparkles className="w-4 h-4 text-indigo-600" />
+            <span>Curated Tech Lineup</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-950 tracking-tight">
-            Browse All Collections
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-neutral-950 tracking-tight">
+            Explore All Categories
           </h1>
-          <p className="text-sm text-neutral-600 mt-2">
-            Explore our carefully organized categories for high-performance PC components, gaming gear, audio equipment, and authentic accessories.
+          <p className="text-sm sm:text-base text-neutral-600 mt-3 leading-relaxed max-w-xl mx-auto">
+            Find everything from high-performance PC components and custom mechanical keyboards to studio audio gear and authentic daily tech essentials.
           </p>
         </div>
 
         {/* Collections Grid */}
         {collections.length === 0 ? (
-          <div className="text-center py-16 border border-neutral-200 rounded-2xl bg-neutral-50">
-            <Layers className="w-10 h-10 text-neutral-400 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-neutral-800">
-              Collections will be listed here soon
+          <div className="text-center py-16 px-6 border border-neutral-200/80 rounded-2xl bg-neutral-50/80 max-w-lg mx-auto">
+            <div className="w-14 h-14 rounded-2xl bg-white border border-neutral-200 flex items-center justify-center mx-auto mb-4 shadow-xs">
+              <Layers className="w-7 h-7 text-neutral-400" />
+            </div>
+            <h3 className="text-lg font-bold text-neutral-900">
+              No Categories Available Right Now
             </h3>
-            <p className="text-xs text-neutral-500 mt-1">
-              In the meantime, explore our full product catalog.
+            <p className="text-sm text-neutral-500 mt-1.5 leading-normal">
+              We're currently reorganizing our product departments. In the meantime, browse our complete inventory.
             </p>
             <Link
               href="/product"
-              className="inline-block mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition-colors"
+              className="inline-flex items-center gap-2 mt-5 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-600/20"
             >
-              Browse All Products
+              <span>Browse All Products</span>
+              <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {collections.map((cat) => (
               <Link
                 key={cat._id || cat.slug}
                 href={`/product?category=${cat.slug || cat.name}`}
-                className="group flex flex-col bg-neutral-50 hover:bg-neutral-100/90 border border-neutral-200/80 rounded-2xl p-4 transition-all duration-300 hover:shadow-md hover:border-neutral-300"
+                className="group flex flex-col bg-neutral-50 hover:bg-white border border-neutral-200/80 hover:border-indigo-300 rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/5 hover:-translate-y-0.5"
               >
                 <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-white border border-neutral-200/60 mb-4">
                   {cat.imageUrl ? (
@@ -134,12 +138,12 @@ export default async function CollectionsPage() {
 
                 <div className="flex items-center justify-between mt-auto pt-1">
                   <div>
-                    <h2 className="text-sm font-bold text-neutral-900 group-hover:text-indigo-600 transition-colors">
+                    <h2 className="text-base font-bold text-neutral-900 group-hover:text-indigo-600 transition-colors">
                       {cat.name}
                     </h2>
-                    <span className="text-[11px] text-neutral-500">Explore Collection</span>
+                    <span className="text-xs text-neutral-500 font-medium">Browse Collection</span>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 group-hover:text-indigo-600 group-hover:border-indigo-200 transition-colors shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 group-hover:text-indigo-600 group-hover:border-indigo-200 transition-colors shrink-0 shadow-2xs">
                     <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </div>
                 </div>
