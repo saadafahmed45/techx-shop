@@ -1,124 +1,195 @@
 "use client";
 
+import React from "react";
 import { useShopData } from "@/context/ShopDataContext";
 import ProductCard from "@/components/ProductCard";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
-import FadeIn from "@/components/FadeIn";
+import { ArrowRight } from "lucide-react";
 
 export { ProductCard };
 
+const FEATURED_FALLBACKS = [
+  {
+    _id: "fb-feat-1",
+    slug: "airpods-pro-2",
+    title: "AirPods Pro 2 with MagSafe Case",
+    vendor: "Apple",
+    price: 189,
+    compareAtPrice: 239,
+    badge: "-20%",
+    images: ["https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=500&auto=format&fit=crop&q=80"],
+    rating: { average: 4.9, count: 1248 },
+    stock: 50,
+  },
+  {
+    _id: "fb-feat-2",
+    slug: "galaxy-watch-6-classic",
+    title: "Galaxy Watch 6 Classic Bluetooth",
+    vendor: "Samsung",
+    price: 299,
+    compareAtPrice: 349,
+    badge: "-15%",
+    images: ["https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=80"],
+    rating: { average: 4.8, count: 892 },
+    stock: 35,
+  },
+  {
+    _id: "fb-feat-3",
+    slug: "classic-everyday-backpack",
+    title: "Classic Everyday Tech Backpack",
+    vendor: "Herschel",
+    price: 89,
+    compareAtPrice: 0,
+    badge: "New",
+    images: ["https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&auto=format&fit=crop&q=80"],
+    rating: { average: 4.7, count: 664 },
+    stock: 20,
+  },
+  {
+    _id: "fb-feat-4",
+    slug: "wh-1000xm5-headphones",
+    title: "WH-1000XM5 Wireless Noise-Cancelling",
+    vendor: "Sony",
+    price: 299,
+    compareAtPrice: 369,
+    badge: "-20%",
+    images: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80"],
+    rating: { average: 4.9, count: 1365 },
+    stock: 45,
+  },
+];
+
+const NEW_ARRIVALS_FALLBACKS = [
+  {
+    _id: "fb-new-1",
+    slug: "go-3-portable-speaker",
+    title: "Go 3 Waterproof Ultra-Portable Speaker",
+    vendor: "JBL",
+    price: 49,
+    compareAtPrice: 0,
+    badge: "New",
+    images: ["https://images.unsplash.com/photo-1545454675-3531b543be5d?w=500&auto=format&fit=crop&q=80"],
+    rating: { average: 4.8, count: 2365 },
+    stock: 40,
+  },
+  {
+    _id: "fb-new-2",
+    slug: "k2-wireless-keyboard",
+    title: "K2 Wireless Mechanical Keyboard RGB",
+    vendor: "Keychron",
+    price: 89,
+    compareAtPrice: 0,
+    badge: "New",
+    images: ["https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500&auto=format&fit=crop&q=80"],
+    rating: { average: 4.9, count: 892 },
+    stock: 25,
+  },
+  {
+    _id: "fb-new-3",
+    slug: "737-power-bank-24k",
+    title: "737 Power Bank (PowerCore 24K)",
+    vendor: "Anker",
+    price: 99,
+    compareAtPrice: 0,
+    badge: "New",
+    images: ["https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=500&auto=format&fit=crop&q=80"],
+    rating: { average: 4.8, count: 654 },
+    stock: 30,
+  },
+  {
+    _id: "fb-new-4",
+    slug: "gen-6-smartwatch-black",
+    title: "Gen 6 Smartwatch Stainless Steel",
+    vendor: "Fossil",
+    price: 199,
+    compareAtPrice: 0,
+    badge: "New",
+    images: ["https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=500&auto=format&fit=crop&q=80"],
+    rating: { average: 4.6, count: 785 },
+    stock: 18,
+  },
+];
+
 export default function ProductSection({
-  title = "Products",
+  title = "Featured Products",
   subtitle,
   filterValue,
   viewAllLink = "/product",
-  bgColor = "bg-white",
-  emptyMessage,
+  viewAllText,
+  isNewArrivals = false,
 }) {
   const { products: allProducts, loading } = useShopData();
 
-  const products = (allProducts || []).filter(
-    (p) => p && p.status === "active",
+  const realProducts = (allProducts || []).filter(
+    (p) => p && p.status === "active"
   );
 
   const filtered = filterValue
-    ? products.filter((p) => {
+    ? realProducts.filter((p) => {
         if (Array.isArray(p.featured)) {
           return p.featured.includes(filterValue);
         }
         return false;
       })
-    : products;
+    : realProducts;
 
-  const displayProducts = filtered.slice(0, 4);
+  // Fallback if not enough products from API
+  const fallbackList = isNewArrivals || title.toLowerCase().includes("arrival")
+    ? NEW_ARRIVALS_FALLBACKS
+    : FEATURED_FALLBACKS;
+
+  const displayProducts =
+    filtered.length >= 4
+      ? filtered.slice(0, 4)
+      : filtered.length > 0
+      ? [...filtered, ...fallbackList.slice(filtered.length, 4)]
+      : fallbackList;
+
+  const resolvedViewAllText =
+    viewAllText ||
+    (title.toLowerCase().includes("arrival")
+      ? "View All"
+      : "View All Products");
 
   return (
-    <section className={`py-16 sm:py-20 ${bgColor}`}>
+    <section className="py-12 sm:py-16 bg-white border-b border-neutral-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* ── Header ── */}
-        <div className="flex items-end justify-between mb-10 sm:mb-12">
-          {/* Left */}
-          <div className="space-y-1">
-            {subtitle && (
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3 text-neutral-300" />
-                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                  {subtitle}
-                </span>
-              </div>
-            )}
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-950 leading-none">
+        
+        {/* Section Header */}
+        <div className="flex items-center justify-between mb-8 sm:mb-10">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-neutral-950 tracking-tight">
               {title}
             </h2>
+            {subtitle && (
+              <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
+                {subtitle}
+              </p>
+            )}
           </div>
 
-          {/* Right */}
           {viewAllLink && (
             <Link
               href={viewAllLink}
-              className="group inline-flex items-center gap-1.5 text-xs font-medium text-neutral-500 hover:text-neutral-950 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors group"
             >
-              <span className="hidden sm:inline border-b border-transparent group-hover:border-neutral-950 transition-colors pb-0.5">
-                Explore All
-              </span>
-              <span className="sm:hidden text-[11px]">All</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              <span>{resolvedViewAllText}</span>
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
           )}
         </div>
 
-        {/* ── Divider line ── */}
-        <div className="h-px bg-neutral-200/80 mb-8 sm:mb-10" />
+        {/* 4-Column Product Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {displayProducts.map((product, i) => (
+            <ProductCard
+              key={product.slug || product._id || i}
+              product={product}
+              index={i}
+            />
+          ))}
+        </div>
 
-        {/* ── Grid ── */}
-        {loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden bg-white border border-neutral-100">
-                <div className="aspect-square bg-neutral-100 animate-pulse" />
-                <div className="p-4 space-y-2.5">
-                  <div className="h-2.5 w-16 bg-neutral-100 rounded-full animate-pulse" />
-                  <div className="h-3 w-full bg-neutral-100 rounded animate-pulse" />
-                  <div className="h-3 w-3/4 bg-neutral-100 rounded animate-pulse" />
-                  <div className="pt-2 border-t border-neutral-50 mt-2">
-                    <div className="h-4 w-20 bg-neutral-100 rounded animate-pulse" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : displayProducts.length === 0 ? (
-          <div className="py-20 text-center rounded-2xl border border-dashed border-neutral-200 bg-neutral-50/30">
-            <p className="text-sm text-neutral-400 font-medium">
-              {emptyMessage || `No ${title.toLowerCase()} currently available.`}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            {displayProducts.map((product, i) => (
-              <FadeIn key={product?.slug || product?._id || i} delay={i * 80} duration={500}>
-                <ProductCard
-                  product={product}
-                  index={i}
-                />
-              </FadeIn>
-            ))}
-          </div>
-        )}
-
-        {/* ── Bottom CTA (mobile) ── */}
-        {viewAllLink && displayProducts.length > 0 && (
-          <div className="mt-8 flex justify-center sm:hidden">
-            <Link
-              href={viewAllLink}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 text-xs font-medium text-neutral-700 hover:bg-neutral-50 transition-colors"
-            >
-              View All {title} <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        )}
       </div>
     </section>
   );

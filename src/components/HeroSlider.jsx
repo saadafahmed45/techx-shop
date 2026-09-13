@@ -8,7 +8,8 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const DUMMY_SLIDES = [
   {
     _id: "dummy-1",
-    image: "https://images.pexels.com/photos/29457406/pexels-photo-29457406.jpeg",
+    image:
+      "https://images.pexels.com/photos/29457406/pexels-photo-29457406.jpeg",
     title: "Nike Air Max 2026",
     description:
       "Experience next-level comfort with the all-new Nike Air Max. Designed for everyday performance and bold street style.",
@@ -38,7 +39,7 @@ const Skeleton = () => (
 export default function HeroSlider() {
   const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
-  const [prev, setPrev] = useState(null);       // outgoing slide index
+  const [prev, setPrev] = useState(null); // outgoing slide index
   const [loading, setLoading] = useState(true);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef(null);
@@ -69,7 +70,10 @@ export default function HeroSlider() {
         try {
           sessionStorage.setItem(
             CACHE_KEY,
-            JSON.stringify({ data: finalSlides, expiresAt: Date.now() + 5 * 60 * 1000 })
+            JSON.stringify({
+              data: finalSlides,
+              expiresAt: Date.now() + 5 * 60 * 1000,
+            }),
           );
         } catch (e) {}
       })
@@ -93,7 +97,7 @@ export default function HeroSlider() {
       // clear outgoing after transition
       setTimeout(() => setPrev(null), 700);
     },
-    [current]
+    [current],
   );
 
   useEffect(() => {
@@ -127,10 +131,8 @@ export default function HeroSlider() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-
       {/* ── Main stage ── */}
       <div className="relative w-full h-[55vw] max-h-[88vh] min-h-65 overflow-hidden bg-neutral-900">
-
         {/* ── All slides stacked; opacity controlled ── */}
         {slides.map((s, idx) => {
           const isActive = idx === current;
@@ -165,7 +167,6 @@ export default function HeroSlider() {
 
         {/* ── Content ── */}
         <div className="absolute inset-0 z-20 flex flex-col justify-end p-5 sm:p-8 lg:p-14 max-w-3xl">
-
           {/* Badge */}
           {slide.badge && (
             <div className="mb-3 sm:mb-4 inline-flex items-center gap-1.5 self-start">
@@ -191,7 +192,9 @@ export default function HeroSlider() {
           {/* CTA */}
           <div className="flex items-center gap-3">
             <button className="group relative overflow-hidden bg-white text-black text-xs sm:text-sm font-extrabold px-5 sm:px-7 py-2.5 sm:py-3 rounded-full tracking-wider transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-white/20 cursor-pointer">
-              <span className="relative z-10">{slide.buttonText || "SHOP NOW"}</span>
+              <span className="relative z-10">
+                {slide.buttonText || "SHOP NOW"}
+              </span>
               <span className="absolute inset-0 bg-indigo-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-full" />
               <span className="absolute inset-0 z-10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-extrabold text-xs sm:text-sm tracking-wider">
                 {slide.buttonText || "SHOP NOW"}
@@ -212,7 +215,16 @@ export default function HeroSlider() {
               aria-label="Previous"
               className="absolute cursor-pointer left-3 sm:left-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
@@ -221,7 +233,16 @@ export default function HeroSlider() {
               aria-label="Next"
               className="absolute cursor-pointer right-3 sm:right-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="9 18 15 12 9 6" />
               </svg>
             </button>
@@ -231,9 +252,13 @@ export default function HeroSlider() {
         {/* ── Slide counter (top-right) ── */}
         {slides.length > 1 && (
           <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-30 flex items-center gap-1.5 bg-black/30 backdrop-blur-sm border border-white/10 rounded-full px-3 py-1.5">
-            <span className="text-white text-xs font-bold">{String(current + 1).padStart(2, "0")}</span>
+            <span className="text-white text-xs font-bold">
+              {String(current + 1).padStart(2, "0")}
+            </span>
             <span className="text-white/30 text-xs">/</span>
-            <span className="text-white/50 text-xs">{String(slides.length).padStart(2, "0")}</span>
+            <span className="text-white/50 text-xs">
+              {String(slides.length).padStart(2, "0")}
+            </span>
           </div>
         )}
 
@@ -286,7 +311,9 @@ export default function HeroSlider() {
               onClick={() => handleDot(idx)}
               aria-label={`Slide ${idx + 1}`}
               className={`rounded-full transition-all duration-300 ${
-                idx === current ? "bg-neutral-800 w-6 h-2" : "bg-neutral-300 w-2 h-2 hover:bg-neutral-400"
+                idx === current
+                  ? "bg-neutral-800 w-6 h-2"
+                  : "bg-neutral-300 w-2 h-2 hover:bg-neutral-400"
               }`}
             />
           ))}

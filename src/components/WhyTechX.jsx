@@ -51,9 +51,9 @@ export default function WhyTechX() {
             return (
               <div
                 key={idx}
-                className="flex flex-col p-5 rounded-xl bg-neutral-50/80 border border-neutral-200/70 hover:border-indigo-200 hover:shadow-xs transition-all duration-200"
+                className="flex flex-col p-5 rounded-2xl bg-neutral-50/80 border border-neutral-200/70 hover:border-blue-200 hover:shadow-xs transition-all duration-200"
               >
-                <div className="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-100/80 flex items-center justify-center text-indigo-600 mb-4 shrink-0 shadow-2xs">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100/80 flex items-center justify-center text-blue-600 mb-4 shrink-0 shadow-2xs">
                   <Icon className="w-4 h-4" />
                 </div>
                 <h3 className="text-xs font-semibold text-neutral-900 mb-1.5">
