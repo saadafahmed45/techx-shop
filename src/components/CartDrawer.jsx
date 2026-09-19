@@ -72,7 +72,7 @@ export default function CartDrawer() {
             </div>
             <div className="w-full h-1 bg-neutral-200 rounded-full overflow-hidden">
               <div
-                className="h-full bg-indigo-600 transition-all duration-300 rounded-full"
+                className="h-full bg-blue-600 transition-all duration-300 rounded-full"
                 style={{ width: `${freeShippingProgress}%` }}
               />
             </div>
@@ -83,7 +83,7 @@ export default function CartDrawer() {
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-4 text-center py-16">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+              <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
                 <ShoppingBag className="w-6 h-6" />
               </div>
               <div>
@@ -96,7 +96,7 @@ export default function CartDrawer() {
               </div>
               <button
                 onClick={closeCart}
-                className="mt-2 px-5 py-2.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-600/20 cursor-pointer"
+                className="mt-2 px-5 py-2.5 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/20 cursor-pointer"
               >
                 Browse Products
               </button>
@@ -129,7 +129,7 @@ export default function CartDrawer() {
                       <Link
                         href={`/product/${item.slug || item._id}`}
                         onClick={closeCart}
-                        className="text-xs font-medium text-neutral-900 hover:text-indigo-600 transition-colors line-clamp-1"
+                        className="text-xs font-medium text-neutral-900 hover:text-blue-600 transition-colors line-clamp-1"
                       >
                         {item.title}
                       </Link>
@@ -196,7 +196,7 @@ export default function CartDrawer() {
             <Link
               href="/checkout"
               onClick={closeCart}
-              className="flex items-center justify-center gap-2 w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-xs transition-colors shadow-sm shadow-indigo-600/20 cursor-pointer"
+              className="flex items-center justify-center gap-2 w-full h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-xs transition-colors shadow-sm shadow-blue-600/20 cursor-pointer"
             >
               <span>Checkout</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -205,7 +205,7 @@ export default function CartDrawer() {
             <Link
               href="/cart"
               onClick={closeCart}
-              className="flex items-center justify-center w-full h-10 border border-neutral-200 hover:border-indigo-300 hover:text-indigo-600 text-neutral-700 rounded-lg text-xs font-medium transition-colors"
+              className="flex items-center justify-center w-full h-10 border border-neutral-200 hover:border-blue-300 hover:text-blue-600 text-neutral-700 rounded-lg text-xs font-medium transition-colors"
             >
               View Full Cart
             </Link>

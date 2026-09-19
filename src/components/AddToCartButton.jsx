@@ -30,7 +30,7 @@ export default function AddToCartButton({ product }) {
           ? "bg-neutral-100 text-neutral-400 border border-neutral-200 cursor-not-allowed"
           : added
           ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-          : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20"
+          : "bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-600/20"
       } disabled:opacity-70`}
     >
       {loading ? (

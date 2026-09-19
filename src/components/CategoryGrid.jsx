@@ -81,30 +81,30 @@ export default function CategoryGrid({ initialCollections = [] }) {
                   className="group flex flex-col items-center text-center p-3.5 sm:p-4 rounded-2xl bg-white border border-neutral-200/80 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 hover:-translate-y-1"
                 >
                   {/* Image Container */}
-                  <div className="relative w-full aspect-square max-w-[96px] rounded-xl overflow-hidden bg-neutral-50 mb-3 flex items-center justify-center border border-neutral-100 group-hover:border-blue-100 transition-colors">
+                  <div className="relative w-full aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-50 mb-3 flex items-center justify-center border border-neutral-100 group-hover:border-blue-100 transition-colors">
                     {cat.imageUrl ? (
                       <Image
                         src={cat.imageUrl}
                         alt={cat.name}
                         fill
-                        sizes="100px"
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                         onError={(e) => {
                           // Handled cleanly
                         }}
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-neutral-400 group-hover:text-blue-600 transition-colors">
-                        <Package className="w-7 h-7 stroke-[1.8]" />
+                        <Package className="w-8 h-8 stroke-[1.8]" />
                       </div>
                     )}
                   </div>
 
                   {/* Title & Product Count */}
-                  <h3 className="text-xs sm:text-[13px] font-bold text-neutral-900 group-hover:text-blue-600 transition-colors truncate w-full">
+                  <h3 className="text-sm sm:text-[15px] font-bold text-neutral-900 group-hover:text-blue-600 transition-colors truncate w-full">
                     {cat.name}
                   </h3>
-                  <p className="text-[11px] text-neutral-400 font-normal mt-0.5 truncate w-full">
+                  <p className="text-xs text-neutral-400 font-normal mt-0.5 truncate w-full">
                     {countText}
                   </p>
                 </Link>
@@ -117,11 +117,11 @@ export default function CategoryGrid({ initialCollections = [] }) {
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="flex flex-col items-center p-4 rounded-2xl bg-white border border-neutral-100 animate-pulse"
+                className="flex flex-col items-center p-3.5 sm:p-4 rounded-2xl bg-white border border-neutral-100 animate-pulse"
               >
-                <div className="w-20 h-20 rounded-xl bg-neutral-100 mb-3" />
-                <div className="h-3 w-16 bg-neutral-100 rounded mb-1.5" />
-                <div className="h-2.5 w-12 bg-neutral-100 rounded" />
+                <div className="w-full aspect-square rounded-xl sm:rounded-2xl bg-neutral-100 mb-3" />
+                <div className="h-3.5 w-20 bg-neutral-100 rounded mb-1.5" />
+                <div className="h-3 w-12 bg-neutral-100 rounded" />
               </div>
             ))}
           </div>

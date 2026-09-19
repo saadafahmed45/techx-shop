@@ -8,64 +8,50 @@ const FEATURES = [
     icon: Truck,
     title: "Free Shipping",
     subtitle: "On orders over $99",
-    color: "text-blue-600",
-    bg: "bg-blue-50",
-    border: "border-blue-100",
   },
   {
     icon: RotateCcw,
-    title: "Easy Returns",
-    subtitle: "30-day return policy",
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
-    border: "border-emerald-100",
+    title: "30-Day Returns",
+    subtitle: "Hassle-free returns",
   },
   {
     icon: ShieldCheck,
-    title: "Secure Checkout",
-    subtitle: "100% secure payment",
-    color: "text-purple-600",
-    bg: "bg-purple-50",
-    border: "border-purple-100",
+    title: "1 Year Warranty",
+    subtitle: "Quality you can trust",
   },
   {
     icon: Headphones,
-    title: "24/7 Support",
-    subtitle: "We're here to help",
-    color: "text-amber-600",
-    bg: "bg-amber-50",
-    border: "border-amber-100",
+    title: "Expert Support",
+    subtitle: "24/7 customer support",
   },
 ];
 
 export default function FeaturesBar() {
   return (
-    <section className="py-8 bg-white border-b border-neutral-100">
+    <section className="bg-white py-6 sm:py-8 border-b border-slate-100 select-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          {FEATURES.map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={idx}
-                className="flex items-center gap-4 p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200/70 hover:border-neutral-300 hover:shadow-md transition-all duration-300 group"
-              >
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs px-6 sm:px-8 py-5 sm:py-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 divide-y sm:divide-y-0 lg:divide-x divide-slate-100">
+            {FEATURES.map((item, idx) => {
+              const Icon = item.icon;
+              return (
                 <div
-                  className={`w-12 h-12 rounded-xl ${item.bg} ${item.border} ${item.color} border flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 shadow-xs`}
+                  key={idx}
+                  className="flex items-center gap-4 pt-4 sm:pt-0 lg:px-6 first:pl-0 last:pr-0 group"
                 >
-                  <Icon className="w-5 h-5 stroke-[2.2]" />
+                  <Icon className="w-8 h-8 sm:w-9 sm:h-9 text-slate-900 stroke-[1.6] shrink-0 group-hover:text-blue-600 transition-colors" />
+                  <div className="min-w-0">
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-snug">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs sm:text-[13px] text-slate-500 font-normal mt-0.5 truncate leading-snug">
+                      {item.subtitle}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-sm font-bold text-neutral-900 tracking-tight">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-neutral-500 font-normal mt-0.5 truncate">
-                    {item.subtitle}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

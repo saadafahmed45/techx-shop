@@ -15,6 +15,7 @@ import {
   Home,
   ChevronRight,
   Users,
+  ShieldCheck,
 } from "lucide-react";
 
 const menuGroups = [
@@ -24,7 +25,13 @@ const menuGroups = [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
       { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
       { href: "/admin/order-list", label: "Order List", icon: ShoppingBag },
-      { href: "/admin/users", label: "Manage Users", icon: Users },
+    ],
+  },
+  {
+    label: "Accounts & Staff",
+    items: [
+      { href: "/admin/users", label: "User Management", icon: Users },
+      { href: "/admin/admins", label: "Admin Management", icon: ShieldCheck },
     ],
   },
     {
@@ -109,7 +116,7 @@ const Sidebar = () => {
         {/* Brand */}
         <div className="px-5 py-6 border-b border-white/8">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-900/50 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-900/50 shrink-0">
               <Package className="w-4.5 h-4.5 text-white" />
             </div>
             <div>
@@ -140,7 +147,7 @@ const Sidebar = () => {
                           flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                           transition-all duration-150 group relative
                           ${active
-                            ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/40"
+                            ? "bg-blue-600 text-white shadow-md shadow-blue-900/40"
                             : "text-gray-400 hover:bg-white/6 hover:text-white"
                           }
                         `}
@@ -169,8 +176,8 @@ const Sidebar = () => {
         <div className="p-3 border-t border-white/8">
           <div className="bg-white/5 rounded-xl p-3.5">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-7 h-7 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                <Settings className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                <Settings className="w-3.5 h-3.5 text-blue-400" />
               </div>
               <p className="text-xs font-semibold text-white">Need Help?</p>
             </div>

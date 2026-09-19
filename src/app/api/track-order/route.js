@@ -11,17 +11,24 @@ export async function GET(request) {
   }
 
   try {
-    const res = await fetch(`${API}/orders?limit=200`, { next: { revalidate: 30 } });
+    const res = await fetch(`${API}/orders?limit=200`, { cache: "no-store" });
     if (!res.ok) return NextResponse.json({ error: "Failed to fetch orders" }, { status: 502 });
 
     const json = await res.json();
     const list = Array.isArray(json) ? json : (json?.data || []);
 
+    const q = query.toLowerCase();
     const found = list.find((item) => {
       const fullId = item._id?.toLowerCase() || "";
       const shortId = item._id?.slice(-6).toLowerCase() || "";
-      const q = query.toLowerCase();
-      return fullId === q || shortId === q || fullId.includes(q);
+      const phone = (item.phone || "").toLowerCase().replace(/[^0-9]/g, "");
+      const cleanQ = q.replace(/[^0-9]/g, "");
+      return (
+        fullId === q ||
+        shortId === q ||
+        fullId.includes(q) ||
+        (cleanQ.length >= 6 && phone.includes(cleanQ))
+      );
     });
 
     if (!found) {

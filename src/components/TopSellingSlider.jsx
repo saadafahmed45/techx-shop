@@ -247,7 +247,7 @@ export default function TopSellingSlider() {
                         <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-200 z-10">
                           <button
                             onClick={(e) => handleAddToCart(e, product)}
-                            className="w-full flex items-center justify-center gap-1.5 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium transition-colors shadow-sm shadow-indigo-600/20 cursor-pointer"
+                            className="w-full flex items-center justify-center gap-1.5 h-9 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition-colors shadow-sm shadow-blue-600/20 cursor-pointer"
                           >
                             <ShoppingBag className="w-3.5 h-3.5" />
                             Add to Cart
@@ -267,7 +267,7 @@ export default function TopSellingSlider() {
                       </span>
 
                       <Link href={productUrl}>
-                        <h3 className="text-[13px] font-medium text-neutral-900 line-clamp-2 leading-snug hover:text-indigo-600 transition-colors">
+                        <h3 className="text-[13px] font-medium text-neutral-900 line-clamp-2 leading-snug hover:text-blue-600 transition-colors">
                           {product.title}
                         </h3>
                       </Link>

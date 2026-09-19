@@ -4,9 +4,9 @@
 @import "swiper/css/pagination";
 
 :root {
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-light: #eef2ff;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
 }
 
 @layer base {
@@ -21,7 +21,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
   ::selection {
-    background-color: #4f46e5;
+    background-color: #2563eb;
     color: #ffffff;
   }
 }
@@ -39,5 +39,5 @@
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4f46e5;
+  background: #2563eb;
 }

@@ -197,7 +197,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
                     onMouseEnter={() => setActiveImage(img)}
                     className={`relative w-16 h-16 rounded-xl bg-[#f6f6f7] p-1.5 shrink-0 border transition-all ${
                       activeImage === img
-                        ? "border-indigo-600 ring-1 ring-indigo-600"
+                        ? "border-blue-600 ring-1 ring-blue-600"
                         : "border-neutral-200 hover:border-neutral-400"
                     }`}
                   >
@@ -307,7 +307,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
                 <button
                   onClick={handleAddToCart}
                   disabled={product.stock === 0}
-                  className="flex-1 flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-neutral-300 text-white text-xs font-medium transition-colors shadow-sm shadow-indigo-600/20 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-neutral-300 text-white text-xs font-medium transition-colors shadow-sm shadow-blue-600/20 cursor-pointer"
                 >
                   <ShoppingBag className="w-4 h-4" />
                   <span>Add to Cart</span>
@@ -318,7 +318,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
               <button
                 onClick={handleBuyNow}
                 disabled={product.stock === 0}
-                className="w-full flex items-center justify-center h-11 px-6 rounded-lg border border-neutral-300 hover:bg-indigo-50 hover:border-indigo-600 hover:text-indigo-600 text-neutral-900 text-xs font-medium transition-colors cursor-pointer"
+                className="w-full flex items-center justify-center h-11 px-6 rounded-lg border border-neutral-300 hover:bg-blue-50 hover:border-blue-600 hover:text-blue-600 text-neutral-900 text-xs font-medium transition-colors cursor-pointer"
               >
                 Buy It Now
               </button>
@@ -355,7 +355,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
                 onClick={() => setActiveTab(tab)}
                 className={`py-4 text-xs font-semibold capitalize tracking-wide transition-all border-b-2 -mb-px cursor-pointer ${
                   activeTab === tab
-                    ? "border-indigo-600 text-indigo-600 font-bold"
+                    ? "border-blue-600 text-blue-600 font-bold"
                     : "border-transparent text-neutral-400 hover:text-neutral-700"
                 }`}
               >

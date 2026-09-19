@@ -44,8 +44,8 @@ export default function ProductsFilterTabs() {
               onClick={() => setActiveCollection("All")}
               className={`px-4 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 activeCollection === "All"
-                  ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
-                  : "bg-white text-neutral-600 hover:text-indigo-600 border border-neutral-200/80 hover:border-indigo-300"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
+                  : "bg-white text-neutral-600 hover:text-blue-600 border border-neutral-200/80 hover:border-blue-300"
               }`}
             >
               All Items
@@ -58,8 +58,8 @@ export default function ProductsFilterTabs() {
                   onClick={() => setActiveCollection(collection.name)}
                   className={`px-4 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     activeCollection === collection.name
-                      ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
-                      : "bg-white text-neutral-600 hover:text-indigo-600 border border-neutral-200/80 hover:border-indigo-300"
+                      ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
+                      : "bg-white text-neutral-600 hover:text-blue-600 border border-neutral-200/80 hover:border-blue-300"
                   }`}
                 >
                   {collection.name}

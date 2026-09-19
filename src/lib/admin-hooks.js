@@ -97,11 +97,38 @@ export function useUpdateOrderStatus() {
   return useMutation({
     mutationFn: ({ id, status }) =>
       fetchJSON(`${API}/orders/${id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       }),
-    onSuccess: () => {
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ["admin", "orders"] });
+      const previousOrders = queryClient.getQueryData(["admin", "orders"]);
+      queryClient.setQueryData(["admin", "orders"], (old) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          return old.map((order) =>
+            order._id === id ? { ...order, status, updatedAt: new Date().toISOString() } : order
+          );
+        }
+        if (Array.isArray(old?.data)) {
+          return {
+            ...old,
+            data: old.data.map((order) =>
+              order._id === id ? { ...order, status, updatedAt: new Date().toISOString() } : order
+            ),
+          };
+        }
+        return old;
+      });
+      return { previousOrders };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousOrders) {
+        queryClient.setQueryData(["admin", "orders"], context.previousOrders);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
     },
   });

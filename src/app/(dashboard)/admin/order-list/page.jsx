@@ -181,7 +181,8 @@ const OrdersListPage = () => {
               </thead>
               <tbody>
                 {filteredOrders.map((order) => {
-                  const StatusIcon = STATUS_ICONS[order.status];
+                  const StatusIcon = STATUS_ICONS[order.status] || Clock3;
+                  const statusStyle = STATUS_STYLES[order.status] || "bg-slate-100 text-slate-700";
                   return (
                     <tr key={order._id} className="border-b border-slate-100 hover:bg-slate-50 transition">
                       <td className="px-6 py-5">
@@ -209,7 +210,7 @@ const OrdersListPage = () => {
                         <span className="font-black text-slate-900">${order.totalPrice?.toLocaleString()}</span>
                       </td>
                       <td className="px-6 py-5">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${STATUS_STYLES[order.status]}`}>
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${statusStyle}`}>
                           <StatusIcon className="w-3.5 h-3.5" />
                           {order.status}
                         </span>

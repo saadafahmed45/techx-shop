@@ -141,7 +141,7 @@ function ProductsContent() {
           {/* Controls bar */}
           <div className="flex flex-wrap items-center gap-3">
             {/* Search Input Bar */}
-            <div className="relative flex items-center h-10 px-3 rounded-lg bg-neutral-50 border border-neutral-200/80 hover:border-neutral-300 focus-within:border-indigo-600 focus-within:bg-white transition-all w-full sm:w-64">
+            <div className="relative flex items-center h-10 px-3 rounded-lg bg-neutral-50 border border-neutral-200/80 hover:border-neutral-300 focus-within:border-blue-600 focus-within:bg-white transition-all w-full sm:w-64">
               <Search className="w-3.5 h-3.5 text-neutral-400 shrink-0 mr-2" />
               <input
                 type="text"
@@ -205,7 +205,7 @@ function ProductsContent() {
                   onClick={() => handleCategorySelect("all")}
                   className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors text-left cursor-pointer ${
                     selectedCategory === "all"
-                      ? "bg-indigo-600 text-white font-medium shadow-sm shadow-indigo-600/20"
+                      ? "bg-blue-600 text-white font-medium shadow-sm shadow-blue-600/20"
                       : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
                   }`}
                 >
@@ -223,7 +223,7 @@ function ProductsContent() {
                         onClick={() => handleCategorySelect(col.slug || col.name)}
                         className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors text-left cursor-pointer ${
                           isSelected
-                            ? "bg-indigo-600 text-white font-medium shadow-sm shadow-indigo-600/20"
+                            ? "bg-blue-600 text-white font-medium shadow-sm shadow-blue-600/20"
                             : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
                         }`}
                       >
@@ -241,7 +241,7 @@ function ProductsContent() {
                 <span className="font-bold uppercase tracking-wider text-neutral-950">
                   Max Price
                 </span>
-                <span className="font-semibold text-indigo-600">
+                <span className="font-semibold text-blue-600">
                   ৳{priceRange.toLocaleString()}
                 </span>
               </div>
@@ -252,7 +252,7 @@ function ProductsContent() {
                 step="500"
                 value={priceRange}
                 onChange={(e) => setPriceRange(Number(e.target.value))}
-                className="w-full accent-indigo-600 cursor-pointer"
+                className="w-full accent-blue-600 cursor-pointer"
               />
             </div>
 
@@ -265,7 +265,7 @@ function ProductsContent() {
                 type="checkbox"
                 checked={inStockOnly}
                 onChange={(e) => setInStockOnly(e.target.checked)}
-                className="w-4 h-4 rounded accent-indigo-600 cursor-pointer"
+                className="w-4 h-4 rounded accent-blue-600 cursor-pointer"
               />
             </div>
           </aside>
@@ -297,7 +297,7 @@ function ProductsContent() {
                     setInStockOnly(false);
                     router.push("/product");
                   }}
-                  className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium cursor-pointer shadow-sm shadow-indigo-600/20"
+                  className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium cursor-pointer shadow-sm shadow-blue-600/20"
                 >
                   Reset Filters
                 </button>
@@ -330,7 +330,7 @@ function ProductsContent() {
                       onClick={() => setCurrentPage(pageNum)}
                       className={`w-9 h-9 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                         currentPage === pageNum
-                          ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
+                          ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
                           : "border border-neutral-200 text-neutral-700 hover:bg-neutral-50"
                       }`}
                     >
