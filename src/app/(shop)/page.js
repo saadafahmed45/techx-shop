@@ -34,6 +34,19 @@ async function getCollections() {
   }
 }
 
+async function getHeroSliders() {
+  try {
+    const res = await fetch(`${API}/hero-sliders`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return Array.isArray(json) ? json : [];
+  } catch {
+    return [];
+  }
+}
+
 function SectionFallback({ height = "h-72" }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -43,12 +56,15 @@ function SectionFallback({ height = "h-72" }) {
 }
 
 export default async function Home() {
-  const collections = await getCollections();
+  const [collections, heroSliders] = await Promise.all([
+    getCollections(),
+    getHeroSliders(),
+  ]);
 
   return (
     <div className="flex flex-col bg-white">
-      {/* 1. Hero — Modern Accesora-style showcase */}
-        <HeroSlider/>
+      {/* 1. Hero — Dynamic showcase */}
+      <HeroSlider initialSlides={heroSliders} />
       {/* <HeroModern /> */}
       {/* 2. Value Propositions Bar (Free Shipping, Returns, Checkout, Support) */}
       <FeaturesBar />
