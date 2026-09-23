@@ -104,6 +104,7 @@ const AddHeroSlider = () => {
       const res = await fetch(`${API}/hero-sliders`, {
         method: "POST",
         body: data,
+        credentials: "include",
       });
 
       const result = await res.json();

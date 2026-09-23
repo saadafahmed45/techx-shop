@@ -374,7 +374,7 @@ const OrdersPage = () => {
                   </div>
 
                   {/* Actions Column: Status Selector, Invoice, Delete */}
-                  <div className="flex flex-col sm:flex-row xl:flex-col gap-2.5 min-w-[200px] xl:w-56 shrink-0 justify-end">
+                  <div className="flex flex-col sm:flex-row xl:flex-col gap-2.5 min-w-50 xl:w-56 shrink-0 justify-end">
                     <div className="relative">
                       <select
                         value={order.status || "Pending"}

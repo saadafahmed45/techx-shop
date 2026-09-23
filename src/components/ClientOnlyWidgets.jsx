@@ -19,9 +19,9 @@ export default function ClientOnlyWidgets() {
     <>
       <CartDrawer />
       <FloatingWhatsApp
-        phoneNumber="1234567890"
+        phoneNumber={process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "1234567890"}
         accountName="TechX Shop"
-        avatar="techx-img.jpg"
+        avatar="/techx-img.jpg"
         statusMessage="Typically replies within 1 hour"
         chatMessage="Hello! How can we help you today?"
         darkMode={false}

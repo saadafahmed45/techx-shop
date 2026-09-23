@@ -7,20 +7,15 @@ export async function GET(request) {
   const q = searchParams.get("q")?.toLowerCase() || "";
 
   try {
-    const res = await fetch(`${API}/products?limit=200`, { next: { revalidate: 60 } });
+    const url = q
+      ? `${API}/products?search=${encodeURIComponent(q)}&limit=50`
+      : `${API}/products?limit=50`;
+
+    const res = await fetch(url, { next: { revalidate: 60 } });
     if (!res.ok) return NextResponse.json({ error: "Search failed" }, { status: 502 });
 
     const json = await res.json();
-    const list = Array.isArray(json) ? json : (json?.data || []);
-
-    const results = q
-      ? list.filter((p) =>
-          p.title?.toLowerCase().includes(q) ||
-          p.vendor?.toLowerCase().includes(q) ||
-          p.productType?.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q)
-        )
-      : list;
+    const results = Array.isArray(json) ? json : (json?.data || []);
 
     return NextResponse.json(
       { results, total: results.length },

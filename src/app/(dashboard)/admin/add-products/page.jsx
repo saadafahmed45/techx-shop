@@ -25,6 +25,7 @@ import {
 
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import ShopifyRichTextEditor from "@/components/ShopifyRichTextEditor";
 
 const API =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -302,6 +303,7 @@ const AddProducts = () => {
       const res = await fetch(`${API}/products`, {
         method: "POST",
         body: formData,
+        credentials: "include",
       });
 
       const data = await res.json();
@@ -358,7 +360,7 @@ const AddProducts = () => {
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] px-4 py-7 md:px-10 md:py-9">
-      <div className="max-w-[1200px] mx-auto">
+      <div className="max-w-300 mx-auto">
 
         {/* HEADER */}
         <div className="flex items-center gap-4 mb-8">
@@ -434,13 +436,12 @@ const AddProducts = () => {
                   {/* DESCRIPTION */}
                   <div>
                     <label className={labelCls}>Description</label>
-                    <textarea
-                      rows={4}
-                      name="description"
+                    <ShopifyRichTextEditor
                       value={fields.description}
-                      onChange={handleChange}
-                      placeholder="Describe this product…"
-                      className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all resize-none"
+                      onChange={(content) =>
+                        setFields((prev) => ({ ...prev, description: content }))
+                      }
+                      placeholder="Write a comprehensive product description, highlights, and specifications..."
                     />
                   </div>
 
@@ -626,7 +627,7 @@ const AddProducts = () => {
               {/* PUBLISH CARD */}
               <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
                 {/* Card top accent */}
-                <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500" />
+                <div className="h-1 w-full bg-linear-to-r from-indigo-500 via-violet-500 to-purple-500" />
 
                 <div className="p-5">
                   <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">Publish</p>

@@ -87,6 +87,7 @@ const EditModal = ({ slider, onClose, onSaved }) => {
       const res = await fetch(`${API}/hero-sliders/${slider._id}`, {
         method: "PUT",
         body: data,
+        credentials: "include",
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.message);
@@ -302,7 +303,9 @@ const ManageHeroSliders = () => {
   const fetchSliders = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API}/hero-sliders`);
+      const res = await fetch(`${API}/hero-sliders`, {
+        credentials: "include",
+      });
       const data = await res.json();
       setSliders(Array.isArray(data) ? data : []);
     } catch {
@@ -336,7 +339,10 @@ const ManageHeroSliders = () => {
 
     try {
       setDeletingId(id);
-      const res = await fetch(`${API}/hero-sliders/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API}/hero-sliders/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setSliders((prev) => prev.filter((s) => s._id !== id));
@@ -360,6 +366,7 @@ const ManageHeroSliders = () => {
       const res = await fetch(`${API}/hero-sliders/${slider._id}`, {
         method: "PUT",
         body: data,
+        credentials: "include",
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.message);

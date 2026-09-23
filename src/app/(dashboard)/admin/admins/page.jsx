@@ -455,7 +455,7 @@ export default function AdminManagementPage() {
             />
           </div>
 
-          <div className="relative min-w-[160px]">
+          <div className="relative min-w-40">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}

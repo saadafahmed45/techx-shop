@@ -9,7 +9,7 @@ export default function AnnouncementBar() {
   const [currentLang, setCurrentLang] = useState("EN");
 
   return (
-    <div className="bg-[#0B0F19] text-white text-xs border-b border-white/[0.08] select-none relative z-50">
+    <div className="bg-[#0B0F19] text-white text-xs border-b border-white/8 select-none relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex flex-col md:flex-row items-center justify-between gap-2 sm:gap-4">
         
         {/* Left: Perks matching the reference image */}
@@ -61,7 +61,7 @@ export default function AnnouncementBar() {
             </button>
 
             {langOpen && (
-              <div className="absolute right-0 top-full mt-1.5 bg-[#0f1523] border border-white/10 rounded-xl shadow-xl py-1 min-w-[90px] z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute right-0 top-full mt-1.5 bg-[#0f1523] border border-white/10 rounded-xl shadow-xl py-1 min-w-22.5 z-50 animate-in fade-in zoom-in-95 duration-150">
                 {["EN", "BN"].map((code) => (
                   <button
                     key={code}

@@ -179,7 +179,7 @@ export default function HeroSlider({ initialSlides = [] }) {
 
   return (
     <section
-      className="relative w-full h-[480px] sm:h-[540px] md:h-[600px] lg:h-[660px] xl:h-[700px] bg-neutral-950 overflow-hidden select-none"
+      className="relative w-full h-120 sm:h-135 md:h-150 lg:h-165 xl:h-175 bg-neutral-950 overflow-hidden select-none"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       aria-label="Homepage Hero Carousel"
@@ -214,11 +214,11 @@ export default function HeroSlider({ initialSlides = [] }) {
 
               {/* Ambient Cinematic Contrast Overlays */}
               {/* Left-to-right subtle gradient for text readability while letting the image shine */}
-              <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/85 via-neutral-950/45 to-transparent sm:w-2/3" />
+              <div className="absolute inset-0 bg-linear-to-r from-neutral-950/85 via-neutral-950/45 to-transparent sm:w-2/3" />
               {/* Bottom subtle gradient for clean transition */}
-              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-neutral-950/80 via-transparent to-transparent" />
               {/* Subtle top vignette */}
-              <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-neutral-950/50 to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 top-0 h-24 bg-linear-to-b from-neutral-950/50 to-transparent pointer-events-none" />
             </div>
 
             {/* Content Container (Layered above the image) */}

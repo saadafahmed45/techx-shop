@@ -179,7 +179,7 @@ export default function Navbar() {
                   onClick={() => setCategoryFilterOpen((prev) => !prev)}
                   className="h-full px-4 text-xs sm:text-sm font-medium text-slate-700 hover:text-blue-600 flex items-center gap-2 border-r border-slate-200 transition-colors bg-white hover:bg-slate-50 cursor-pointer"
                 >
-                  <span className="max-w-[110px] truncate">
+                  <span className="max-w-27.5 truncate">
                     {selectedCategory}
                   </span>
                   <ChevronDown
@@ -413,7 +413,7 @@ export default function Navbar() {
         </div>
 
         {/* ─── TIER 2: SECONDARY NAVIGATION & CATEGORIES BAR ─── */}
-        <div className="border-t border-white/[0.08] bg-[#0B0F19] hidden md:block select-none">
+        <div className="border-t border-white/8 bg-[#0B0F19] hidden md:block select-none">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
             {/* Left: Categories Hamburger Dropdown Trigger */}
             <div ref={categoriesRef} className="relative">

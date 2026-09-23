@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AiFillStar } from "react-icons/ai";
+import { Star } from "lucide-react";
 import { toast } from "react-toastify";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
@@ -27,9 +27,11 @@ function StarPicker({ value, onChange }) {
           className="p-0.5 transition-transform hover:scale-110"
           aria-label={`${s} star`}
         >
-          <AiFillStar
-            className={`text-2xl transition-colors ${
-              s <= (hovered || value) ? "text-amber-400" : "text-stone-200"
+          <Star
+            className={`w-6 h-6 transition-colors ${
+              s <= (hovered || value)
+                ? "text-amber-400 fill-amber-400"
+                : "text-stone-300 fill-stone-100"
             }`}
           />
         </button>

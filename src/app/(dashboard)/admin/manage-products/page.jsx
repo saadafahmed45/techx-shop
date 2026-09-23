@@ -21,6 +21,7 @@ import {
   ToggleRight,
 } from "lucide-react";
 import Swal from "sweetalert2";
+import ShopifyRichTextEditor from "@/components/ShopifyRichTextEditor";
 import {
   useAdminProducts,
   useAdminCollections,
@@ -477,7 +478,7 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/products/${product._id}`,
-        { method: "PUT", body: fd },
+        { method: "PUT", body: fd, credentials: "include" },
       );
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
@@ -499,7 +500,7 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-4xl min-h-[400px] flex flex-col items-center justify-center p-8"
+          className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-4xl min-h-100 flex flex-col items-center justify-center p-8"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between w-full mb-6 border-b border-slate-100 pb-4">
@@ -647,16 +648,15 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
           </div>
 
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-400 block mb-2">
               Description
             </label>
-            <textarea
+            <ShopifyRichTextEditor
               value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
+              onChange={(content) =>
+                setFormData((prev) => ({ ...prev, description: content }))
               }
-              rows={5}
-              className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 mt-1"
+              placeholder="Describe this product, its key features, specifications, and what makes it special..."
             />
           </div>
 
@@ -680,7 +680,7 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
               <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
                 Featured Tags
               </label>
-              <div className="mt-1 flex flex-wrap gap-1.5 p-2 rounded-2xl border border-slate-200 min-h-[48px]">
+              <div className="mt-1 flex flex-wrap gap-1.5 p-2 rounded-2xl border border-slate-200 min-h-12">
                 {FEATURE_OPTIONS.map((opt) => {
                   const active = formData.featured.includes(opt);
                   return (
@@ -711,7 +711,7 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
               <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
                 Collections
               </label>
-              <div className="mt-1 flex flex-wrap gap-1.5 p-2 rounded-2xl border border-slate-200 min-h-[48px] max-h-32 overflow-y-auto">
+              <div className="mt-1 flex flex-wrap gap-1.5 p-2 rounded-2xl border border-slate-200 min-h-12 max-h-32 overflow-y-auto">
                 {collections.map((col) => {
                   const active = formData.collections.some(
                     (c) => (c._id || c) === col._id,

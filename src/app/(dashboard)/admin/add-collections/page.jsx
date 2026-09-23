@@ -123,6 +123,7 @@ const AddCollection = () => {
       const res = await fetch(`${API}/collections`, {
         method: "POST",
         body: fd,
+        credentials: "include",
       });
       const data = await res.json();
       if (!res.ok)
@@ -164,7 +165,7 @@ const AddCollection = () => {
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] px-4 py-7 md:px-10 md:py-9">
-      <div className="max-w-[1200px] mx-auto">
+      <div className="max-w-300 mx-auto">
 
         {/* HEADER */}
         <div className="flex items-center gap-4 mb-8">
@@ -426,7 +427,7 @@ const AddCollection = () => {
 
               {/* PUBLISH CARD */}
               <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
-                <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500" />
+                <div className="h-1 w-full bg-linear-to-r from-indigo-500 via-violet-500 to-purple-500" />
                 <div className="p-5">
                   <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">
                     Summary
@@ -461,7 +462,7 @@ const AddCollection = () => {
                       >
                         <span className="text-slate-400">{label}</span>
                         <span
-                          className={`font-semibold truncate max-w-[140px] text-right ${
+                          className={`font-semibold truncate max-w-35 text-right ${
                             green ? "text-emerald-600" : "text-slate-700"
                           }`}
                         >

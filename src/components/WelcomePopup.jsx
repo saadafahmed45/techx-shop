@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IoClose } from "react-icons/io5";
+import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function WelcomePopup() {
@@ -40,9 +40,10 @@ export default function WelcomePopup() {
             {/* Close Button */}
             <button
               onClick={closePopup}
-              className="absolute right-4 top-4 text-gray-500 hover:text-black"
+              aria-label="Close welcome popup"
+              className="absolute right-4 top-4 text-gray-500 hover:text-black transition-colors"
             >
-              <IoClose size={25} />
+              <X size={24} />
             </button>
 
             <h2 className="text-3xl font-bold text-gray-800">

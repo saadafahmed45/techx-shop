@@ -41,3 +41,188 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #2563eb;
 }
+
+/* ==========================================================================
+   SHOPIFY RICH TEXT EDITOR (.shopify-rte) STYLING
+   ========================================================================== */
+.shopify-rte {
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #1e293b;
+  letter-spacing: normal;
+  text-align: left;
+}
+
+.shopify-rte p {
+  margin-bottom: 1.15rem;
+  line-height: 1.8;
+  color: #334155;
+}
+
+.shopify-rte p:last-child {
+  margin-bottom: 0;
+}
+
+.shopify-rte h1,
+.shopify-rte h2,
+.shopify-rte h3,
+.shopify-rte h4,
+.shopify-rte h5,
+.shopify-rte h6 {
+  color: #0f172a;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.shopify-rte h1:first-child,
+.shopify-rte h2:first-child,
+.shopify-rte h3:first-child,
+.shopify-rte h4:first-child {
+  margin-top: 0;
+}
+
+.shopify-rte h1 {
+  font-size: 1.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.shopify-rte h2 {
+  font-size: 1.35rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.shopify-rte h3 {
+  font-size: 1.15rem;
+}
+
+.shopify-rte h4 {
+  font-size: 1.025rem;
+}
+
+.shopify-rte ul {
+  list-style-type: disc;
+  padding-left: 1.4rem;
+  margin-top: 0.75rem;
+  margin-bottom: 1.15rem;
+}
+
+.shopify-rte ol {
+  list-style-type: decimal;
+  padding-left: 1.4rem;
+  margin-top: 0.75rem;
+  margin-bottom: 1.15rem;
+}
+
+.shopify-rte li {
+  margin-bottom: 0.45rem;
+  line-height: 1.75;
+  color: #334155;
+  padding-left: 0.25rem;
+}
+
+.shopify-rte li::marker {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+.shopify-rte strong,
+.shopify-rte b {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.shopify-rte em,
+.shopify-rte i {
+  font-style: italic;
+}
+
+.shopify-rte u {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.shopify-rte a {
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.shopify-rte a:hover {
+  color: #1d4ed8;
+}
+
+.shopify-rte table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.shopify-rte th,
+.shopify-rte td {
+  border: 1px solid #e2e8f0;
+  padding: 11px 16px;
+  text-align: left;
+}
+
+.shopify-rte th {
+  background-color: #f8fafc;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.shopify-rte tr:nth-child(even) td {
+  background-color: #fcfdfe;
+}
+
+.shopify-rte tr:hover td {
+  background-color: #f1f5f9;
+}
+
+.shopify-rte blockquote {
+  border-left: 4px solid #4f46e5;
+  background-color: #f8fafc;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  color: #475569;
+  font-style: italic;
+  border-radius: 0 12px 12px 0;
+}
+
+.shopify-rte code {
+  background-color: #f1f5f9;
+  color: #4338ca;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.875em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.shopify-rte hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 1.75rem 0;
+}
+
+.shopify-rte img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  margin: 1.25rem 0;
+}

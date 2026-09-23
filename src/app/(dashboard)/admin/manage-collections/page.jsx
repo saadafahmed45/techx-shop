@@ -75,7 +75,7 @@ const ManageCollections = () => {
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] px-4 py-7 md:px-10 md:py-9">
-      <div className="max-w-[1200px] mx-auto space-y-6">
+      <div className="max-w-300 mx-auto space-y-6">
 
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -271,6 +271,7 @@ function EditCollectionModal({ collection, onClose, onUpdated }) {
       const res = await fetch(`${API}/collections/${collection._id}`, {
         method: "PUT",
         body: fd,
+        credentials: "include",
       });
 
       if (!res.ok) {

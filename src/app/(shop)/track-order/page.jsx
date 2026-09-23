@@ -1,8 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { FiSearch, FiTruck, FiCalendar, FiCreditCard, FiInfo, FiPackage, FiHelpCircle, FiDownload } from "react-icons/fi";
-import { BsBoxSeam } from "react-icons/bs";
+import {
+  Search,
+  Truck,
+  Calendar,
+  CreditCard,
+  Info,
+  Package,
+  HelpCircle,
+  Download,
+  PackageCheck,
+} from "lucide-react";
 
 const generateInvoice = async (order) => {
   const { default: jsPDF } = await import("jspdf");
@@ -224,7 +233,7 @@ function Stepper({ status }) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 ) : active ? (
-                  <FiTruck className="w-3.5 h-3.5" />
+                  <Truck className="w-3.5 h-3.5" />
                 ) : (
                   <div className="w-2 h-2 rounded-full bg-gray-300" />
                 )}
@@ -295,7 +304,7 @@ export default function TrackOrderPage() {
 
       <div className="flex flex-col items-center mb-8 text-center">
         <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
-          <FiTruck className="w-8 h-8 text-indigo-600" />
+          <Truck className="w-8 h-8 text-indigo-600" />
         </div>
         <h1 className="text-2xl font-bold text-gray-800">Track Your Order</h1>
         <p className="text-sm text-gray-500 mt-1">Enter your Order ID to get live updates</p>
@@ -303,7 +312,7 @@ export default function TrackOrderPage() {
 
       <form onSubmit={handleTrack}
         className="w-full max-w-xl flex items-center border border-gray-200 rounded-full bg-white shadow-sm px-4 py-1 mb-6 focus-within:border-indigo-600 transition-colors">
-        <FiSearch className="text-gray-400 w-5 h-5 shrink-0" />
+        <Search className="text-gray-400 w-5 h-5 shrink-0" />
         <input
           type="text"
           placeholder="Enter Order ID e.g. e6de65"
@@ -330,7 +339,7 @@ export default function TrackOrderPage() {
 
           <div className={`flex items-center gap-4 px-5 py-4 ${meta.bg} border-b ${meta.border}`}>
             <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
-              <FiTruck className={`w-5 h-5 ${meta.icon}`} />
+              <Truck className={`w-5 h-5 ${meta.icon}`} />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-0.5">
@@ -351,25 +360,25 @@ export default function TrackOrderPage() {
             <div className="border border-gray-100 rounded-xl p-4 space-y-4">
 
               <h3 className="font-semibold text-sm text-gray-800 flex items-center gap-2">
-                <FiPackage className="text-indigo-600 w-4 h-4" /> Order Details
+                <Package className="text-indigo-600 w-4 h-4" /> Order Details
               </h3>
 
               <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                 <div>
                   <p className="text-xs text-gray-400 flex items-center gap-1 mb-0.5">
-                    <FiCalendar className="w-3 h-3" /> Order Date
+                    <Calendar className="w-3 h-3" /> Order Date
                   </p>
                   <p className="text-sm font-medium text-gray-700">{formatDate(order.createdAt)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 flex items-center gap-1 mb-0.5">
-                    <FiCreditCard className="w-3 h-3" /> Total Amount
+                    <CreditCard className="w-3 h-3" /> Total Amount
                   </p>
                   <p className="text-sm font-medium text-gray-700">TK {order.totalPrice?.toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 flex items-center gap-1 mb-0.5">
-                    <FiCreditCard className="w-3 h-3" /> Payment
+                    <CreditCard className="w-3 h-3" /> Payment
                   </p>
                   <p className="text-sm font-medium text-gray-700">
                     {order.paymentMethod ?? "COD"} —{" "}
@@ -380,7 +389,7 @@ export default function TrackOrderPage() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 flex items-center gap-1 mb-0.5">
-                    <FiInfo className="w-3 h-3" /> Order ID
+                    <Info className="w-3 h-3" /> Order ID
                   </p>
                   <p className="text-sm font-medium text-gray-700">#{shortId}</p>
                 </div>
@@ -391,7 +400,7 @@ export default function TrackOrderPage() {
               {order.products?.length > 0 && (
                 <div>
                   <p className="text-xs text-gray-400 flex items-center gap-1 mb-3">
-                    <BsBoxSeam className="w-3 h-3" /> Items ({order.products.length})
+                    <PackageCheck className="w-3 h-3" /> Items ({order.products.length})
                   </p>
                   <div className="space-y-3">
                     {order.products.map((item, i) => (
@@ -441,7 +450,7 @@ export default function TrackOrderPage() {
               onClick={() => generateInvoice(order)}
               className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all cursor-pointer"
             >
-              <FiDownload className="w-4 h-4" />
+              <Download className="w-4 h-4" />
               Download Invoice
             </button>
 
@@ -449,7 +458,7 @@ export default function TrackOrderPage() {
               type="button"
               className="flex items-center gap-2 text-sm text-gray-500 border border-gray-200 rounded-full px-4 py-2.5 hover:bg-gray-50 transition-colors cursor-pointer"
             >
-              <FiHelpCircle className="w-4 h-4" /> Need Help?
+              <HelpCircle className="w-4 h-4" /> Need Help?
             </button>
           </div>
 
