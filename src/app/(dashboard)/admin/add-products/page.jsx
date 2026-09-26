@@ -441,6 +441,8 @@ const AddProducts = () => {
                       onChange={(content) =>
                         setFields((prev) => ({ ...prev, description: content }))
                       }
+                      productTitle={fields.title}
+                      productCategory={fields.collections?.[0] || fields.productType}
                       placeholder="Write a comprehensive product description, highlights, and specifications..."
                     />
                   </div>

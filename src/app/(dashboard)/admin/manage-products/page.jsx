@@ -656,6 +656,8 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
               onChange={(content) =>
                 setFormData((prev) => ({ ...prev, description: content }))
               }
+              productTitle={formData.title}
+              productCategory={formData.collections?.[0] || formData.productType}
               placeholder="Describe this product, its key features, specifications, and what makes it special..."
             />
           </div>
