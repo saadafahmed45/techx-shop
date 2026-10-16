@@ -1,9 +1,8 @@
 import { Suspense } from "react";
-import HeroModern from "@/components/HeroModern";
 import FeaturesBar from "@/components/FeaturesBar";
 import CategoryGrid from "@/components/CategoryGrid";
 import ProductSection from "@/components/ProductSection";
-import FlashSaleBanner from "@/components/FlashSaleBanner";
+import PromoBanner from "@/components/PromoBanner";
 import FeaturedCollections from "@/components/FeaturedCollections";
 import WhyTechX from "@/components/WhyTechX";
 import FadeIn from "@/components/FadeIn";
@@ -63,72 +62,65 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col bg-white">
-      {/* 1. Hero — Dynamic showcase */}
+
+      {/* 1. Hero Banner — Dynamic showcase */}
       <HeroSlider initialSlides={heroSliders} />
-      {/* <HeroModern /> */}
-      {/* 2. Value Propositions Bar (Free Shipping, Returns, Checkout, Support) */}
+
+      {/* 2. Trust Bar — Value Propositions (Free Shipping, Returns, Support) */}
       <FeaturesBar />
 
-      {/* 3. Shop by Category (Dynamic collections from database) */}
+      {/* 3. Shop by Category — Dynamic collections from database */}
       <FadeIn delay={60}>
         <Suspense fallback={<SectionFallback height="h-64" />}>
           <CategoryGrid initialCollections={collections} />
         </Suspense>
       </FadeIn>
 
-<ProductsFilterTabs/>
-
-      {/* 4. Featured Products (Card grid with discount badges, ratings, full-width blue CTA) */}
+      {/* 4. Best Sellers — Top performing products */}
       <FadeIn delay={80}>
         <Suspense fallback={<SectionFallback height="h-96" />}>
           <ProductSection
-            title="Featured Products"
+            title="Best Sellers"
+            subtitle="Our most loved products, trusted by thousands of customers."
             filterValue="Featured"
             viewAllLink="/product?sort=featured"
-            viewAllText="View All Products"
+            viewAllText="View All Best Sellers"
           />
         </Suspense>
       </FadeIn>
 
-      {/* 5. Flash Sale Banner (Dark high-tech countdown timer + glowing visual) */}
-      <FadeIn direction="none" duration={700}>
-        <FlashSaleBanner />
-      </FadeIn>
-
-
-      {/* 7. New Arrivals (Latest gear with "New" badges) */}
+      {/* 5. New Arrivals — Latest gear with "New" badges */}
       <FadeIn delay={80}>
         <Suspense fallback={<SectionFallback height="h-96" />}>
           <ProductSection
             title="New Arrivals"
+            subtitle="Fresh drops — the latest tech just landed in store."
             filterValue="New Arrivals"
             viewAllLink="/product?sort=newest"
-            viewAllText="View All"
+            viewAllText="View All New Arrivals"
             isNewArrivals={true}
           />
         </Suspense>
       </FadeIn>
 
-      {/* 6. Featured Collections (Tech Essentials & Travel Collection split cards) */}
+      {/* 6. Promotional Banner — Flagship showcase */}
+      <FadeIn direction="none" duration={700}>
+        <PromoBanner />
+      </FadeIn>
+
+      {/* 7. Explore All Products — Interactive category tabs with real data */}
+      <ProductsFilterTabs />
+
+      {/* 8. Featured Collections — Tech Essentials & Travel Collection split cards */}
       <FadeIn delay={80}>
         <FeaturedCollections />
       </FadeIn>
-      {/* 7. Top Selling Products */}
-      <FadeIn delay={80}>
-        <Suspense fallback={<SectionFallback height="h-96" />}>
-          <ProductSection
-            title="Top Selling Products"
-            filterValue="Top Selling Products"
-            viewAllLink="/product?sort=newest"
-            viewAllText="View All"
-            isNewArrivals={true}
-          />
-        </Suspense>
-      </FadeIn>
-      {/* 8. Why TechX (Trust & Warranty Pillars) */}
+
+      {/* 9. Why Shop With TechX? — Trust & Warranty Pillars */}
       <FadeIn delay={100} duration={800}>
         <WhyTechX />
       </FadeIn>
+
     </div>
   );
 }
