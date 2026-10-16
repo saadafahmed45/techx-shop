@@ -12,6 +12,7 @@ export default function ProductCard({
   index = 0,
   showWishlist = true,
   showRating = true,
+  variant = "default",
 }) {
   const { addToCart, openCart } = useCart();
   const { items, toggleWishlist, hydrate } = useWishlistStore();
@@ -71,7 +72,128 @@ export default function ProductCard({
     toggleWishlist(product);
   };
 
+  const rawCat =
+    typeof product.category === "object"
+      ? product.category?.name
+      : product.category;
+  const categoryName =
+    (rawCat && !rawCat.match(/^[0-9a-fA-F]{24}$/) ? rawCat : null) ||
+    product.brand ||
+    "TECH";
+
   const productUrl = `/product/${product.slug || product._id}`;
+
+  if (variant === "carousel") {
+    return (
+      <div className="group relative flex flex-col h-full bg-transparent overflow-hidden select-none">
+        {/* Media Container — light neutral background with smooth rounded corners */}
+        <div className="relative aspect-[4/5] sm:aspect-square w-full bg-[#f4f4f4] overflow-hidden flex items-center justify-center mb-3 sm:mb-3.5 p-4 rounded-xl">
+          
+          {/* Lime Green Discount / New Badge */}
+          {hasDiscount && discountPercent > 0 ? (
+            <span className="absolute top-3 left-3 px-2 py-0.5 text-[11px] font-black uppercase tracking-tight bg-[#bdf338] text-neutral-950 z-10 shadow-2xs rounded-xs">
+              -{discountPercent}%
+            </span>
+          ) : product.badge || index % 3 === 0 ? (
+            <span className="absolute top-3 left-3 px-2 py-0.5 text-[11px] font-black uppercase tracking-tight bg-[#bdf338] text-neutral-950 z-10 shadow-2xs rounded-xs">
+              {product.badge || "NEW"}
+            </span>
+          ) : null}
+
+          {/* Circular Wishlist Button */}
+          {showWishlist && (
+            <button
+              onClick={handleWishlist}
+              className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center border transition-all z-10 shadow-2xs ${
+                isWished
+                  ? "bg-rose-50 border-rose-200 text-rose-500"
+                  : "bg-white border-neutral-200/80 text-neutral-700 hover:text-black hover:bg-neutral-50"
+              }`}
+              aria-label="Wishlist"
+            >
+              <Heart
+                className={`w-3.5 h-3.5 transition-transform active:scale-125 ${
+                  isWished ? "fill-current text-rose-500" : ""
+                }`}
+              />
+            </button>
+          )}
+
+          {/* Product Image */}
+          <Link href={productUrl} className="relative w-full h-full flex items-center justify-center">
+            <Image
+              src={imgSrc}
+              alt={product.title || "Product"}
+              fill
+              sizes="(max-width: 640px) 70vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-contain transition-transform duration-500 ease-out group-hover:scale-105"
+              onError={() => {
+                setImgSrc(
+                  `https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80`
+                );
+              }}
+            />
+          </Link>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex flex-col flex-1 justify-between">
+          <div>
+            {/* Category */}
+            <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1 truncate">
+              {categoryName}
+            </span>
+
+            {/* Product Title */}
+            <Link href={productUrl} className="block mb-1.5">
+              <h3 className="text-xs sm:text-sm font-bold text-neutral-900 uppercase tracking-tight line-clamp-1 hover:text-blue-600 transition-colors">
+                {product.title}
+              </h3>
+            </Link>
+
+            {/* Price */}
+            <div className="flex items-baseline gap-2 mb-3">
+              <span className="text-sm sm:text-base font-black text-neutral-950">
+                ৳{price > 0 ? price.toLocaleString() : "650"}
+              </span>
+              {hasDiscount && (
+                <span className="text-xs sm:text-sm text-neutral-400 line-through font-normal">
+                  ৳{Math.round(comparePrice).toLocaleString()}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Add to Cart Button at Bottom */}
+          <button
+            onClick={handleQuickAdd}
+            disabled={product.stock === 0}
+            className={`w-full h-10 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.98] mt-auto ${
+              product.stock === 0
+                ? "bg-neutral-100 text-neutral-400 cursor-not-allowed border border-neutral-200"
+                : added
+                ? "bg-emerald-600 text-white shadow-emerald-500/20"
+                : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
+            }`}
+          >
+            {added ? (
+              <>
+                <Check className="w-4 h-4 animate-in zoom-in-50 duration-200" />
+                <span>Added to Cart!</span>
+              </>
+            ) : product.stock === 0 ? (
+              <span>Out of Stock</span>
+            ) : (
+              <>
+                <ShoppingBag className="w-4 h-4" />
+                <span>Add to Cart</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="group relative flex flex-col bg-white rounded-2xl border border-neutral-200/80 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 overflow-hidden p-3.5 sm:p-4">

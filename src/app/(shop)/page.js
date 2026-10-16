@@ -80,11 +80,11 @@ export default async function Home() {
       <FadeIn delay={80}>
         <Suspense fallback={<SectionFallback height="h-96" />}>
           <ProductSection
+            eyebrow="COMMUNITY PICKS"
             title="Best Sellers"
-            subtitle="Our most loved products, trusted by thousands of customers."
             filterValue="Featured"
             viewAllLink="/product?sort=featured"
-            viewAllText="View All Best Sellers"
+            viewAllText="VIEW ALL"
           />
         </Suspense>
       </FadeIn>
@@ -93,11 +93,11 @@ export default async function Home() {
       <FadeIn delay={80}>
         <Suspense fallback={<SectionFallback height="h-96" />}>
           <ProductSection
+            eyebrow="JUST ARRIVED"
             title="New Arrivals"
-            subtitle="Fresh drops — the latest tech just landed in store."
             filterValue="New Arrivals"
             viewAllLink="/product?sort=newest"
-            viewAllText="View All New Arrivals"
+            viewAllText="VIEW ALL"
             isNewArrivals={true}
           />
         </Suspense>
