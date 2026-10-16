@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Upload,
   Loader2,
@@ -13,6 +14,8 @@ import {
   MousePointerClick,
   Sparkles,
   X,
+  ArrowUpDown,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -44,6 +47,7 @@ const AddHeroSlider = () => {
     description: "",
     badge: "",
     buttonText: "SHOP NOW",
+    order: 1,
   });
 
   // =========================================
@@ -97,6 +101,7 @@ const AddHeroSlider = () => {
       data.append("description", formData.description);
       data.append("badge", formData.badge);
       data.append("buttonText", formData.buttonText);
+      data.append("order", formData.order || 0);
       data.append("badges", JSON.stringify(selectedBadges));
       data.append("status", status);
       data.append("image", image);
@@ -118,6 +123,7 @@ const AddHeroSlider = () => {
         description: "",
         badge: "",
         buttonText: "SHOP NOW",
+        order: 1,
       });
       setImage(null);
       setPreview("");
@@ -240,35 +246,53 @@ const AddHeroSlider = () => {
                     </div>
                   </div>
 
-                  {/* BADGE (manual text) */}
-                  <div>
-                    <label className={labelCls}>Badge Text</label>
-                    <div className="relative">
-                      <Tag size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                      <input
-                        type="text"
-                        name="badge"
-                        value={formData.badge}
-                        onChange={handleChange}
-                        placeholder="e.g. New Arrival"
-                        className={`${inputCls} pl-9`}
-                      />
+                  {/* BADGE, BUTTON, SLIDER ORDER */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className={labelCls}>Badge Text</label>
+                      <div className="relative">
+                        <Tag size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        <input
+                          type="text"
+                          name="badge"
+                          value={formData.badge}
+                          onChange={handleChange}
+                          placeholder="e.g. New Arrival"
+                          className={`${inputCls} pl-9`}
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* BUTTON TEXT */}
-                  <div>
-                    <label className={labelCls}>Button Text</label>
-                    <div className="relative">
-                      <MousePointerClick size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                      <input
-                        type="text"
-                        name="buttonText"
-                        value={formData.buttonText}
-                        onChange={handleChange}
-                        placeholder="SHOP NOW"
-                        className={`${inputCls} pl-9`}
-                      />
+                    <div>
+                      <label className={labelCls}>Button Text</label>
+                      <div className="relative">
+                        <MousePointerClick size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        <input
+                          type="text"
+                          name="buttonText"
+                          value={formData.buttonText}
+                          onChange={handleChange}
+                          placeholder="SHOP NOW"
+                          className={`${inputCls} pl-9`}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelCls}>Slider Order</label>
+                      <div className="relative">
+                        <ArrowUpDown size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        <input
+                          type="number"
+                          name="order"
+                          value={formData.order}
+                          onChange={handleChange}
+                          min="0"
+                          placeholder="1"
+                          className={`${inputCls} pl-9`}
+                        />
+                      </div>
+                      <span className="text-[10px] text-slate-400 mt-1 block">Order on home page (e.g. 1, 2, 3)</span>
                     </div>
                   </div>
 
@@ -324,6 +348,28 @@ const AddHeroSlider = () => {
                   </div>
                 </div>
               </div>
+
+              {/* GLOBAL SLIDER SETTINGS BANNER */}
+              <div className="bg-linear-to-r from-indigo-50/70 via-blue-50/60 to-purple-50/50 border border-indigo-100 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-indigo-200">
+                    <SlidersHorizontal size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-800">Slider Display Settings</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Image fit mode, banner height, and text typography are configured separately for all slides in the dedicated settings panel.
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href="/admin/manage-hero-sliders?settings=true"
+                  className="shrink-0 h-9 px-4 rounded-xl bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+                >
+                  <SlidersHorizontal size={13} />
+                  Slider Settings
+                </Link>
+              </div>
             </div>
 
             {/* ==================== RIGHT ==================== */}
@@ -340,7 +386,7 @@ const AddHeroSlider = () => {
                       key={item}
                       type="button"
                       onClick={() => setStatus(item)}
-                      className={`w-full h-11 rounded-xl border text-sm font-semibold capitalize transition-all ${
+                      className={`w-full h-11 rounded-xl border text-sm font-semibold capitalize transition-all cursor-pointer ${
                         status === item
                           ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200"
                           : "bg-white border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-500"
@@ -361,6 +407,7 @@ const AddHeroSlider = () => {
                 <div className="space-y-3 text-sm">
                   {[
                     { label: "Title", value: formData.title || "—", cls: "truncate max-w-[120px] text-right" },
+                    { label: "Order", value: `#${formData.order || 1}` },
                     { label: "Badge", value: formData.badge || "—" },
                     { label: "Button", value: formData.buttonText || "—" },
                     { label: "Quick Tags", value: selectedBadges.length },

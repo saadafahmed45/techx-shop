@@ -5,7 +5,8 @@ import Link from "next/link";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "https://techx-server-tau.vercel.app";
+const API =
+  process.env.NEXT_PUBLIC_API_URL || "https://techx-server-tau.vercel.app";
 
 const DEFAULT_SLIDES = [
   {
@@ -64,6 +65,50 @@ function optimizeImageUrl(url) {
 }
 
 /**
+ * Helper to get slider container height classes based on sliderHeight setting.
+ */
+function getSliderHeightClass(sliderHeight) {
+  switch (sliderHeight) {
+    case "compact":
+      return "h-[380px] sm:h-[440px] md:h-[480px] lg:h-[540px]";
+    case "tall":
+      return "h-[540px] sm:h-[620px] md:h-[700px] lg:h-[780px] xl:h-[840px]";
+    case "fullscreen":
+      return "h-[85vh] sm:h-[90vh] min-h-[520px]";
+    case "medium":
+    default:
+      return "h-120 sm:h-135 md:h-150 lg:h-165 xl:h-175";
+  }
+}
+
+/**
+ * Helper to get responsive typography sizes based on slide textSize setting.
+ */
+function getTextSizeClasses(textSize) {
+  switch (textSize) {
+    case "small":
+      return {
+        badge: "text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-blue-300",
+        title: "text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.15] mb-3 sm:mb-3.5 drop-shadow-md",
+        description: "text-slate-200 text-xs sm:text-sm lg:text-base max-w-lg mb-6 sm:mb-7 leading-relaxed font-normal drop-shadow",
+      };
+    case "large":
+      return {
+        badge: "text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-blue-300",
+        title: "text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.08] mb-4 sm:mb-5 drop-shadow-lg",
+        description: "text-slate-200 text-base sm:text-lg lg:text-xl max-w-2xl mb-8 sm:mb-9 leading-relaxed font-normal drop-shadow",
+      };
+    case "medium":
+    default:
+      return {
+        badge: "text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-blue-300",
+        title: "text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.12] mb-3.5 sm:mb-4 drop-shadow-md",
+        description: "text-slate-200 text-sm sm:text-base lg:text-lg max-w-xl mb-7 sm:mb-8 leading-relaxed font-normal drop-shadow",
+      };
+  }
+}
+
+/**
  * Maps raw database slide objects to normalized slide models.
  */
 function mapSlide(s, idx) {
@@ -82,18 +127,52 @@ function mapSlide(s, idx) {
     secondaryCta: "Explore More",
     secondaryLink: "/collections",
     image: optimizeImageUrl(s.image),
+    order: typeof s.order === "number" ? s.order : idx + 1,
+    textSize: s.textSize || "medium",
+    imageSize: s.imageSize || "cover",
+    sliderHeight: s.sliderHeight || "medium",
   };
 }
 
 /**
- * Filters and formats slide list.
+ * Filters and formats slide list, sorted by order ascending.
  */
 function formatSlides(data) {
   if (!Array.isArray(data) || data.length === 0) return [];
   const active = data.filter((s) => s.status !== "draft" && s.image);
   if (active.length === 0) return [];
-  return active.map(mapSlide);
+
+  // Check if custom order sequence is saved locally
+  let orderMap = new Map();
+  if (typeof window !== "undefined") {
+    try {
+      const savedOrders = localStorage.getItem("techx_slider_order_sequence");
+      if (savedOrders) {
+        const parsed = JSON.parse(savedOrders);
+        if (Array.isArray(parsed)) {
+          parsed.forEach((item, idx) => {
+            if (item.id) orderMap.set(item.id, Number(item.order) || idx + 1);
+          });
+        }
+      }
+    } catch (e) {}
+  }
+
+  const sorted = [...active].sort((a, b) => {
+    const orderA = orderMap.has(a._id) ? orderMap.get(a._id) : (Number(a.order) || 999);
+    const orderB = orderMap.has(b._id) ? orderMap.get(b._id) : (Number(b.order) || 999);
+    return orderA - orderB;
+  });
+
+  return sorted.map(mapSlide);
 }
+
+const DEFAULT_GLOBAL_SETTINGS = {
+  imageSize: "cover",
+  sliderHeight: "medium",
+  textSize: "medium",
+  autoplaySpeed: 5500,
+};
 
 export default function HeroSlider({ initialSlides = [] }) {
   // Initialize state immediately with formatted server data or fallback defaults (0ms loader delay)
@@ -102,9 +181,45 @@ export default function HeroSlider({ initialSlides = [] }) {
     return formatted.length > 0 ? formatted : DEFAULT_SLIDES;
   });
 
+  const [sliderSettings, setSliderSettings] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const local = localStorage.getItem("techx_global_slider_settings");
+        if (local) {
+          return { ...DEFAULT_GLOBAL_SETTINGS, ...JSON.parse(local) };
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_GLOBAL_SETTINGS;
+  });
+
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef(null);
+
+  // Listen to live settings changes from admin modal
+  useEffect(() => {
+    const handleSettingsUpdated = (e) => {
+      if (e.detail?.settings) {
+        setSliderSettings((prev) => ({ ...prev, ...e.detail.settings }));
+      }
+      if (e.detail?.orderedSlides && Array.isArray(e.detail.orderedSlides)) {
+        const orderMap = new Map(
+          e.detail.orderedSlides.map((s, idx) => [s._id, s.order || idx + 1])
+        );
+        setSlides((prev) => {
+          return [...prev].sort((a, b) => {
+            const ordA = orderMap.has(a._id) ? orderMap.get(a._id) : (Number(a.order) || 999);
+            const ordB = orderMap.has(b._id) ? orderMap.get(b._id) : (Number(b.order) || 999);
+            return ordA - ordB;
+          });
+        });
+      }
+    };
+
+    window.addEventListener("techx_slider_settings_updated", handleSettingsUpdated);
+    return () => window.removeEventListener("techx_slider_settings_updated", handleSettingsUpdated);
+  }, []);
 
   // Background silent revalidation using sessionStorage cache + SWR
   useEffect(() => {
@@ -124,7 +239,7 @@ export default function HeroSlider({ initialSlides = [] }) {
       // Ignore sessionStorage issues
     }
 
-    // 2. Fetch latest data in background without blocking UI
+    // 2. Fetch latest slides in background
     fetch(`${API}/hero-sliders?status=active`)
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
@@ -136,9 +251,22 @@ export default function HeroSlider({ initialSlides = [] }) {
           } catch (e) {}
         }
       })
-      .catch(() => {
-        // Retain current slides on network failure
-      });
+      .catch(() => {});
+
+    // 3. Fetch global slider settings (if API is active/deployed)
+    fetch(`${API}/hero-sliders/settings`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && typeof data === "object" && !data.message) {
+          setSliderSettings({
+            imageSize: data.imageSize || "cover",
+            sliderHeight: data.sliderHeight || "medium",
+            textSize: data.textSize || "medium",
+            autoplaySpeed: Number(data.autoplaySpeed) || 5500,
+          });
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Pre-warm / preload all slide images in browser cache for instantaneous transitions
@@ -159,11 +287,12 @@ export default function HeroSlider({ initialSlides = [] }) {
   // Autoplay timer with pause on hover
   useEffect(() => {
     if (slides.length <= 1 || paused) return;
+    const interval = Number(sliderSettings.autoplaySpeed) || 5500;
     timerRef.current = setInterval(() => {
       go((current + 1) % slides.length);
-    }, 5500);
+    }, interval);
     return () => clearInterval(timerRef.current);
-  }, [slides, current, paused, go]);
+  }, [slides, current, paused, go, sliderSettings.autoplaySpeed]);
 
   const handlePrev = (e) => {
     e?.stopPropagation?.();
@@ -179,7 +308,7 @@ export default function HeroSlider({ initialSlides = [] }) {
 
   return (
     <section
-      className="relative w-full h-120 sm:h-135 md:h-150 lg:h-165 xl:h-175 bg-neutral-950 overflow-hidden select-none"
+      className={`relative w-full ${getSliderHeightClass(sliderSettings.sliderHeight)} bg-neutral-950 overflow-hidden select-none transition-all duration-700`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       aria-label="Homepage Hero Carousel"
@@ -187,6 +316,9 @@ export default function HeroSlider({ initialSlides = [] }) {
       {/* ─── Stack of Full-Width & Full-Height Slides ─── */}
       {slides.map((slide, idx) => {
         const isActive = idx === current;
+        const textClasses = getTextSizeClasses(sliderSettings.textSize || slide.textSize);
+        const isContain = (sliderSettings.imageSize || slide.imageSize) === "contain";
+
         return (
           <div
             key={slide._id || idx}
@@ -197,8 +329,15 @@ export default function HeroSlider({ initialSlides = [] }) {
             }`}
             aria-hidden={!isActive}
           >
-            {/* Full-bleed Background Image */}
+            {/* Background Image (Cover or Contain based on imageSize) */}
             <div className="relative w-full h-full overflow-hidden">
+              {isContain && (
+                <div
+                  className="absolute inset-0 bg-cover bg-center blur-2xl scale-110 opacity-35 pointer-events-none"
+                  style={{ backgroundImage: `url(${slide.image})` }}
+                />
+              )}
+
               <Image
                 src={slide.image}
                 alt={slide.title || "TechX Hero Banner"}
@@ -207,43 +346,43 @@ export default function HeroSlider({ initialSlides = [] }) {
                 fetchPriority={idx === 0 ? "high" : "auto"}
                 sizes="100vw"
                 quality={90}
-                className={`object-cover object-center w-full h-full transition-transform duration-7000 ease-out ${
-                  isActive ? "scale-105" : "scale-100"
+                className={`${
+                  isContain
+                    ? "object-contain object-center z-10"
+                    : "object-cover object-center"
+                } w-full h-full transition-transform duration-7000 ease-out ${
+                  isActive ? (isContain ? "scale-102" : "scale-105") : "scale-100"
                 }`}
               />
 
               {/* Ambient Cinematic Contrast Overlays */}
-              {/* Left-to-right subtle gradient for text readability while letting the image shine */}
-              <div className="absolute inset-0 bg-linear-to-r from-neutral-950/85 via-neutral-950/45 to-transparent sm:w-2/3" />
-              {/* Bottom subtle gradient for clean transition */}
-              <div className="absolute inset-0 bg-linear-to-t from-neutral-950/80 via-transparent to-transparent" />
-              {/* Subtle top vignette */}
-              <div className="absolute inset-x-0 top-0 h-24 bg-linear-to-b from-neutral-950/50 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-linear-to-r from-neutral-950/85 via-neutral-950/45 to-transparent sm:w-2/3 z-15" />
+              <div className="absolute inset-0 bg-linear-to-t from-neutral-950/80 via-transparent to-transparent z-15" />
+              <div className="absolute inset-x-0 top-0 h-24 bg-linear-to-b from-neutral-950/50 to-transparent pointer-events-none z-15" />
             </div>
 
             {/* Content Container (Layered above the image) */}
             <div className="absolute inset-0 flex items-center z-20">
               <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="max-w-xl sm:max-w-2xl text-left py-12">
-                  
                   {/* Badge */}
                   {slide.badge && (
                     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-600/30 border border-blue-400/40 backdrop-blur-md mb-4 sm:mb-5 shadow-lg shadow-blue-900/20">
                       <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                      <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-blue-300">
+                      <span className={textClasses.badge}>
                         {slide.badge}
                       </span>
                     </div>
                   )}
 
                   {/* Title */}
-                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.12] mb-3.5 sm:mb-4 drop-shadow-md">
+                  <h1 className={textClasses.title}>
                     {slide.title}
                   </h1>
 
                   {/* Description (Renders only if available) */}
                   {slide.description ? (
-                    <p className="text-slate-200 text-sm sm:text-base lg:text-lg max-w-xl mb-7 sm:mb-8 leading-relaxed font-normal drop-shadow">
+                    <p className={textClasses.description}>
                       {slide.description}
                     </p>
                   ) : (
@@ -267,7 +406,6 @@ export default function HeroSlider({ initialSlides = [] }) {
                       <span>{slide.secondaryCta || "Explore More"}</span>
                     </Link>
                   </div>
-
                 </div>
               </div>
             </div>

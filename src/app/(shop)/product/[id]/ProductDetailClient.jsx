@@ -75,6 +75,8 @@ export default function ProductDetailClient({ product: serverProduct }) {
   const [added, setAdded] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [imageZoom, setImageZoom] = useState({ active: false, x: 50, y: 50 });
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [touchEndX, setTouchEndX] = useState(null);
 
   const tabsRef = useRef(null);
   const buyBoxRef = useRef(null);
@@ -226,7 +228,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
     }
   };
 
-  // Image zoom handler
+  // Image zoom handler (desktop hover)
   const handleMouseMove = (e) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - left) / width) * 100;
@@ -238,51 +240,82 @@ export default function ProductDetailClient({ product: serverProduct }) {
     setImageZoom({ active: false, x: 50, y: 50 });
   };
 
+  // Touch swipe gestures for mobile gallery
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+    setTouchEndX(null);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX || !touchEndX) return;
+    const distance = touchStartX - touchEndX;
+    if (distance > 45 && images.length > 1) {
+      // Swiped Left -> Next image
+      const currentIdx = images.indexOf(activeImage);
+      const nextIdx = currentIdx === images.length - 1 ? 0 : currentIdx + 1;
+      setActiveImage(images[nextIdx]);
+    } else if (distance < -45 && images.length > 1) {
+      // Swiped Right -> Prev image
+      const currentIdx = images.indexOf(activeImage);
+      const prevIdx = currentIdx === 0 ? images.length - 1 : currentIdx - 1;
+      setActiveImage(images[prevIdx]);
+    }
+    setTouchStartX(null);
+    setTouchEndX(null);
+  };
+
   const currentImageIndex = images.indexOf(activeImage);
 
   return (
     <div className="bg-[#fafafc] min-h-screen pb-24 text-neutral-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5">
         
         {/* Modern Breadcrumbs */}
-        <nav className="flex items-center flex-wrap gap-2 text-xs text-neutral-500 mb-6 font-medium">
-          <Link href="/" className="hover:text-blue-600 transition-colors">
+        <nav className="flex items-center gap-1.5 sm:gap-2 text-xs text-neutral-500 mb-4 sm:mb-6 font-medium overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
+          <Link href="/" className="hover:text-blue-600 transition-colors shrink-0">
             Home
           </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-neutral-300" />
-          <Link href="/product" className="hover:text-blue-600 transition-colors">
+          <ChevronRight className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
+          <Link href="/product" className="hover:text-blue-600 transition-colors shrink-0">
             Products
           </Link>
           {product.productType && (
             <>
-              <ChevronRight className="w-3.5 h-3.5 text-neutral-300" />
-              <span className="text-neutral-500 capitalize">{product.productType}</span>
+              <ChevronRight className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
+              <span className="text-neutral-500 capitalize shrink-0">{product.productType}</span>
             </>
           )}
-          <ChevronRight className="w-3.5 h-3.5 text-neutral-300" />
-          <span className="text-neutral-900 font-semibold truncate max-w-50 sm:max-w-md">
+          <ChevronRight className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
+          <span className="text-neutral-900 font-semibold truncate max-w-44 sm:max-w-md shrink-0">
             {product.title}
           </span>
         </nav>
 
         {/* 2-Column Product Showcase Stage */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
           
           {/* ========================================== */}
-          {/* LEFT: Elevated Media Gallery               */}
+          {/* LEFT: Elevated Media Gallery (Sticky on desktop only) */}
           {/* ========================================== */}
-          <div className="lg:col-span-6 flex flex-col gap-4 sticky top-24">
+          <div className="lg:col-span-6 flex flex-col gap-3.5 sm:gap-4 lg:sticky lg:top-24">
             
             {/* Primary Image Viewport */}
             <div
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
               onClick={() => {
                 const idx = images.indexOf(activeImage);
                 setLightboxIndex(idx !== -1 ? idx : 0);
                 setIsLightboxOpen(true);
               }}
-              className="relative aspect-square w-full rounded-3xl bg-white border border-neutral-200/90 shadow-sm p-6 sm:p-10 flex items-center justify-center cursor-zoom-in group overflow-hidden select-none"
+              className="relative aspect-square w-full rounded-2xl sm:rounded-3xl bg-white border border-neutral-200/90 shadow-sm p-4 sm:p-10 flex items-center justify-center cursor-zoom-in group overflow-hidden select-none touch-pan-y"
             >
               {/* Image Container with Smooth Zoom Preview */}
               <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
@@ -305,28 +338,28 @@ export default function ProductDetailClient({ product: serverProduct }) {
               </div>
 
               {/* Status Badges Overlay */}
-              <div className="absolute top-4 left-4 flex flex-col gap-2 z-10 pointer-events-none">
+              <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex flex-col gap-1.5 sm:gap-2 z-10 pointer-events-none">
                 {hasDiscount && discountPercent > 0 && (
-                  <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-600 text-white shadow-sm flex items-center gap-1">
+                  <span className="px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold uppercase tracking-wider bg-rose-600 text-white shadow-sm flex items-center gap-1">
                     <Sparkles className="w-3 h-3" /> -{discountPercent}% OFF
                   </span>
                 )}
                 {product.badge && (
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-neutral-900 text-white shadow-xs">
+                  <span className="px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold tracking-wide uppercase bg-neutral-900 text-white shadow-xs">
                     {product.badge}
                   </span>
                 )}
               </div>
 
               {/* Action Buttons Overlay (Wishlist, Fullscreen) */}
-              <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+              <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex items-center gap-2 z-10">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     toggleWishlist(product);
                   }}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border shadow-xs transition-all cursor-pointer ${
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border shadow-xs transition-all cursor-pointer ${
                     isWished
                       ? "bg-rose-50 border-rose-200 text-rose-500 scale-105"
                       : "bg-white/90 backdrop-blur-xs border-neutral-200 text-neutral-500 hover:text-neutral-950 hover:bg-white hover:scale-105"
@@ -345,7 +378,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
                     setLightboxIndex(idx !== -1 ? idx : 0);
                     setIsLightboxOpen(true);
                   }}
-                  className="w-10 h-10 rounded-full flex items-center justify-center border border-neutral-200 bg-white/90 backdrop-blur-xs text-neutral-500 hover:text-neutral-950 hover:bg-white hover:scale-105 shadow-xs transition-all cursor-pointer"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border border-neutral-200 bg-white/90 backdrop-blur-xs text-neutral-500 hover:text-neutral-950 hover:bg-white hover:scale-105 shadow-xs transition-all cursor-pointer"
                   aria-label="Zoom Image"
                   title="Expand image fullscreen"
                 >
@@ -353,7 +386,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
                 </button>
               </div>
 
-              {/* Quick Image Slide Arrows on Hover */}
+              {/* Quick Image Slide Arrows */}
               {images.length > 1 && (
                 <>
                   <button
@@ -364,7 +397,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
                       const prevIdx = currentIdx === 0 ? images.length - 1 : currentIdx - 1;
                       setActiveImage(images[prevIdx]);
                     }}
-                    className="absolute left-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-xs border border-neutral-200 text-neutral-700 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-white hover:scale-105 transition-all shadow-sm z-10 cursor-pointer"
+                    className="absolute left-2.5 sm:left-3 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/90 backdrop-blur-xs border border-neutral-200 text-neutral-700 flex items-center justify-center opacity-80 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-white hover:scale-105 transition-all shadow-sm z-10 cursor-pointer"
                     aria-label="Previous image"
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -377,7 +410,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
                       const nextIdx = currentIdx === images.length - 1 ? 0 : currentIdx + 1;
                       setActiveImage(images[nextIdx]);
                     }}
-                    className="absolute right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-xs border border-neutral-200 text-neutral-700 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-white hover:scale-105 transition-all shadow-sm z-10 cursor-pointer"
+                    className="absolute right-2.5 sm:right-3 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/90 backdrop-blur-xs border border-neutral-200 text-neutral-700 flex items-center justify-center opacity-80 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-white hover:scale-105 transition-all shadow-sm z-10 cursor-pointer"
                     aria-label="Next image"
                   >
                     <ChevronRight className="w-4 h-4" />
@@ -387,7 +420,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
 
               {/* Image Count Indicator */}
               {images.length > 1 && (
-                <div className="absolute bottom-4 right-4 px-2.5 py-1 rounded-full bg-neutral-900/70 backdrop-blur-xs text-white text-[11px] font-medium tracking-wider z-10 pointer-events-none">
+                <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 px-2.5 py-1 rounded-full bg-neutral-900/70 backdrop-blur-xs text-white text-[11px] font-medium tracking-wider z-10 pointer-events-none">
                   {currentImageIndex + 1} / {images.length}
                 </div>
               )}
@@ -395,14 +428,14 @@ export default function ProductDetailClient({ product: serverProduct }) {
 
             {/* Thumbnail Navigation Strip */}
             {images.length > 1 && (
-              <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+              <div className="flex items-center gap-2.5 sm:gap-3 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
                 {images.map((img, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setActiveImage(img)}
                     onMouseEnter={() => setActiveImage(img)}
-                    className={`relative w-18 h-18 rounded-2xl bg-white p-2 shrink-0 border transition-all cursor-pointer ${
+                    className={`relative w-16 h-16 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl bg-white p-1.5 sm:p-2 shrink-0 border transition-all cursor-pointer ${
                       activeImage === img
                         ? "border-blue-600 ring-2 ring-blue-600/30 shadow-xs scale-102"
                         : "border-neutral-200/90 hover:border-neutral-400 opacity-80 hover:opacity-100"
@@ -412,7 +445,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
                       src={img}
                       alt={`${product.title} view ${i + 1}`}
                       fill
-                      sizes="72px"
+                      sizes="(max-width: 640px) 64px, 72px"
                       className="object-contain mix-blend-multiply p-1"
                     />
                   </button>
@@ -424,12 +457,12 @@ export default function ProductDetailClient({ product: serverProduct }) {
           {/* ========================================== */}
           {/* RIGHT: Product Information & Purchase Hub   */}
           {/* ========================================== */}
-          <div className="lg:col-span-6 flex flex-col gap-6" ref={buyBoxRef}>
+          <div className="lg:col-span-6 flex flex-col gap-5 sm:gap-6" ref={buyBoxRef}>
             
             {/* Header: Vendor, Category, Stock & Title */}
-            <div className="space-y-3">
-              <div className="flex items-center flex-wrap gap-2.5">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-50 border border-blue-200/60 text-blue-700 text-xs font-semibold uppercase tracking-wider">
+            <div className="space-y-2.5 sm:space-y-3">
+              <div className="flex items-center flex-wrap gap-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg bg-blue-50 border border-blue-200/60 text-blue-700 text-xs font-semibold uppercase tracking-wider">
                   <BadgeCheck className="w-3.5 h-3.5" />
                   {product.vendor || product.brand || "TechX Official"}
                 </span>
@@ -445,7 +478,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
 
                 {/* Stock Indicator with animated pulse dot */}
                 <span
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold ml-auto border ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold sm:ml-auto border ${
                     product.stock > 0
                       ? "bg-emerald-50 text-emerald-700 border-emerald-200/80"
                       : "bg-rose-50 text-rose-700 border-rose-200/80"
@@ -463,12 +496,12 @@ export default function ProductDetailClient({ product: serverProduct }) {
               </div>
 
               {/* Main Product Title */}
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-950 leading-snug text-left">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-neutral-950 leading-snug text-left">
                 {product.title}
               </h1>
 
               {/* Star Rating & Review Link */}
-              <div className="flex items-center gap-3 pt-1">
+              <div className="flex items-center flex-wrap gap-2.5 sm:gap-3 pt-0.5">
                 <button
                   type="button"
                   onClick={() => scrollToTab("reviews")}
@@ -491,17 +524,17 @@ export default function ProductDetailClient({ product: serverProduct }) {
 
             {/* Pricing Section Card */}
             <div className="p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200/90 shadow-xs space-y-2">
-              <div className="flex items-baseline flex-wrap gap-3">
-                <span className="text-3xl sm:text-4xl font-extrabold text-neutral-950 tracking-tight">
+              <div className="flex items-baseline flex-wrap gap-2.5 sm:gap-3">
+                <span className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-neutral-950 tracking-tight">
                   ৳{price.toLocaleString()}
                 </span>
                 {comparePrice > price && (
-                  <span className="text-base sm:text-lg text-neutral-400 line-through font-medium">
+                  <span className="text-sm sm:text-lg text-neutral-400 line-through font-medium">
                     ৳{comparePrice.toLocaleString()}
                   </span>
                 )}
                 {hasDiscount && savings > 0 && (
-                  <span className="px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold">
+                  <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold">
                     Save ৳{savings.toLocaleString()} ({discountPercent}%)
                   </span>
                 )}
@@ -517,7 +550,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
 
             {/* Shopify-Style Product Description */}
             {product.description && (
-              <div className="pt-1 pb-1">
+              <div className="pt-0.5 pb-0.5">
                 <ProductDescription
                   description={product.description}
                   variant="compact"
@@ -527,20 +560,20 @@ export default function ProductDetailClient({ product: serverProduct }) {
             )}
 
             {/* Quantity Stepper & Main CTAs */}
-            <div className="space-y-3 pt-1">
-              <div className="flex items-center gap-3">
+            <div className="space-y-2.5 sm:space-y-3 pt-1">
+              <div className="flex items-center gap-2.5 sm:gap-3">
                 {/* Quantity Stepper */}
-                <div className="flex items-center h-12 border border-neutral-200 rounded-xl bg-white px-2 shadow-xs">
+                <div className="flex items-center h-11 sm:h-12 border border-neutral-200 rounded-xl bg-white px-2 shadow-xs shrink-0">
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     disabled={quantity <= 1 || product.stock === 0}
-                    className="w-8 h-8 flex items-center justify-center text-neutral-600 hover:text-neutral-950 disabled:opacity-30 transition-colors cursor-pointer"
+                    className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-neutral-600 hover:text-neutral-950 disabled:opacity-30 transition-colors cursor-pointer"
                     aria-label="Decrease quantity"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="w-10 text-center text-sm font-bold text-neutral-950">
+                  <span className="w-8 sm:w-10 text-center text-sm font-bold text-neutral-950">
                     {quantity}
                   </span>
                   <button
@@ -554,7 +587,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
                       product.stock !== undefined &&
                       quantity >= product.stock
                     }
-                    className="w-8 h-8 flex items-center justify-center text-neutral-600 hover:text-neutral-950 disabled:opacity-30 transition-colors cursor-pointer"
+                    className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-neutral-600 hover:text-neutral-950 disabled:opacity-30 transition-colors cursor-pointer"
                     aria-label="Increase quantity"
                   >
                     <Plus className="w-4 h-4" />
@@ -566,7 +599,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
                   type="button"
                   onClick={handleAddToCart}
                   disabled={product.stock === 0}
-                  className={`flex-1 flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl font-bold text-sm transition-all duration-200 shadow-sm cursor-pointer ${
+                  className={`flex-1 flex items-center justify-center gap-2 sm:gap-2.5 h-11 sm:h-12 px-4 sm:px-6 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm cursor-pointer ${
                     added
                       ? "bg-emerald-600 text-white"
                       : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 hover:shadow-blue-600/30"
@@ -587,12 +620,12 @@ export default function ProductDetailClient({ product: serverProduct }) {
               </div>
 
               {/* Buy Now Button & Share Button */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3">
                 <button
                   type="button"
                   onClick={handleBuyNow}
                   disabled={product.stock === 0}
-                  className="flex-1 flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-sm font-bold transition-all shadow-sm disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-11 sm:h-12 px-4 sm:px-6 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-xs sm:text-sm font-bold transition-all shadow-sm disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
                   <span>Instant Checkout</span>
@@ -601,7 +634,7 @@ export default function ProductDetailClient({ product: serverProduct }) {
                 <button
                   type="button"
                   onClick={handleShare}
-                  className="h-12 w-12 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 flex items-center justify-center transition-colors cursor-pointer shrink-0 shadow-xs"
+                  className="h-11 sm:h-12 w-11 sm:w-12 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 flex items-center justify-center transition-colors cursor-pointer shrink-0 shadow-xs"
                   aria-label="Share product"
                   title="Share product link"
                 >
@@ -611,44 +644,44 @@ export default function ProductDetailClient({ product: serverProduct }) {
             </div>
 
             {/* Trust and Assurance Grid (4 Modern Cards) */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-center gap-3 shadow-xs">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 pt-1 sm:pt-2">
+              <div className="p-3 sm:p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-center gap-2.5 sm:gap-3 shadow-xs">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                   <Truck className="w-4 h-4" />
                 </div>
-                <div className="text-left">
-                  <div className="text-xs font-bold text-neutral-900">Express Delivery</div>
-                  <div className="text-[11px] text-neutral-500">24-72h Across BD</div>
+                <div className="min-w-0 text-left">
+                  <div className="text-xs font-bold text-neutral-900 truncate">Express Delivery</div>
+                  <div className="text-[10px] sm:text-[11px] text-neutral-500 truncate">24-72h Across BD</div>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-center gap-3 shadow-xs">
+              <div className="p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-center gap-2.5 sm:gap-3 shadow-xs">
                 <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
-                <div className="text-left">
-                  <div className="text-xs font-bold text-neutral-900">Official Warranty</div>
-                  <div className="text-[11px] text-neutral-500">100% Genuine Gear</div>
+                <div className="min-w-0 text-left">
+                  <div className="text-xs font-bold text-neutral-900 truncate">Official Warranty</div>
+                  <div className="text-[10px] sm:text-[11px] text-neutral-500 truncate">100% Genuine Gear</div>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-center gap-3 shadow-xs">
+              <div className="p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-center gap-2.5 sm:gap-3 shadow-xs">
                 <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                   <RotateCcw className="w-4 h-4" />
                 </div>
-                <div className="text-left">
-                  <div className="text-xs font-bold text-neutral-900">7 Days Return</div>
-                  <div className="text-[11px] text-neutral-500">Hassle-Free Replacement</div>
+                <div className="min-w-0 text-left">
+                  <div className="text-xs font-bold text-neutral-900 truncate">7 Days Return</div>
+                  <div className="text-[10px] sm:text-[11px] text-neutral-500 truncate">Hassle-Free Replacement</div>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-center gap-3 shadow-xs">
+              <div className="p-3.5 rounded-xl bg-white border border-neutral-200/80 flex items-center gap-2.5 sm:gap-3 shadow-xs">
                 <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
                   <Headphones className="w-4 h-4" />
                 </div>
-                <div className="text-left">
-                  <div className="text-xs font-bold text-neutral-900">Priority Support</div>
-                  <div className="text-[11px] text-neutral-500">Technical Consultation</div>
+                <div className="min-w-0 text-left">
+                  <div className="text-xs font-bold text-neutral-900 truncate">Priority Support</div>
+                  <div className="text-[10px] sm:text-[11px] text-neutral-500 truncate">Technical Help</div>
                 </div>
               </div>
             </div>
@@ -710,27 +743,27 @@ export default function ProductDetailClient({ product: serverProduct }) {
                 </div>
 
                 <div className="border border-neutral-200 rounded-2xl overflow-hidden divide-y divide-neutral-200 text-xs sm:text-sm">
-                  <div className="grid grid-cols-3 p-4 bg-neutral-50/70">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 sm:p-4 gap-1 sm:gap-0 bg-neutral-50/70">
                     <span className="font-semibold text-neutral-800">Brand / Vendor</span>
-                    <span className="col-span-2 text-neutral-600 font-medium">
+                    <span className="sm:col-span-2 text-neutral-600 font-medium">
                       {product.vendor || product.brand || "TechX Authentic Gear"}
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 p-4 bg-white">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 sm:p-4 gap-1 sm:gap-0 bg-white">
                     <span className="font-semibold text-neutral-800">Product Model / Slug</span>
-                    <span className="col-span-2 text-neutral-600 font-mono text-xs">
+                    <span className="sm:col-span-2 text-neutral-600 font-mono text-xs">
                       {product.slug || product._id}
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 p-4 bg-neutral-50/70">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 sm:p-4 gap-1 sm:gap-0 bg-neutral-50/70">
                     <span className="font-semibold text-neutral-800">Category Classification</span>
-                    <span className="col-span-2 text-neutral-600 capitalize">
+                    <span className="sm:col-span-2 text-neutral-600 capitalize">
                       {product.productType || product.collections?.[0]?.name || "Electronics & Hardware"}
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 p-4 bg-white">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 sm:p-4 gap-1 sm:gap-0 bg-white">
                     <span className="font-semibold text-neutral-800">Current Stock Status</span>
-                    <span className="col-span-2 text-neutral-600">
+                    <span className="sm:col-span-2 text-neutral-600">
                       {product.stock > 0 ? (
                         <span className="text-emerald-700 font-semibold">
                           Available ({product.stock} units ready for immediate dispatch)
@@ -740,19 +773,19 @@ export default function ProductDetailClient({ product: serverProduct }) {
                       )}
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 p-4 bg-neutral-50/70">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 sm:p-4 gap-1 sm:gap-0 bg-neutral-50/70">
                     <span className="font-semibold text-neutral-800">Warranty Coverage</span>
-                    <span className="col-span-2 text-neutral-600">
+                    <span className="sm:col-span-2 text-neutral-600">
                       1 Year Official Brand Warranty with free servicing support
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 p-4 bg-white">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 sm:p-4 gap-1 sm:gap-0 bg-white">
                     <span className="font-semibold text-neutral-800">Country Availability</span>
-                    <span className="col-span-2 text-neutral-600">Bangladesh (Nationwide Delivery)</span>
+                    <span className="sm:col-span-2 text-neutral-600">Bangladesh (Nationwide Delivery)</span>
                   </div>
-                  <div className="grid grid-cols-3 p-4 bg-neutral-50/70">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 p-3.5 sm:p-4 gap-1 sm:gap-0 bg-neutral-50/70">
                     <span className="font-semibold text-neutral-800">Replacement Guarantee</span>
-                    <span className="col-span-2 text-neutral-600">
+                    <span className="sm:col-span-2 text-neutral-600">
                       7 Days standard replacement for manufacturing discrepancies
                     </span>
                   </div>
