@@ -59,6 +59,21 @@ function Stars({ value = 0, size = "w-4 h-4", showCount = false, count = 0 }) {
   );
 }
 
+function WhatsAppIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.888 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+    </svg>
+  );
+}
+
 export default function ProductDetailClient({ product: serverProduct }) {
   const params = useParams();
   const router = useRouter();
@@ -218,6 +233,34 @@ export default function ProductDetailClient({ product: serverProduct }) {
     if (typeof window !== "undefined") {
       navigator.clipboard?.writeText(window.location.href);
       toast.success("Product link copied to clipboard!");
+    }
+  };
+
+  const handleWhatsAppBuy = () => {
+    const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+    const rawPhone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "";
+    const cleanPhone = rawPhone.replace(/[^0-9]/g, "");
+
+    const formattedPrice = `৳${price.toLocaleString()}`;
+    const qtyText = quantity > 1 ? ` (Quantity: ${quantity})` : "";
+
+    const message = [
+      "Hello TechX Shop! I would like to buy this product:",
+      "",
+      `*Product:* ${product.title || "Product"}`,
+      `*Price:* ${formattedPrice}${qtyText}`,
+      `*URL:* ${currentUrl}`,
+      "",
+      "Please confirm availability and help me place my order. Thank you!",
+    ].join("\n");
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = cleanPhone
+      ? `https://wa.me/${cleanPhone}?text=${encodedMessage}`
+      : `https://api.whatsapp.com/send?text=${encodedMessage}`;
+
+    if (typeof window !== "undefined") {
+      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -561,62 +604,79 @@ export default function ProductDetailClient({ product: serverProduct }) {
 
             {/* Quantity Stepper & Main CTAs */}
             <div className="space-y-2.5 sm:space-y-3 pt-1">
-              <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
                 {/* Quantity Stepper */}
-                <div className="flex items-center h-11 sm:h-12 border border-neutral-200 rounded-xl bg-white px-2 shadow-xs shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    disabled={quantity <= 1 || product.stock === 0}
-                    className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-neutral-600 hover:text-neutral-950 disabled:opacity-30 transition-colors cursor-pointer"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="w-8 sm:w-10 text-center text-sm font-bold text-neutral-950">
-                    {quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setQuantity((q) =>
-                        product.stock ? Math.min(product.stock, q + 1) : q + 1
-                      )
-                    }
-                    disabled={
-                      product.stock !== undefined &&
-                      quantity >= product.stock
-                    }
-                    className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-neutral-600 hover:text-neutral-950 disabled:opacity-30 transition-colors cursor-pointer"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
+                <div className="flex items-center justify-between sm:justify-center h-11 sm:h-12 border border-neutral-200 rounded-xl bg-white px-3 sm:px-2 shadow-xs shrink-0">
+                  <span className="text-xs font-semibold text-neutral-500 sm:hidden">Quantity</span>
+                  <div className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      disabled={quantity <= 1 || product.stock === 0}
+                      className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-neutral-600 hover:text-neutral-950 disabled:opacity-30 transition-colors cursor-pointer"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="w-8 sm:w-10 text-center text-sm font-bold text-neutral-950">
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setQuantity((q) =>
+                          product.stock ? Math.min(product.stock, q + 1) : q + 1
+                        )
+                      }
+                      disabled={
+                        product.stock !== undefined &&
+                        quantity >= product.stock
+                      }
+                      className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-neutral-600 hover:text-neutral-950 disabled:opacity-30 transition-colors cursor-pointer"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
-                {/* Primary Add to Cart Button */}
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={product.stock === 0}
-                  className={`flex-1 flex items-center justify-center gap-2 sm:gap-2.5 h-11 sm:h-12 px-4 sm:px-6 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm cursor-pointer ${
-                    added
-                      ? "bg-emerald-600 text-white"
-                      : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 hover:shadow-blue-600/30"
-                  } disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed`}
-                >
-                  {added ? (
-                    <>
-                      <Check className="w-4 h-4" />
-                      <span>Added to Bag!</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="w-4 h-4" />
-                      <span>{product.stock > 0 ? "Add to Cart" : "Out of Stock"}</span>
-                    </>
-                  )}
-                </button>
+                {/* Main CTAs: Add to Cart & Buy Now via WhatsApp side-by-side */}
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 flex-1">
+                  {/* Primary Add to Cart Button */}
+                  <button
+                    type="button"
+                    onClick={handleAddToCart}
+                    disabled={product.stock === 0}
+                    className={`flex items-center justify-center gap-1.5 sm:gap-2 h-11 sm:h-12 px-3 sm:px-4 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm cursor-pointer ${
+                      added
+                        ? "bg-emerald-600 text-white"
+                        : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 hover:shadow-blue-600/30"
+                    } disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed`}
+                  >
+                    {added ? (
+                      <>
+                        <Check className="w-4 h-4 shrink-0" />
+                        <span>Added!</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="w-4 h-4 shrink-0" />
+                        <span className="truncate">{product.stock > 0 ? "Add to Cart" : "Out of Stock"}</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Buy Now via WhatsApp Button */}
+                  <button
+                    type="button"
+                    onClick={handleWhatsAppBuy}
+                    className="flex items-center justify-center gap-1.5 sm:gap-2 h-11 sm:h-12 px-3 sm:px-4 rounded-xl font-bold text-xs sm:text-sm bg-[#25D366] hover:bg-[#20bd5a] active:scale-[0.98] text-white shadow-sm hover:shadow-[#25D366]/25 transition-all duration-200 cursor-pointer"
+                    title="Buy Now via WhatsApp"
+                  >
+                    <WhatsAppIcon className="w-4 h-4 shrink-0 fill-current" />
+                    <span className="truncate">Buy Now via WhatsApp</span>
+                  </button>
+                </div>
               </div>
 
               {/* Buy Now Button & Share Button */}
@@ -997,14 +1057,25 @@ export default function ProductDetailClient({ product: serverProduct }) {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className="px-4 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-bold shrink-0 hover:bg-blue-700 transition-colors shadow-sm disabled:bg-neutral-300"
-          >
-            {product.stock > 0 ? "Add to Bag" : "Out of Stock"}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleWhatsAppBuy}
+              className="p-2.5 rounded-xl bg-[#25D366] text-white hover:bg-[#20bd5c] transition-colors shadow-sm flex items-center justify-center cursor-pointer active:scale-95"
+              title="Buy Now via WhatsApp"
+              aria-label="Buy Now via WhatsApp"
+            >
+              <WhatsAppIcon className="w-4 h-4 fill-current" />
+            </button>
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              className="px-4 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-bold shrink-0 hover:bg-blue-700 transition-colors shadow-sm disabled:bg-neutral-300 cursor-pointer"
+            >
+              {product.stock > 0 ? "Add to Bag" : "Out of Stock"}
+            </button>
+          </div>
         </div>
       )}
 
