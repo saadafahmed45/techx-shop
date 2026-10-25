@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { trackInitiateCheckout } from "@/lib/metaPixel";
 import {
   ShieldCheck,
   Truck,
@@ -67,6 +68,17 @@ export default function CheckoutPage() {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
+
+  // Track Meta Pixel InitiateCheckout
+  useEffect(() => {
+    if (cart.length > 0) {
+      trackInitiateCheckout({
+        value: totalPrice,
+        numItems: cart.length,
+        contentIds: cart.map((i) => i._id),
+      });
+    }
+  }, [cart.length]);
 
   const handleChange = (field) => (e) => {
     const update = { ...formData, [field]: e.target.value };

@@ -135,7 +135,7 @@ export default function ProductSection({
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="aspect-[4/5] bg-neutral-100 animate-pulse rounded-xs" />
+              <div key={i} className="aspect-4/5 bg-neutral-100 animate-pulse rounded-xs" />
             ))}
           </div>
         ) : (
@@ -167,10 +167,10 @@ export default function ProductSection({
                 1280: { slidesPerView: 4, spaceBetween: 28 },
               }}
               loop={false}
-              className="!overflow-hidden"
+              className="overflow-hidden!"
             >
               {displayProducts.map((product, i) => (
-                <SwiperSlide key={product.slug || product._id || i} className="!h-auto pb-1">
+                <SwiperSlide key={product.slug || product._id || i} className="h-auto! pb-1">
                   <ProductCard product={product} index={i} variant="carousel" />
                 </SwiperSlide>
               ))}
@@ -178,7 +178,7 @@ export default function ProductSection({
 
             {/* Bottom Progress Bar Indicator */}
             <div className="flex justify-center mt-8 sm:mt-12">
-              <div className="w-48 sm:w-64 h-[3px] bg-neutral-200 rounded-full overflow-hidden relative">
+              <div className="w-48 sm:w-64 h-0.75 bg-neutral-200 rounded-full overflow-hidden relative">
                 <div
                   className="absolute top-0 h-full bg-neutral-950 rounded-full transition-all duration-200 ease-out"
                   style={{

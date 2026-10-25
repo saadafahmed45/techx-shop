@@ -38,6 +38,7 @@ import {
 import AddReview from "@/components/AddReview";
 import ProductCard from "@/components/ProductCard";
 import ProductDescription from "@/components/ProductDescription";
+import { trackViewContent } from "@/lib/metaPixel";
 
 const FALLBACK = "https://picsum.photos/600/600";
 
@@ -113,6 +114,13 @@ export default function ProductDetailClient({ product: serverProduct }) {
   useEffect(() => {
     if (images.length > 0) {
       setActiveImage(images[0]);
+    }
+  }, [product?._id]);
+
+  // Track Meta Pixel ViewContent
+  useEffect(() => {
+    if (product?._id) {
+      trackViewContent(product);
     }
   }, [product?._id]);
 

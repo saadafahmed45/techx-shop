@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Search, X, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
+import { trackSearch } from "@/lib/metaPixel";
 
 function useDebounce(value, delay = 300) {
   const [debounced, setDebounced] = useState(value);
@@ -46,7 +47,10 @@ function useSearchProducts(query) {
     queryKey: ["search", debouncedQuery],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (debouncedQuery.trim()) params.set("q", debouncedQuery.trim());
+      if (debouncedQuery.trim()) {
+        params.set("q", debouncedQuery.trim());
+        trackSearch(debouncedQuery.trim());
+      }
       const url = `/api/search${params.toString() ? "?" + params.toString() : ""}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Search failed");

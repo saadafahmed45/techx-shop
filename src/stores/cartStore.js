@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { trackAddToCart } from "@/lib/metaPixel";
 
 const useCartStore = create((set, get) => ({
   cart: [],
@@ -32,6 +33,10 @@ const useCartStore = create((set, get) => ({
       return { cart: next, isCartOpen: true };
     });
     get().persist();
+
+    try {
+      trackAddToCart(product);
+    } catch {}
   },
 
   increaseQuantity: (id) => {

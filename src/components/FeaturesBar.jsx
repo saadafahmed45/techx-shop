@@ -48,11 +48,11 @@ export default function FeaturesBar() {
             return (
               <div
                 key={idx}
-                className="group flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300 cursor-default"
+                className="group flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-xl bg-white/3 hover:bg-white/6 border border-white/6 hover:border-white/12 transition-all duration-300 cursor-default"
               >
                 {/* Icon bubble */}
                 <div
-                  className={`shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br ${item.color} ring-1 ${item.ring} flex items-center justify-center transition-transform duration-300 group-hover:scale-105`}
+                  className={`shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-linear-to-br ${item.color} ring-1 ${item.ring} flex items-center justify-center transition-transform duration-300 group-hover:scale-105`}
                 >
                   <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${item.iconColor} stroke-[1.8]`} />
                 </div>

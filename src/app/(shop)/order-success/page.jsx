@@ -1,8 +1,9 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
+import { trackPurchase } from "@/lib/metaPixel";
 
 // ==========================================
 // CHECKMARK ANIMATION
@@ -180,6 +181,19 @@ function OrderSuccessContent() {
   // Format order ID for display
   const shortId = orderId ? orderId.slice(-8).toUpperCase() : "N/A";
   const displayId = orderId ? `#${shortId}` : "N/A";
+
+  const trackedRef = useRef(false);
+  useEffect(() => {
+    if (orderId && !trackedRef.current) {
+      trackedRef.current = true;
+      trackPurchase({
+        orderId,
+        value: Number(total) || 0,
+        numItems: Number(items) || 1,
+        currency: "BDT",
+      });
+    }
+  }, [orderId, total, items]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-start py-12 px-4">

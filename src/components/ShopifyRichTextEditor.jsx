@@ -428,7 +428,7 @@ export default function ShopifyRichTextEditor({
               setTemplateModalOpen(true);
             }}
             title="Open Smart Templates & AI Writer Studio"
-            className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 text-white shadow-xs hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-linear-to-r from-indigo-600 via-indigo-700 to-purple-600 text-white shadow-xs hover:brightness-110 active:scale-95 transition-all cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
             <span>Templates & AI Writer</span>
@@ -978,7 +978,7 @@ export default function ShopifyRichTextEditor({
       {/* ============================================================== */}
       {/* EDITOR CONTENT VIEWPORT                                       */}
       {/* ============================================================== */}
-      <div className="relative min-h-[220px]">
+      <div className="relative min-h-55">
         {viewMode === "code" && (
           /* HTML Code Editor View */
           <textarea
@@ -991,7 +991,7 @@ export default function ShopifyRichTextEditor({
             onBlur={() => setIsFocused(false)}
             rows={12}
             placeholder="<p>Write your raw HTML here...</p>"
-            className="w-full p-4 font-mono text-xs text-slate-800 bg-slate-50/60 outline-none resize-y min-h-[240px]"
+            className="w-full p-4 font-mono text-xs text-slate-800 bg-slate-50/60 outline-none resize-y min-h-60"
           />
         )}
 
@@ -1028,7 +1028,7 @@ export default function ShopifyRichTextEditor({
               onBlur={() => setIsFocused(false)}
               onKeyUp={updateActiveBlock}
               onMouseUp={updateActiveBlock}
-              className="shopify-rte p-5 sm:p-6 outline-none min-h-[240px] max-h-[500px] overflow-y-auto text-sm text-[#1e293b]"
+              className="shopify-rte p-5 sm:p-6 outline-none min-h-60 max-h-125 overflow-y-auto text-sm text-[#1e293b]"
             />
 
             {/* Placeholder overlay when empty */}
@@ -1108,7 +1108,7 @@ export default function ShopifyRichTextEditor({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-5">
           <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-indigo-50/70 via-purple-50/40 to-white">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-linear-to-r from-indigo-50/70 via-purple-50/40 to-white">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
                   <Sparkles className="w-5 h-5 text-yellow-300" />
@@ -1421,7 +1421,7 @@ export default function ShopifyRichTextEditor({
                 <button
                   type="button"
                   onClick={() => handleApplyTemplate("replace")}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-xs font-bold text-white hover:brightness-110 cursor-pointer shadow-xs"
+                  className="px-5 py-2 rounded-xl bg-linear-to-r from-indigo-600 to-indigo-700 text-xs font-bold text-white hover:brightness-110 cursor-pointer shadow-xs"
                 >
                   ⚡ Apply & Replace Description
                 </button>

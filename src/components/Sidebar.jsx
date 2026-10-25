@@ -79,7 +79,7 @@ const Sidebar = () => {
 
       {/* Sidebar panel */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen z-40 w-[220px] shrink-0 bg-[#0f172a] text-white flex flex-col transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+        className={`fixed lg:sticky top-0 left-0 h-screen z-40 w-55 shrink-0 bg-[#0f172a] text-white flex flex-col transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
         {/* Brand */}
         <div className="px-4 py-5 border-b border-white/[0.07]">
@@ -115,7 +115,7 @@ const Sidebar = () => {
                         className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 ${
                           active
                             ? "bg-blue-600 text-white shadow-sm shadow-blue-900/40"
-                            : "text-slate-400 hover:bg-white/[0.06] hover:text-white"
+                            : "text-slate-400 hover:bg-white/6 hover:text-white"
                         }`}
                       >
                         <Icon className={`w-4 h-4 shrink-0 ${active ? "text-white" : "text-slate-600"}`} />
@@ -157,7 +157,7 @@ const Sidebar = () => {
           <Link
             href="/"
             onClick={closeSidebar}
-            className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-[12px] text-slate-600 hover:text-white hover:bg-white/[0.05] transition-all"
+            className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-[12px] text-slate-600 hover:text-white hover:bg-white/5 transition-all"
           >
             <ExternalLink className="w-3.5 h-3.5" />
             <span>View Storefront</span>

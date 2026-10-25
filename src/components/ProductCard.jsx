@@ -87,7 +87,7 @@ export default function ProductCard({
     return (
       <div className="group relative flex flex-col h-full bg-transparent overflow-hidden select-none">
         {/* Media Container — light neutral background with smooth rounded corners */}
-        <div className="relative aspect-[4/5] sm:aspect-square w-full bg-[#f4f4f4] overflow-hidden flex items-center justify-center mb-3 sm:mb-3.5 p-4 rounded-xl">
+        <div className="relative aspect-4/5 sm:aspect-square w-full bg-[#f4f4f4] overflow-hidden flex items-center justify-center mb-3 sm:mb-3.5 p-4 rounded-xl">
           
           {/* Lime Green Discount / New Badge */}
           {hasDiscount && discountPercent > 0 ? (

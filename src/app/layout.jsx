@@ -1,6 +1,7 @@
 import Providers from "@/providers/Providers";
 import "./globals.css";
 import ClientPopups from "@/components/ClientPopups";
+import MetaPixel from "@/components/MetaPixel";
 
 export const viewport = {
   width: "device-width",
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
         <meta charSet="utf-8" />
       </head>
       <body>
+        <MetaPixel />
         <Providers>
           <ClientPopups />
           {children}
