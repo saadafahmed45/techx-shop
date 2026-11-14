@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
   PackageCheck,
   Clock3,
@@ -19,6 +20,8 @@ import {
   Loader2,
   RefreshCw,
   ShoppingBag,
+  Copy,
+  ExternalLink,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
@@ -27,7 +30,11 @@ import {
   useAdminOrders,
   useUpdateOrderStatus,
   useDeleteOrder,
+  useRefreshCourierStatus,
 } from "@/lib/admin-hooks";
+import SendToSteadfastModal from "@/components/courier/SendToSteadfastModal";
+import CourierStatusBadge from "@/components/courier/CourierStatusBadge";
+import CourierBalanceWidget from "@/components/courier/CourierBalanceWidget";
 
 const STATUS_COLORS = {
   Pending: "bg-amber-100 text-amber-800 border-amber-200",
@@ -81,10 +88,31 @@ const OrdersPage = () => {
   const { data: orders = [], isLoading, refetch, isFetching } = useAdminOrders();
   const updateStatus = useUpdateOrderStatus();
   const deleteOrderMutation = useDeleteOrder();
+  const refreshCourierStatus = useRefreshCourierStatus();
 
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   const [updatingId, setUpdatingId] = useState(null);
+  const [selectedOrderForModal, setSelectedOrderForModal] = useState(null);
+  const [refreshingCourierId, setRefreshingCourierId] = useState(null);
+
+  const copyToClipboard = (text, label) => {
+    if (!text) return;
+    navigator.clipboard.writeText(String(text));
+    toast.info(`${label} copied to clipboard!`);
+  };
+
+  const handleRefreshCourier = async (orderId) => {
+    try {
+      setRefreshingCourierId(orderId);
+      const res = await refreshCourierStatus.mutateAsync(orderId);
+      toast.success(res?.message || "Courier status refreshed");
+    } catch (err) {
+      toast.error(err?.message || "Failed to refresh courier status");
+    } finally {
+      setRefreshingCourierId(null);
+    }
+  };
 
   // Filter and search
   const filteredOrders = useMemo(() => {
@@ -204,14 +232,24 @@ const OrdersPage = () => {
             </p>
           </div>
 
-          <button
-            onClick={() => refetch()}
-            disabled={isFetching}
-            className="self-start md:self-auto inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-xs cursor-pointer disabled:opacity-60"
-          >
-            <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
-            <span>Refresh</span>
-          </button>
+          <div className="flex items-center gap-3 self-start md:self-auto flex-wrap">
+            <Link
+              href="/admin/courier"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-sm font-semibold text-white transition-all shadow-xs shadow-indigo-600/30 cursor-pointer"
+            >
+              <Truck className="w-4 h-4" />
+              <span>Steadfast Hub</span>
+            </Link>
+
+            <button
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-xs cursor-pointer disabled:opacity-60"
+            >
+              <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
 
         {/* Summary Metrics */}
@@ -371,10 +409,131 @@ const OrdersPage = () => {
                         </span>
                       </div>
                     </div>
+
+                    {/* Steadfast Courier Parcel Section */}
+                    {order.courier?.bookingState === "created" ? (
+                      <div className="mt-4 bg-gradient-to-r from-slate-50 to-indigo-50/40 border border-indigo-100 rounded-2xl p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-indigo-100/60">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                              <Truck className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-black text-slate-900 tracking-tight">Steadfast Courier</span>
+                                <CourierStatusBadge
+                                  status={order.courier.deliveryStatus}
+                                  bookingState={order.courier.bookingState}
+                                />
+                              </div>
+                              <p className="text-[10px] text-slate-400 mt-0.5">
+                                Booked on {formatDate(order.courier.bookedAt)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => handleRefreshCourier(order._id)}
+                            disabled={refreshingCourierId === order._id}
+                            className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 shadow-2xs transition cursor-pointer disabled:opacity-50"
+                          >
+                            <RefreshCw className={`w-3.5 h-3.5 ${refreshingCourierId === order._id ? "animate-spin text-indigo-600" : ""}`} />
+                            <span>Refresh Status</span>
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 pt-1 text-xs">
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Consignment ID</span>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="font-mono font-bold text-slate-900 text-xs">{order.courier.consignmentId}</span>
+                              <button
+                                onClick={() => copyToClipboard(order.courier.consignmentId, "Consignment ID")}
+                                title="Copy Consignment ID"
+                                className="text-slate-400 hover:text-indigo-600 p-0.5 rounded cursor-pointer"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tracking Code</span>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="font-mono font-bold text-indigo-600 text-xs">{order.courier.trackingCode || "—"}</span>
+                              {order.courier.trackingCode && (
+                                <button
+                                  onClick={() => copyToClipboard(order.courier.trackingCode, "Tracking Code")}
+                                  title="Copy Tracking Code"
+                                  className="text-slate-400 hover:text-indigo-600 p-0.5 rounded cursor-pointer"
+                                >
+                                  <Copy className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">COD to Collect</span>
+                            <span className="font-black text-slate-900 text-xs mt-0.5 block">
+                              ৳{(order.courier.codAmount ?? order.totalPrice)?.toLocaleString()}
+                            </span>
+                          </div>
+
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Last Synced</span>
+                            <span className="text-slate-600 text-xs mt-0.5 block">
+                              {order.courier.lastCheckedAt ? formatDate(order.courier.lastCheckedAt) : "—"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-lg bg-slate-200 flex items-center justify-center text-slate-600 shrink-0">
+                            <Truck className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-slate-800">
+                                Courier Status:
+                              </p>
+                              <CourierStatusBadge
+                                status={order.courier?.deliveryStatus}
+                                bookingState={order.courier?.bookingState || "not_created"}
+                              />
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              {order.courier?.error
+                                ? `Error: ${order.courier.error}`
+                                : "Not booked on Steadfast Courier yet."}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setSelectedOrderForModal(order)}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-sm shadow-indigo-600/30 cursor-pointer shrink-0"
+                        >
+                          <Truck className="w-3.5 h-3.5" />
+                          <span>Send to Steadfast</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Actions Column: Status Selector, Invoice, Delete */}
+                  {/* Actions Column: Status Selector, Invoice, Delete, Courier */}
                   <div className="flex flex-col sm:flex-row xl:flex-col gap-2.5 min-w-50 xl:w-56 shrink-0 justify-end">
+                    {order.courier?.bookingState !== "created" && (
+                      <button
+                        onClick={() => setSelectedOrderForModal(order)}
+                        className="cursor-pointer flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 text-white py-2.5 px-4 text-xs font-bold hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-600/30"
+                      >
+                        <Truck className="w-4 h-4" />
+                        <span>Send to Steadfast</span>
+                      </button>
+                    )}
                     <div className="relative">
                       <select
                         value={order.status || "Pending"}
@@ -484,6 +643,17 @@ const OrdersPage = () => {
         </div>
 
       </div>
+
+      {/* Steadfast Booking Confirmation Modal */}
+      {selectedOrderForModal && (
+        <SendToSteadfastModal
+          key={selectedOrderForModal._id}
+          order={selectedOrderForModal}
+          isOpen={!!selectedOrderForModal}
+          onClose={() => setSelectedOrderForModal(null)}
+          onSuccess={() => refetch()}
+        />
+      )}
     </div>
   );
 };

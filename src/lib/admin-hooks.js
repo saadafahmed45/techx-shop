@@ -8,7 +8,14 @@ async function fetchJSON(url, options = {}) {
     cache: "no-store",
     ...options,
   });
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+  if (!res.ok) {
+    let errorMsg = `Request failed: ${res.status}`;
+    try {
+      const errData = await res.json();
+      if (errData?.message) errorMsg = errData.message;
+    } catch {}
+    throw new Error(errorMsg);
+  }
   return res.json();
 }
 
@@ -145,6 +152,68 @@ export function useDeleteOrder() {
       fetchJSON(`${API}/orders/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+    },
+  });
+}
+
+// ─── STEADFAST COURIER INTEGRATION HOOKS ────────────────────
+
+export function useAdminParcels(params = {}) {
+  const queryParams = new URLSearchParams();
+  if (params.page) queryParams.set("page", params.page);
+  if (params.limit) queryParams.set("limit", params.limit);
+  if (params.search) queryParams.set("search", params.search);
+  if (params.deliveryStatus && params.deliveryStatus !== "All")
+    queryParams.set("deliveryStatus", params.deliveryStatus);
+  if (params.bookingState && params.bookingState !== "All")
+    queryParams.set("bookingState", params.bookingState);
+  if (params.startDate) queryParams.set("startDate", params.startDate);
+  if (params.endDate) queryParams.set("endDate", params.endDate);
+
+  const queryStr = queryParams.toString();
+
+  return useQuery({
+    queryKey: ["admin", "parcels", queryStr],
+    queryFn: () =>
+      fetchJSON(`${API}/api/steadfast/parcels${queryStr ? `?${queryStr}` : ""}`),
+    staleTime: 30_000,
+  });
+}
+
+export function useSteadfastBalance() {
+  return useQuery({
+    queryKey: ["admin", "steadfast-balance"],
+    queryFn: () => fetchJSON(`${API}/api/steadfast/balance`),
+    staleTime: 60_000,
+    retry: 1,
+  });
+}
+
+export function useBookSteadfastOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }) =>
+      fetchJSON(`${API}/api/steadfast/orders/${id}/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload || {}),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "parcels"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "steadfast-balance"] });
+    },
+  });
+}
+
+export function useRefreshCourierStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) =>
+      fetchJSON(`${API}/api/steadfast/orders/${id}/status`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "parcels"] });
     },
   });
 }

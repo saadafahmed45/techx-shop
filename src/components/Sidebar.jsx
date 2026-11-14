@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import {
   LayoutDashboard, ShoppingBag, Package, Plus, Menu, X,
   Layers3, Users, ShieldCheck, ImageIcon, ExternalLink, ListOrdered,
+  Truck,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
@@ -17,6 +18,7 @@ const menuGroups = [
       { href: "/admin/manage-products",    label: "Products",          icon: Package },
       { href: "/admin/manage-collections", label: "Categories",        icon: Layers3 },
       { href: "/admin/orders",             label: "Orders",            icon: ShoppingBag },
+      { href: "/admin/courier",            label: "Steadfast Courier", icon: Truck },
     ],
   },
   {
