@@ -29,6 +29,9 @@ const nextConfig = {
     ],
   },
   compress: true,
+  experimental: {
+    turbopackFileSystemCacheForDev: false,
+  },
   httpAgentOptions: {
     keepAlive: true,
   },

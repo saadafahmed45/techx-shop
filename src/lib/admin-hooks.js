@@ -5,6 +5,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 async function fetchJSON(url, options = {}) {
   const res = await fetch(url, {
     credentials: "include",
+    cache: "no-store",
     ...options,
   });
   if (!res.ok) throw new Error(`Request failed: ${res.status}`);

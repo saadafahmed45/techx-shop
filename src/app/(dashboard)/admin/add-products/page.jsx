@@ -18,6 +18,8 @@ import {
   Hash,
   GripVertical,
   ArrowLeft,
+  ArrowRight,
+  Star,
   Send,
   FileText,
   Eye,
@@ -51,84 +53,195 @@ const FEATURE_OPTIONS = [
 
 const DraggableImageList = ({ previews, onReorder, onRemove }) => {
   const dragIndex = useRef(null);
-  const [dragOver, setDragOver] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [isDraggingIndex, setIsDraggingIndex] = useState(null);
 
-  const handleDragStart = (i) => {
+  const handleDragStart = (e, i) => {
     dragIndex.current = i;
+    setIsDraggingIndex(i);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(i));
   };
+
   const handleDragOver = (e, i) => {
     e.preventDefault();
-    setDragOver(i);
-  };
-  const handleDrop = (i) => {
-    const from = dragIndex.current;
-    if (from === null || from === i) {
-      setDragOver(null);
-      return;
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverIndex !== i) {
+      setDragOverIndex(i);
     }
-    onReorder(from, i);
-    dragIndex.current = null;
-    setDragOver(null);
   };
+
+  const handleDragLeave = (e, i) => {
+    e.preventDefault();
+    if (e.currentTarget.contains(e.relatedTarget)) return;
+    if (dragOverIndex === i) {
+      setDragOverIndex(null);
+    }
+  };
+
+  const handleDrop = (e, i) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const from = dragIndex.current;
+    dragIndex.current = null;
+    setDragOverIndex(null);
+    setIsDraggingIndex(null);
+
+    if (from === null || from === undefined || from === i) return;
+    onReorder(from, i);
+  };
+
   const handleDragEnd = () => {
     dragIndex.current = null;
-    setDragOver(null);
+    setDragOverIndex(null);
+    setIsDraggingIndex(null);
   };
 
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-      {previews.map((src, i) => (
-        <div
-          key={i}
-          draggable
-          onDragStart={() => handleDragStart(i)}
-          onDragOver={(e) => handleDragOver(e, i)}
-          onDrop={() => handleDrop(i)}
-          onDragEnd={handleDragEnd}
-          className={`relative group rounded-xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing select-none ${
-            dragOver === i
-              ? "border-indigo-400 scale-105 shadow-lg shadow-indigo-100"
-              : "border-slate-200"
-          }`}
-        >
-          <img
-            src={src}
-            alt={`image-${i + 1}`}
-            className="w-full h-24 object-cover"
-            draggable={false}
-          />
+    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
+      {previews.map((src, i) => {
+        const isCover = i === 0;
+        const isDragging = isDraggingIndex === i;
+        const isOver = dragOverIndex === i;
 
-          {/* Drag handle */}
-          <div className="absolute top-1.5 left-1.5 bg-black/50 rounded-md p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <GripVertical size={12} className="text-white" />
-          </div>
-
-          {/* Serial number badge */}
-          <div className="absolute top-1.5 right-7 bg-black/50 text-white text-[9px] font-bold rounded-md px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            #{i + 1}
-          </div>
-
-          {/* Remove button */}
-          <button
-            type="button"
-            onClick={() => onRemove(i)}
-            className="absolute top-1.5 right-1.5 w-5 h-5 rounded-md bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+        return (
+          <div
+            key={src || i}
+            draggable
+            onDragStart={(e) => handleDragStart(e, i)}
+            onDragOver={(e) => handleDragOver(e, i)}
+            onDrop={(e) => handleDrop(e, i)}
+            onDragEnd={handleDragEnd}
+            className={`relative group rounded-2xl overflow-hidden border-2 cursor-grab active:cursor-grabbing select-none bg-slate-50 transition-colors ${
+              isDragging
+                ? "opacity-30 border-dashed border-indigo-400"
+                : isOver
+                ? "ring-4 ring-indigo-500/30 border-indigo-500 bg-indigo-50/30"
+                : isCover
+                ? "border-indigo-500 shadow-sm ring-1 ring-indigo-200"
+                : "border-slate-200 hover:border-slate-300"
+            }`}
           >
-            <X size={10} />
-          </button>
+            <img
+              src={src}
+              alt={`image-${i + 1}`}
+              className="w-full h-28 object-cover pointer-events-none select-none"
+              draggable={false}
+            />
 
-          {/* MAIN / serial label */}
-          {i === 0 ? (
-            <span className="absolute bottom-1.5 left-1.5 text-[9px] font-bold bg-indigo-500 text-white px-1.5 py-0.5 rounded-md">
-              MAIN
-            </span>
-          ) : (
-            <span className="absolute bottom-1.5 left-1.5 text-[9px] font-bold bg-black/40 text-white px-1.5 py-0.5 rounded-md">
-              #{i + 1}
-            </span>
-          )}
-        </div>
-      ))}
+            {/* Drag handle & Cover badge */}
+            <div className="absolute top-1.5 left-1.5 flex items-center gap-1 z-10">
+              <div className="bg-black/60 backdrop-blur-sm rounded-md p-1 text-white pointer-events-none">
+                <GripVertical size={11} />
+              </div>
+              {isCover ? (
+                <span className="text-[9px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-sm pointer-events-none">
+                  <Star size={9} className="fill-white" /> MAIN
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  draggable={false}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onReorder(i, 0);
+                  }}
+                  title="Click to set as main cover"
+                  className="text-[9px] font-bold bg-black/60 hover:bg-indigo-600 text-white px-1.5 py-0.5 rounded-md backdrop-blur-sm transition-colors cursor-pointer"
+                >
+                  #{i + 1}
+                </button>
+              )}
+            </div>
+
+            {/* Remove button */}
+            <button
+              type="button"
+              draggable={false}
+              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onRemove(i);
+              }}
+              title="Remove image"
+              className="absolute top-1.5 right-1.5 w-6 h-6 rounded-md bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-red-500 shadow-sm cursor-pointer z-10"
+            >
+              <X size={12} />
+            </button>
+
+            {/* Move arrows on hover */}
+            <div
+              draggable={false}
+              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              className="absolute bottom-1.5 inset-x-1.5 flex items-center justify-between z-10"
+            >
+              <div className="flex items-center gap-0.5 bg-black/70 backdrop-blur-sm rounded-lg p-0.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  type="button"
+                  draggable={false}
+                  disabled={i === 0}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onReorder(i, i - 1);
+                  }}
+                  title="Move left"
+                  className="w-5 h-5 rounded flex items-center justify-center text-white hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <ArrowLeft size={11} />
+                </button>
+                <button
+                  type="button"
+                  draggable={false}
+                  disabled={i === previews.length - 1}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onReorder(i, i + 1);
+                  }}
+                  title="Move right"
+                  className="w-5 h-5 rounded flex items-center justify-center text-white hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <ArrowRight size={11} />
+                </button>
+              </div>
+
+              {!isCover && (
+                <button
+                  type="button"
+                  draggable={false}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onReorder(i, 0);
+                  }}
+                  title="Make Cover"
+                  className="ml-auto px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-[10px] font-bold rounded-lg flex items-center gap-0.5 shadow-md transition-all cursor-pointer"
+                >
+                  <Star size={10} className="fill-white" /> Cover
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

@@ -3,6 +3,7 @@
 import { useRef, useMemo, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useShopData } from "@/context/ShopDataContext";
 import { useCart } from "@/context/CartContext";
 import { useWishlistStore } from "@/stores/wishlistStore";
@@ -14,11 +15,13 @@ import {
   Heart,
   TrendingUp,
   ArrowRight,
+  Zap,
 } from "lucide-react";
 
 export default function TopSellingSlider() {
+  const router = useRouter();
   const { products: allProducts, loading } = useShopData();
-  const { addToCart, openCart } = useCart();
+  const { addToCart, openCart, closeCart } = useCart();
   const { items, toggleWishlist } = useWishlistStore();
 
   const scrollRef = useRef(null);
@@ -64,8 +67,18 @@ export default function TopSellingSlider() {
   const handleAddToCart = (e, product) => {
     e.preventDefault();
     e.stopPropagation();
+    if (product.stock === 0) return;
     addToCart(product);
     openCart();
+  };
+
+  const handleOrderNow = (e, product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (product.stock === 0) return;
+    addToCart(product);
+    closeCart?.();
+    router.push("/checkout");
   };
 
   const handleWishlist = (e, product) => {
@@ -242,15 +255,26 @@ export default function TopSellingSlider() {
                         <Heart className={`w-3.5 h-3.5 ${isWished ? "fill-current text-red-500" : ""}`} />
                       </button>
 
-                      {/* Quick Add */}
+                      {/* Quick Actions: Add to Cart & Order Now */}
                       {product.stock !== 0 ? (
-                        <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-200 z-10">
+                        <div className="absolute inset-x-2.5 bottom-2.5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-200 z-10 grid grid-cols-2 gap-1.5">
                           <button
+                            type="button"
                             onClick={(e) => handleAddToCart(e, product)}
-                            className="w-full flex items-center justify-center gap-1.5 h-9 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition-colors shadow-sm shadow-blue-600/20 cursor-pointer"
+                            className="flex items-center justify-center gap-1 h-8 sm:h-9 rounded-xl bg-white/95 backdrop-blur-xs hover:bg-white text-neutral-900 border border-neutral-200/90 text-[11px] font-semibold transition-all shadow-sm cursor-pointer"
+                            title="Add to Cart"
                           >
-                            <ShoppingBag className="w-3.5 h-3.5" />
-                            Add to Cart
+                            <ShoppingBag className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                            <span className="truncate">Add to Cart</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => handleOrderNow(e, product)}
+                            className="flex items-center justify-center gap-1 h-8 sm:h-9 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold transition-all shadow-sm shadow-blue-600/20 cursor-pointer"
+                            title="Order Now"
+                          >
+                            <Zap className="w-3.5 h-3.5 shrink-0 fill-current" />
+                            <span className="truncate">Order Now</span>
                           </button>
                         </div>
                       ) : (

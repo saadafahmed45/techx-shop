@@ -19,7 +19,10 @@ import {
   GripVertical,
   ToggleLeft,
   ToggleRight,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import Swal from "sweetalert2";
 import ShopifyRichTextEditor from "@/components/ShopifyRichTextEditor";
 import {
@@ -40,7 +43,10 @@ const FEATURE_OPTIONS = [
 
 const ProductThumb = ({ src, alt, className }) => {
   const [error, setError] = useState(false);
-  useMemo(() => setError(false), [src]);
+
+  useEffect(() => {
+    setError(false);
+  }, [src]);
 
   if (!src || error) {
     return (
@@ -56,6 +62,7 @@ const ProductThumb = ({ src, alt, className }) => {
       src={src}
       alt={alt}
       className={className}
+      draggable={false}
       onError={() => setError(true)}
     />
   );
@@ -63,71 +70,239 @@ const ProductThumb = ({ src, alt, className }) => {
 
 const DraggableImageList = ({ images, onReorder, onRemove }) => {
   const dragIndex = useRef(null);
-  const [dragOver, setDragOver] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [isDraggingIndex, setIsDraggingIndex] = useState(null);
 
-  const handleDragStart = (i) => {
-    dragIndex.current = i;
+  const moveItem = (from, to) => {
+    onReorder((prev) => {
+      if (
+        from === to ||
+        from < 0 ||
+        to < 0 ||
+        from >= prev.length ||
+        to >= prev.length
+      )
+        return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
   };
+
+  const handleDragStart = (e, i) => {
+    dragIndex.current = i;
+    setIsDraggingIndex(i);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(i));
+  };
+
   const handleDragOver = (e, i) => {
     e.preventDefault();
-    setDragOver(i);
-  };
-  const handleDrop = (i) => {
-    const from = dragIndex.current;
-    if (from === null || from === i) {
-      setDragOver(null);
-      return;
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverIndex !== i) {
+      setDragOverIndex(i);
     }
-    const next = [...images];
-    const [moved] = next.splice(from, 1);
-    next.splice(i, 0, moved);
-    onReorder(next);
-    dragIndex.current = null;
-    setDragOver(null);
   };
+
+  const handleDrop = (e, i) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const dataFrom = e.dataTransfer
+      ? e.dataTransfer.getData("text/plain")
+      : null;
+    const from =
+      dataFrom !== null && dataFrom !== ""
+        ? Number(dataFrom)
+        : dragIndex.current;
+
+    dragIndex.current = null;
+    setDragOverIndex(null);
+    setIsDraggingIndex(null);
+
+    if (from === null || from === undefined || isNaN(from) || from === i)
+      return;
+    moveItem(from, i);
+  };
+
   const handleDragEnd = () => {
     dragIndex.current = null;
-    setDragOver(null);
+    setDragOverIndex(null);
+    setIsDraggingIndex(null);
   };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
-      {images.map((img, i) => (
-        <div
-          key={i}
-          draggable
-          onDragStart={() => handleDragStart(i)}
-          onDragOver={(e) => handleDragOver(e, i)}
-          onDrop={() => handleDrop(i)}
-          onDragEnd={handleDragEnd}
-          className={`relative group rounded-3xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing
-            ${dragOver === i ? "border-indigo-400 scale-105 shadow-lg" : "border-slate-200"}`}
-        >
-          <ProductThumb
-            src={typeof img === "string" ? img : URL.createObjectURL(img)}
-            alt={`image-${i}`}
-            className="w-full h-32 object-cover"
-          />
-          <div className="absolute top-2 left-2 bg-black/50 rounded-lg p-1 opacity-0 group-hover:opacity-100 transition">
-            <GripVertical size={14} className="text-white" />
-          </div>
-          <div className="absolute top-2 right-8 bg-black/50 text-white text-[10px] font-bold rounded-md px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition">
-            #{i + 1}
-          </div>
-          <button
-            type="button"
-            onClick={() => onRemove(i)}
-            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-red-500"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      ))}
+    <div className="space-y-2 mt-3">
+      <div className="flex items-center justify-between text-xs text-slate-400">
+        <span>Click <strong>Make Cover</strong>, use arrows, or drag to arrange order</span>
+        <span className="font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+          {images.length} {images.length === 1 ? "image" : "images"}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {images.map((img, i) => {
+          const isCover = i === 0;
+          const isDragging = isDraggingIndex === i;
+          const isOver = dragOverIndex === i;
+          const src =
+            typeof img === "string"
+              ? img
+              : (img._preview || (img._preview = URL.createObjectURL(img)));
+          const key =
+            typeof img === "string"
+              ? img
+              : `${img.name}-${img.size}-${img.lastModified || i}`;
+
+          return (
+            <div
+              key={key}
+              draggable
+              onDragStart={(e) => handleDragStart(e, i)}
+              onDragOver={(e) => handleDragOver(e, i)}
+              onDrop={(e) => handleDrop(e, i)}
+              onDragEnd={handleDragEnd}
+              className={`relative group rounded-3xl overflow-hidden border-2 cursor-grab active:cursor-grabbing select-none bg-slate-50 transition-colors ${
+                isDragging
+                  ? "opacity-30 border-dashed border-indigo-400"
+                  : isOver
+                  ? "ring-4 ring-indigo-500/30 border-indigo-600 bg-indigo-50/30"
+                  : isCover
+                  ? "border-indigo-600 ring-2 ring-indigo-100 shadow-md"
+                  : "border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              {/* Product Thumbnail with pointer-events-none so it doesn't hijack dragging */}
+              <div className="w-full h-32 bg-slate-100 relative pointer-events-none flex items-center justify-center overflow-hidden">
+                <ProductThumb
+                  src={src}
+                  alt={`Product image ${i + 1}`}
+                  className="w-full h-32 object-cover pointer-events-none select-none"
+                />
+              </div>
+
+              {/* Badges / Header overlay */}
+              <div className="absolute top-2 left-2 flex items-center gap-1.5 z-10">
+                <div className="bg-black/60 backdrop-blur-sm rounded-lg p-1 text-white shadow-sm pointer-events-none">
+                  <GripVertical size={13} />
+                </div>
+                {isCover ? (
+                  <span className="bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-1 pointer-events-none">
+                    <Star size={10} className="fill-white" />
+                    COVER
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    draggable={false}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      moveItem(i, 0);
+                    }}
+                    title="Click to set as main cover"
+                    className="bg-black/60 hover:bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-sm transition-colors cursor-pointer"
+                  >
+                    #{i + 1}
+                  </button>
+                )}
+              </div>
+
+              {/* Remove button */}
+              <button
+                type="button"
+                draggable={false}
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onRemove(i);
+                }}
+                title="Remove image"
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-red-500 shadow-sm cursor-pointer z-10"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Bottom Quick Controls Toolbar */}
+              <div
+                draggable={false}
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+                className="absolute bottom-2 inset-x-2 flex items-center justify-between z-10"
+              >
+                <div className="flex items-center gap-1 bg-black/75 backdrop-blur-md rounded-xl p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    type="button"
+                    draggable={false}
+                    disabled={i === 0}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      moveItem(i, i - 1);
+                    }}
+                    title="Move left"
+                    className="w-6 h-6 rounded-lg flex items-center justify-center text-white hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                  >
+                    <ArrowLeft size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    draggable={false}
+                    disabled={i === images.length - 1}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      moveItem(i, i + 1);
+                    }}
+                    title="Move right"
+                    className="w-6 h-6 rounded-lg flex items-center justify-center text-white hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                  >
+                    <ArrowRight size={13} />
+                  </button>
+                </div>
+
+                {!isCover && (
+                  <button
+                    type="button"
+                    draggable={false}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      moveItem(i, 0);
+                    }}
+                    title="Set as main cover image"
+                    className="ml-auto px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-[11px] font-bold rounded-xl shadow-lg transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <Star size={11} className="fill-white" />
+                    Make Cover
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
 
 export default function ManageProducts() {
+  const queryClient = useQueryClient();
   const {
     data: products = [],
     isLoading: productsLoading,
@@ -370,9 +545,32 @@ export default function ManageProducts() {
           product={selectedProduct}
           collections={collections}
           onClose={() => setEditModal(false)}
-          onUpdated={() => {
-            setEditModal(false);
+          onUpdated={(updatedRes) => {
+            const updatedDoc = updatedRes?.data || updatedRes;
+            if (updatedDoc?._id) {
+              queryClient.setQueryData(["admin", "products"], (old) => {
+                if (!old) return old;
+                const updateItem = (item) =>
+                  String(item._id) === String(updatedDoc._id)
+                    ? { ...item, ...updatedDoc }
+                    : item;
+                if (Array.isArray(old)) return old.map(updateItem);
+                if (Array.isArray(old?.data))
+                  return { ...old, data: old.data.map(updateItem) };
+                return old;
+              });
+            }
+            queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
             refetchProducts();
+            setSelectedProduct(null);
+            setEditModal(false);
+            Swal.fire({
+              icon: "success",
+              title: "Product Updated",
+              text: "Product details and image order saved successfully.",
+              timer: 1500,
+              showConfirmButton: false,
+            });
           }}
         />
       )}
@@ -383,7 +581,7 @@ export default function ManageProducts() {
 function EditProductModal({ product, collections, onClose, onUpdated }) {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState(product?.images || []);
   // Stock toggle
   const [showStock, setShowStock] = useState(false);
   const [formData, setFormData] = useState({
@@ -404,7 +602,8 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
       try {
         setLoading(true);
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/products/${product._id}`
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/products/${product._id}`,
+          { cache: "no-store" }
         );
         if (!res.ok) {
           throw new Error("Failed to fetch product details");
@@ -475,6 +674,12 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
 
       fd.append("existingImages", JSON.stringify(existingImages));
       newFiles.forEach((file) => fd.append("images", file));
+
+      // Append imageOrder array preserving exact order of existing and new files
+      const imageOrder = images.map((img) =>
+        typeof img === "string" ? { type: "existing", url: img } : { type: "new" }
+      );
+      fd.append("imageOrder", JSON.stringify(imageOrder));
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/products/${product._id}`,
@@ -761,7 +966,7 @@ function EditProductModal({ product, collections, onClose, onUpdated }) {
 
           <div>
             <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
-              Images (drag to reorder)
+              Images (drag to reorder or use arrows · First image is cover)
             </label>
             <label className="mt-2 flex items-center justify-center h-28 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 cursor-pointer hover:border-indigo-300 hover:bg-indigo-50 transition">
               <input

@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Star, Heart, ShoppingBag, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Star, Heart, ShoppingBag, Check, Zap, Loader2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useWishlistStore } from "@/stores/wishlistStore";
 
@@ -14,9 +15,11 @@ export default function ProductCard({
   showRating = true,
   variant = "default",
 }) {
-  const { addToCart, openCart } = useCart();
+  const router = useRouter();
+  const { addToCart, openCart, closeCart } = useCart();
   const { items, toggleWishlist, hydrate } = useWishlistStore();
   const [added, setAdded] = useState(false);
+  const [ordering, setOrdering] = useState(false);
 
   useEffect(() => {
     hydrate();
@@ -57,6 +60,7 @@ export default function ProductCard({
   const handleQuickAdd = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (product.stock === 0) return;
     addToCart(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 1600);
@@ -64,6 +68,16 @@ export default function ProductCard({
     setTimeout(() => {
       openCart?.();
     }, 300);
+  };
+
+  const handleOrderNow = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (product.stock === 0 || ordering) return;
+    setOrdering(true);
+    addToCart(product);
+    closeCart?.();
+    router.push("/checkout");
   };
 
   const handleWishlist = (e) => {
@@ -164,32 +178,55 @@ export default function ProductCard({
             </div>
           </div>
 
-          {/* Add to Cart Button at Bottom */}
-          <button
-            onClick={handleQuickAdd}
-            disabled={product.stock === 0}
-            className={`w-full h-10 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.98] mt-auto ${
-              product.stock === 0
-                ? "bg-neutral-100 text-neutral-400 cursor-not-allowed border border-neutral-200"
-                : added
-                ? "bg-emerald-600 text-white shadow-emerald-500/20"
-                : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
-            }`}
-          >
-            {added ? (
-              <>
-                <Check className="w-4 h-4 animate-in zoom-in-50 duration-200" />
-                <span>Added to Cart!</span>
-              </>
-            ) : product.stock === 0 ? (
-              <span>Out of Stock</span>
-            ) : (
-              <>
-                <ShoppingBag className="w-4 h-4" />
-                <span>Add to Cart</span>
-              </>
-            )}
-          </button>
+          {/* Add to Cart & Order Now Buttons */}
+          {product.stock === 0 ? (
+            <button
+              disabled
+              className="w-full h-10 rounded-xl bg-neutral-100 text-neutral-400 text-xs sm:text-sm font-bold flex items-center justify-center border border-neutral-200 cursor-not-allowed mt-auto"
+            >
+              Out of Stock
+            </button>
+          ) : (
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mt-auto">
+              <button
+                type="button"
+                onClick={handleQuickAdd}
+                className={`h-10 px-1.5 sm:px-2 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer border active:scale-[0.98] ${
+                  added
+                    ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
+                    : "bg-blue-50 hover:bg-blue-100 border-blue-200/80 text-blue-700"
+                }`}
+                title="Add to Cart"
+              >
+                {added ? (
+                  <>
+                    <Check className="w-4 h-4 shrink-0 animate-in zoom-in-50 duration-200" />
+                    <span className="truncate">Added!</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="w-4 h-4 shrink-0" />
+                    <span className="truncate">Add to Cart</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleOrderNow}
+                disabled={ordering}
+                className="h-10 px-1.5 sm:px-2 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white transition-all duration-200 cursor-pointer shadow-xs shadow-blue-500/20 disabled:opacity-75"
+                title="Order Now"
+              >
+                {ordering ? (
+                  <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
+                ) : (
+                  <Zap className="w-4 h-4 shrink-0 fill-current" />
+                )}
+                <span className="truncate">{ordering ? "Ordering..." : "Order Now"}</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -288,32 +325,55 @@ export default function ProductCard({
           )}
         </div>
 
-        {/* Full-width Electric Blue Add to Cart Button */}
-        <button
-          onClick={handleQuickAdd}
-          disabled={product.stock === 0}
-          className={`w-full h-10 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-sm ${
-            product.stock === 0
-              ? "bg-neutral-100 text-neutral-400 cursor-not-allowed border border-neutral-200"
-              : added
-              ? "bg-emerald-600 text-white shadow-emerald-500/20"
-              : "bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white shadow-blue-500/20"
-          }`}
-        >
-          {added ? (
-            <>
-              <Check className="w-4 h-4 animate-in zoom-in-50 duration-200" />
-              <span>Added to Cart!</span>
-            </>
-          ) : product.stock === 0 ? (
-            <span>Out of Stock</span>
-          ) : (
-            <>
-              <ShoppingBag className="w-4 h-4" />
-              <span>Add to Cart</span>
-            </>
-          )}
-        </button>
+        {/* Add to Cart & Order Now Buttons */}
+        {product.stock === 0 ? (
+          <button
+            disabled
+            className="w-full h-10 rounded-xl bg-neutral-100 text-neutral-400 text-xs sm:text-sm font-semibold flex items-center justify-center border border-neutral-200 cursor-not-allowed mt-auto"
+          >
+            Out of Stock
+          </button>
+        ) : (
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mt-auto">
+            <button
+              type="button"
+              onClick={handleQuickAdd}
+              className={`h-10 px-1.5 sm:px-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer border active:scale-[0.98] ${
+                added
+                  ? "bg-emerald-600 border-emerald-600 text-white shadow-emerald-500/20"
+                  : "bg-blue-50 hover:bg-blue-100 border-blue-200/80 text-blue-700"
+              }`}
+              title="Add to Cart"
+            >
+              {added ? (
+                <>
+                  <Check className="w-4 h-4 shrink-0 animate-in zoom-in-50 duration-200" />
+                  <span className="truncate">Added!</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingBag className="w-4 h-4 shrink-0" />
+                  <span className="truncate">Add to Cart</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleOrderNow}
+              disabled={ordering}
+              className="h-10 px-1.5 sm:px-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white transition-all duration-200 cursor-pointer shadow-sm shadow-blue-500/20 disabled:opacity-75"
+              title="Order Now"
+            >
+              {ordering ? (
+                <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
+              ) : (
+                <Zap className="w-4 h-4 shrink-0 fill-current" />
+              )}
+              <span className="truncate">{ordering ? "Ordering..." : "Order Now"}</span>
+            </button>
+          </div>
+        )}
 
       </div>
 
