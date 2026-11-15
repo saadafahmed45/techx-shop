@@ -446,19 +446,19 @@ export default function CourierManagementPage() {
                         <td className="py-3.5 px-4 align-top">
                           <div className="space-y-0.5">
                             <span className="text-base font-black text-indigo-700 block">
-                              ৳{(courier.codAmount ?? order.totalPrice)?.toLocaleString()}
+                              ৳{Number(courier.codAmount ?? order.totalPrice ?? 0).toLocaleString()}
                             </span>
                             <span className="text-[10px] text-slate-400 block">
-                              Order Total: ${order.totalPrice?.toLocaleString()}
+                              Order Total: ${Number(order.totalPrice || 0).toLocaleString()}
                             </span>
-                            {courier.deliveryCharge > 0 && (
+                            {Number(courier.deliveryCharge) > 0 && (
                               <span className="text-[10px] text-slate-400 block">
-                                Delivery: +৳{courier.deliveryCharge}
+                                Delivery: +৳{Number(courier.deliveryCharge).toLocaleString()}
                               </span>
                             )}
-                            {courier.alreadyPaid > 0 && (
+                            {Number(courier.alreadyPaid) > 0 && (
                               <span className="text-[10px] text-emerald-600 font-semibold block">
-                                Paid: -৳{courier.alreadyPaid}
+                                Paid: -৳{Number(courier.alreadyPaid).toLocaleString()}
                               </span>
                             )}
                           </div>

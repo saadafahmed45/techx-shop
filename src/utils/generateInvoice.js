@@ -53,15 +53,18 @@ export const generateInvoice = (order) => {
     Confirmed: [79, 70, 229],    // indigo
     Pending:   [245, 158, 11],   // amber
     Cancelled: [239, 68, 68],    // red
+    Shipped:   [99, 102, 241],   // indigo
+    Processing:[139, 92, 246],   // violet
   };
-  const [r, g, b] = statusColors[order.status] || [100, 116, 139];
+  const orderStatus = String(order?.status || "Pending");
+  const [r, g, b] = statusColors[orderStatus] || [100, 116, 139];
 
   doc.setFillColor(r, g, b);
   doc.roundedRect(pageWidth - 52, 58, 42, 10, 3, 3, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(255, 255, 255);
-  doc.text(order.status.toUpperCase(), pageWidth - 31, 65, { align: "center" });
+  doc.text(orderStatus.toUpperCase(), pageWidth - 31, 65, { align: "center" });
 
   // ─── BILL TO CARD ─────────────────────────────────────────
   doc.setFillColor(255, 255, 255);
@@ -78,19 +81,20 @@ export const generateInvoice = (order) => {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
   doc.setTextColor(15, 23, 42); // slate-900
-  doc.text(order.customerName, 22, 92);
+  doc.text(String(order?.customerName || order?.name || "Customer"), 22, 92);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(71, 85, 105); // slate-600
-  doc.text(order.email, 22, 101);
-  doc.text(order.phone, 22, 110);
+  doc.text(String(order?.email || "N/A"), 22, 101);
+  doc.text(String(order?.phone || "N/A"), 22, 110);
 
   // wrap address if long
-  const addressLines = doc.splitTextToSize(order.address, 72);
+  const rawAddress = String(order?.address || "No delivery address provided");
+  const addressLines = doc.splitTextToSize(rawAddress, 72);
   doc.text(addressLines, 22, 119);
 
-  // ─── PAYMENT CARD ─────────────────────────────────────────
+  // ─── PAYMENT & COURIER CARD ────────────────────────────────
   doc.setFillColor(255, 255, 255);
   doc.roundedRect(110, 72, 85, 58, 4, 4, "F");
   doc.setDrawColor(226, 232, 240);
@@ -99,7 +103,7 @@ export const generateInvoice = (order) => {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(148, 163, 184);
-  doc.text("PAYMENT INFO", 117, 82);
+  doc.text("PAYMENT & FULFILLMENT", 117, 82);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
@@ -111,14 +115,19 @@ export const generateInvoice = (order) => {
   doc.text("Method", 117, 94);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(15, 23, 42);
-  doc.text(order.paymentMethod, 117, 103);
+  doc.text(String(order?.paymentMethod || "Cash On Delivery"), 117, 103);
 
   doc.setFont("helvetica", "bold");
   doc.setTextColor(100, 116, 139);
-  doc.text("Order Status", 117, 115);
+  doc.text(order?.courier?.consignmentId ? "Courier (Steadfast)" : "Order Status", 117, 115);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(r, g, b);
-  doc.text(order.status, 117, 124);
+  if (order?.courier?.consignmentId) {
+    doc.setTextColor(79, 70, 229);
+    doc.text(`CID: ${order.courier.consignmentId}`, 117, 124);
+  } else {
+    doc.setTextColor(r, g, b);
+    doc.text(orderStatus, 117, 124);
+  }
 
   // ─── PRODUCTS TABLE ───────────────────────────────────────
   const tableTop = 145;
@@ -138,7 +147,8 @@ export const generateInvoice = (order) => {
 
   // Table rows
   let y = tableTop + 18;
-  order.products.forEach((item, index) => {
+  const productList = Array.isArray(order?.products) ? order.products : [];
+  productList.forEach((item, index) => {
     const rowBg = index % 2 === 0 ? [248, 250, 252] : [255, 255, 255];
     doc.setFillColor(...rowBg);
     doc.rect(15, y - 7, pageWidth - 30, 14, "F");
@@ -154,18 +164,21 @@ export const generateInvoice = (order) => {
     doc.text(`${index + 1}`, 22, y + 1);
 
     // wrap long title
-    const titleLines = doc.splitTextToSize(item.title, 95);
+    const titleLines = doc.splitTextToSize(String(item.title || "Product"), 95);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(15, 23, 42);
-    doc.text(titleLines[0], 32, y + 1); // only first line to keep row height
+    doc.text(titleLines[0] || "Product", 32, y + 1); // only first line to keep row height
+
+    const qty = Number(item.quantity) || 1;
+    const price = Number(item.price) || 0;
 
     doc.setTextColor(71, 85, 105);
-    doc.text(`${item.quantity}`, 140, y + 1, { align: "center" });
-    doc.text(`$${item.price}`, 162, y + 1, { align: "center" });
+    doc.text(`${qty}`, 140, y + 1, { align: "center" });
+    doc.text(`$${price.toLocaleString()}`, 162, y + 1, { align: "center" });
 
     doc.setFont("helvetica", "bold");
     doc.setTextColor(15, 23, 42);
-    doc.text(`$${item.price * item.quantity}`, pageWidth - 18, y + 1, {
+    doc.text(`$${(price * qty).toLocaleString()}`, pageWidth - 18, y + 1, {
       align: "right",
     });
 
@@ -193,7 +206,7 @@ export const generateInvoice = (order) => {
 
   doc.setFontSize(14);
   doc.setTextColor(255, 255, 255);
-  doc.text(`$${order.totalPrice}`, pageWidth - 18, y + 1, { align: "right" });
+  doc.text(`$${Number(order?.totalPrice || 0).toLocaleString()}`, pageWidth - 18, y + 1, { align: "right" });
 
   // ─── FOOTER ───────────────────────────────────────────────
   const footerY = pageHeight - 22;

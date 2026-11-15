@@ -110,9 +110,10 @@ export default function SendToSteadfastModal({ order, isOpen, onClose, onSuccess
     }
 
     try {
+      const cleanedPhone = cleanBdPhone(recipientPhone.trim());
       const payload = {
         recipientName: recipientName.trim(),
-        recipientPhone: recipientPhone.trim(),
+        recipientPhone: cleanedPhone,
         recipientAddress: recipientAddress.trim(),
         deliveryCharge: Number(deliveryCharge) || 0,
         alreadyPaid: Number(alreadyPaid) || 0,
@@ -228,6 +229,7 @@ export default function SendToSteadfastModal({ order, isOpen, onClose, onSuccess
                     required
                     value={recipientPhone}
                     onChange={(e) => setRecipientPhone(e.target.value)}
+                    onBlur={() => setRecipientPhone((p) => cleanBdPhone(p))}
                     placeholder="01XXXXXXXXX"
                     className={`w-full h-9 pl-9 pr-3 rounded-xl bg-slate-50 border text-xs font-medium outline-none transition ${
                       recipientPhone && !isPhoneValid
@@ -238,7 +240,11 @@ export default function SendToSteadfastModal({ order, isOpen, onClose, onSuccess
                 </div>
                 {recipientPhone && !isPhoneValid && (
                   <p className="text-[11px] text-rose-500 font-medium mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" /> Must be 11 digits starting with 01
+                    <AlertCircle className="w-3 h-3" />
+                    Must be 11 digits starting with 01
+                    {cleanBdPhone(recipientPhone).length > 0 && cleanBdPhone(recipientPhone).length !== 11
+                      ? ` (${cleanBdPhone(recipientPhone).length} digits)`
+                      : ""}
                   </p>
                 )}
               </div>

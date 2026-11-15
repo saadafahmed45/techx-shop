@@ -1,14 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
   Search, Trash2, Pencil,
   PackageCheck, Clock3, Truck,
-  CheckCircle2, XCircle,
+  CheckCircle2, XCircle, ExternalLink,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import { useAdminOrders, useUpdateOrderStatus, useDeleteOrder } from "@/lib/admin-hooks";
+import CourierStatusBadge from "@/components/courier/CourierStatusBadge";
 
 const STATUS_STYLES = {
   Pending:    "bg-amber-100 text-amber-700",
@@ -176,6 +178,7 @@ const OrdersListPage = () => {
                   <th className="text-left px-6 py-4">Products</th>
                   <th className="text-left px-6 py-4">Total</th>
                   <th className="text-left px-6 py-4">Status</th>
+                  <th className="text-left px-6 py-4">Steadfast Courier</th>
                   <th className="text-left px-6 py-4">Actions</th>
                 </tr>
               </thead>
@@ -214,6 +217,27 @@ const OrdersListPage = () => {
                           <StatusIcon className="w-3.5 h-3.5" />
                           {order.status}
                         </span>
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="space-y-1">
+                          <CourierStatusBadge
+                            status={order.courier?.deliveryStatus}
+                            bookingState={order.courier?.bookingState || "not_created"}
+                          />
+                          {order.courier?.consignmentId ? (
+                            <p className="text-[10px] font-mono text-indigo-600 font-semibold">
+                              CID: {order.courier.consignmentId}
+                            </p>
+                          ) : (
+                            <Link
+                              href="/admin/orders"
+                              className="text-[10px] text-slate-400 hover:text-indigo-600 flex items-center gap-0.5"
+                            >
+                              <span>Book in Orders</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </Link>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-2">

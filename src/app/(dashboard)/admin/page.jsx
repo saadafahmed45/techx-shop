@@ -219,7 +219,14 @@ export default function AdminPage() {
               <li key={p._id} className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center">
                   {p.images?.[0] ? (
-                    <Image src={p.images[0]} alt={p.title} width={36} height={36} className="object-cover w-full h-full" />
+                    <Image
+                      src={p.images[0]}
+                      alt={p.title || "Product"}
+                      width={36}
+                      height={36}
+                      unoptimized
+                      className="object-cover w-full h-full"
+                    />
                   ) : (
                     <Package className="w-4 h-4 text-slate-300" />
                   )}
@@ -273,7 +280,7 @@ export default function AdminPage() {
                     <p className="text-[10px] text-slate-400">{order.phone || order.customerPhone || ""}</p>
                   </td>
                   <td className="px-5 py-3.5 text-[12px] text-slate-500">{order.district || order.city || "N/A"}</td>
-                  <td className="px-5 py-3.5 text-[12px] font-bold text-slate-900">${order.totalPrice}</td>
+                  <td className="px-5 py-3.5 text-[12px] font-bold text-slate-900">${Number(order.totalPrice || 0).toLocaleString()}</td>
                   <td className="px-5 py-3.5">
                     <span className={`inline-block text-[10px] font-semibold px-2.5 py-1 rounded-full capitalize ${statusColor(order.status)}`}>
                       {order.status || "Pending"}

@@ -476,7 +476,7 @@ const OrdersPage = () => {
                           <div>
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">COD to Collect</span>
                             <span className="font-black text-slate-900 text-xs mt-0.5 block">
-                              ৳{(order.courier.codAmount ?? order.totalPrice)?.toLocaleString()}
+                              ৳{Number(order.courier.codAmount ?? order.totalPrice ?? 0).toLocaleString()}
                             </span>
                           </div>
 
@@ -523,17 +523,8 @@ const OrdersPage = () => {
                     )}
                   </div>
 
-                  {/* Actions Column: Status Selector, Invoice, Delete, Courier */}
+                  {/* Actions Column: Status Selector, Invoice, Delete */}
                   <div className="flex flex-col sm:flex-row xl:flex-col gap-2.5 min-w-50 xl:w-56 shrink-0 justify-end">
-                    {order.courier?.bookingState !== "created" && (
-                      <button
-                        onClick={() => setSelectedOrderForModal(order)}
-                        className="cursor-pointer flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 text-white py-2.5 px-4 text-xs font-bold hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-600/30"
-                      >
-                        <Truck className="w-4 h-4" />
-                        <span>Send to Steadfast</span>
-                      </button>
-                    )}
                     <div className="relative">
                       <select
                         value={order.status || "Pending"}
